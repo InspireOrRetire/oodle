@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #060608;
+  --s1: #0d0d10;
+  --s2: #13131a;
+  --s3: #1a1a24;
+  --s4: #20202c;
+  --bdr: rgba(255,255,255,0.06);
+  --bdr2: rgba(255,255,255,0.10);
+  --bdr3: rgba(255,255,255,0.16);
+  --tx: #e2dff8;
+  --tx2: #6b6880;
+  --tx3: #35333f;
+  --tx4: #25232e;
+  --ac: #b8ff3c;
+  --ac2: rgba(184,255,60,0.12);
+  --ac3: rgba(184,255,60,0.05);
+  --pk: #ff3caa;
+  --pk2: rgba(255,60,170,0.14);
+  --pk3: rgba(255,60,170,0.06);
+  --cy: #3cdfff;
+  --fn: 'Inter', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body, #root { height: 100%; }
+body {
+  font-family: var(--fn);
+  background: #ffffff;
+  color: #111111;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+/* scrollbar hide */
+.no-scroll::-webkit-scrollbar, .no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scroll, .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* hide number input spinners globally */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; }
+
+/* pip animation */
+@keyframes pip {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+@keyframes pip-fast {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+/* live bars */
+@keyframes lb {
+  0%, 100% { transform: scaleY(0.35); opacity: 0.3; }
+  50% { transform: scaleY(1); opacity: 1; }
+}
+
+/* chat message slide in */
+@keyframes msgin {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* pulse ring for DM sliver */
+@keyframes pulsering {
+  0%   { box-shadow: 0 0 0 0 rgba(255,60,170,0.5); }
+  70%  { box-shadow: 0 0 0 7px rgba(255,60,170,0); }
+  100% { box-shadow: 0 0 0 0 rgba(255,60,170,0); }
+}
+
+/* GIF bars */
+@keyframes gb {
+  0%, 100% { transform: scaleY(0.35); opacity: 0.3; }
+  50% { transform: scaleY(1); opacity: 1; }
+}

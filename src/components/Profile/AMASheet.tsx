@@ -1,0 +1,171 @@
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { submitQuestion } from '../../services/profileQuestionService'
+
+// ── Props ─────────────────────────────────────────────────────────────────────
+
+interface AMASheetProps {
+  open: boolean
+  onClose: () => void
+  creatorUsername: string
+  creatorAvatarUrl?: string
+  currentUserId: string
+  creatorId: string
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .map(w => w[0] ?? '')
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
+const MAX_CHARS = 280
+
+export default function AMASheet({
+  open,
+  onClose,
+  creatorUsername,
+  creatorAvatarUrl,
+  currentUserId,
+  creatorId,
+}: AMASheetProps) {
+  const [text, setText] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  async function handleSubmit() {
+    const trimmed = text.trim()
+    if (!trimmed || loading) return
+    setLoading(true)
+    try {
+      await submitQuestion(creatorId, currentUserId, trimmed)
+      setText('')
+      onClose()
+    } catch (err) {
+      console.error('AMASheet submit error', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function handleClose() {
+    if (loading) return
+    setText('')
+    onClose()
+  }
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            key="ama-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="fixed inset-0 z-40"
+            style={{ background: 'rgba(0,0,0,0.45)' }}
+            onClick={handleClose}
+          />
+
+          {/* Sheet */}
+          <motion.div
+            key="ama-sheet"
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 34, stiffness: 380 }}
+            className="fixed bottom-0 left-0 right-0 z-50 bg-white"
+            style={{ borderRadius: '24px 24px 0 0', paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Drag handle */}
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-10 h-[4px] rounded-full" style={{ background: '#e0e0e0' }} />
+            </div>
+
+            <div className="px-5 pb-6 pt-3">
+              {/* Header */}
+              <div className="flex items-center gap-3 mb-5">
+                {creatorAvatarUrl ? (
+                  <img
+                    src={creatorAvatarUrl}
+                    alt={creatorUsername}
+                    className="w-11 h-11 rounded-full object-cover flex-shrink-0"
+                  />
+                ) : (
+                  <div
+                    className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 text-white font-semibold text-[16px]"
+                    style={{ background: '#111' }}
+                  >
+                    {initials(creatorUsername)}
+                  </div>
+                )}
+                <div>
+                  <p className="text-[15px] font-semibold text-[#111]">
+                    Ask @{creatorUsername} anything
+                  </p>
+                  <p className="text-[12px] text-[#aaa]">Questions are public</p>
+                </div>
+                <button
+                  className="ml-auto w-7 h-7 rounded-full flex items-center justify-center"
+                  style={{ background: '#f4f4f4' }}
+                  onClick={handleClose}
+                >
+                  <span className="text-[#888] text-[18px] leading-none">×</span>
+                </button>
+              </div>
+
+              {/* Textarea */}
+              <div className="relative">
+                <textarea
+                  autoFocus
+                  value={text}
+                  onChange={e => setText(e.target.value.slice(0, MAX_CHARS))}
+                  placeholder="What do you want to know?"
+                  rows={4}
+                  className="w-full rounded-[14px] px-4 py-3 text-[14px] text-[#111] placeholder-[#ccc] resize-none outline-none leading-[1.55]"
+                  style={{ background: '#f5f5f7', minHeight: 100 }}
+                />
+                <span
+                  className="absolute bottom-3 right-3 text-[11px] font-mono"
+                  style={{ color: text.length >= MAX_CHARS ? '#f5a623' : '#ccc' }}
+                >
+                  {text.length}/{MAX_CHARS}
+                </span>
+              </div>
+
+              {/* Submit */}
+              <button
+                onClick={handleSubmit}
+                disabled={!text.trim() || loading}
+                className="w-full mt-4 rounded-[12px] py-[14px] text-[15px] font-semibold transition-all flex items-center justify-center gap-2"
+                style={{
+                  background: text.trim() ? '#111' : '#e5e5e5',
+                  color: text.trim() ? '#fff' : '#aaa',
+                }}
+              >
+                {loading ? (
+                  <>
+                    <span
+                      className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin"
+                    />
+                    Sending…
+                  </>
+                ) : 'Submit question'}
+              </button>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  )
+}
