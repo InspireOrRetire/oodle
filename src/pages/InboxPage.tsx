@@ -892,12 +892,29 @@ export default function InboxPage() {
       <div className="px-4 pt-14 pb-2">
         <div className="flex items-center justify-between mb-1">
           <h1 className="text-[28px] font-extrabold text-gray-900 tracking-tight">Messages</h1>
-          <button
-            onClick={() => setComposing(true)}
-            className="w-9 h-9 flex items-center justify-center rounded-full active:opacity-60 transition-opacity"
-          >
-            <Edit className="w-[22px] h-[22px] text-gray-900" strokeWidth={1.7} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setComposing(true)}
+              className="w-9 h-9 flex items-center justify-center rounded-full active:opacity-60 transition-opacity"
+            >
+              <Edit className="w-[22px] h-[22px] text-gray-900" strokeWidth={1.7} />
+            </button>
+            {/* Profile avatar */}
+            <button
+              onClick={() => navigate('/profile')}
+              className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center"
+              style={{ background: profile?.avatar_url ? 'transparent' : '#111' }}
+            >
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-white font-semibold" style={{ fontSize: 12 }}>
+                  {(profile?.display_name ?? profile?.username ?? '?')
+                    .split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 

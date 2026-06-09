@@ -29,9 +29,8 @@ export default function Layout() {
   }
 
   const tabs = [
-    { id: 'home',  path: '/',        label: 'home'  },
-    { id: 'inbox', path: '/inbox',   label: 'inbox' },
-    { id: 'you',   path: '/profile', label: 'you'   },
+    { id: 'home',  path: '/',      label: 'home'  },
+    { id: 'inbox', path: '/inbox', label: 'inbox' },
   ] as const
 
   return (

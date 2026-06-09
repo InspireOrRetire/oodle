@@ -1935,7 +1935,7 @@ export default function HomePage() {
   }, [])
 
   // ── Real feed from Supabase ─────────────────────────────────────────────────
-  const { user, loading: authLoading, isExploreMode } = useAuth()
+  const { user, profile: myProfile, loading: authLoading, isExploreMode } = useAuth()
   const [feed,        setFeed]        = useState<FeedItem[]>([])
   const [feedLoading, setFeedLoading] = useState(true)
   const [feedError,   setFeedError]   = useState<string | null>(null)
@@ -2179,6 +2179,22 @@ export default function HomePage() {
                   style={{ background: '#111', fontSize: 8 }}
                 >
                   {cartCount > 9 ? '9+' : cartCount}
+                </span>
+              )}
+            </button>
+
+            {/* Profile avatar */}
+            <button
+              onClick={() => navigate('/profile')}
+              className="w-[30px] h-[30px] rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center"
+              style={{ background: myProfile?.avatar_url ? 'transparent' : '#111' }}
+            >
+              {myProfile?.avatar_url ? (
+                <img src={myProfile.avatar_url} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-white font-semibold" style={{ fontSize: 11 }}>
+                  {(myProfile?.display_name ?? myProfile?.username ?? '?')
+                    .split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()}
                 </span>
               )}
             </button>
