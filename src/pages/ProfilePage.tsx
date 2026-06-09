@@ -3172,7 +3172,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (authLoading) return
-    if (!user) { setTimelineLoading(false); return }
+    if (!user || user.id === 'explore-guest') { setTimelineLoading(false); return }
     const uid = user.id
     let cancelled = false
 
@@ -3307,7 +3307,7 @@ export default function ProfilePage() {
       .then(async qs => {
         if (cancelled) return
         setProfileQuestions(qs)
-        if (user && qs.length) {
+        if (user && user.id !== 'explore-guest' && qs.length) {
           const voted = await fetchMyUpvotes(qs.map(q => q.id), user.id)
           if (!cancelled) setPqUpvotedIds(voted)
         }
