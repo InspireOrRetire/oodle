@@ -541,13 +541,13 @@ export default function PostDetailPage() {
               onClick={() => { if (!askSending) setAskOpen(false) }}
             />
 
-            {/* Sheet */}
+            {/* Sheet — fixed tall, keyboard-anchored, no drag (Threads-style) */}
             <motion.div
               key="ask-sh"
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 36, stiffness: 400 }}
-              className="fixed bottom-0 left-0 right-0 z-50 bg-white"
-              style={{ borderRadius: '24px 24px 0 0' }}
+              className="fixed bottom-0 left-0 right-0 z-50 bg-white flex flex-col"
+              style={{ borderRadius: '24px 24px 0 0', height: '88vh' }}
               onClick={e => e.stopPropagation()}
             >
               {/* Handle */}

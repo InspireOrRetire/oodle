@@ -317,10 +317,7 @@ function AnswerComposeSheet({
             key="ans-sheet"
             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 32, stiffness: 380 }}
-            drag="y" dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0.04, bottom: 0.3 }} dragMomentum={false}
-            onDragEnd={(_: never, i: { offset: { y: number } }) => { if (i.offset.y > 80) close() }}
-            style={{ y: sheetY, borderRadius: '22px 22px 0 0', maxHeight: '92vh' }}
+            style={{ borderRadius: '22px 22px 0 0', height: '92vh' }}
             className="fixed bottom-0 left-0 right-0 z-[60] bg-white flex flex-col overflow-hidden"
           >
             {/* Handle */}

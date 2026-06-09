@@ -1595,8 +1595,8 @@ function AskSheet({
             key="ask-sheet"
             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 36, stiffness: 400 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-white overflow-hidden"
-            style={{ borderRadius: '24px 24px 0 0', maxHeight: '88vh' }}
+            className="fixed bottom-0 left-0 right-0 z-50 bg-white flex flex-col overflow-hidden"
+            style={{ borderRadius: '24px 24px 0 0', height: '88vh' }}
             onClick={e => e.stopPropagation()}
           >
             {/* Handle */}
@@ -2713,15 +2713,15 @@ function CreatePostSheet({
             className="fixed inset-0 z-[50]" style={{ background: 'rgba(0,0,0,0.4)' }}
             onClick={handleClose}
           />
-          {/* Sheet */}
+          {/* Sheet — fixed tall, keyboard-anchored, no drag (Threads-style) */}
           <motion.div key="cp-sh"
             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 32, stiffness: 380 }}
-            style={{ borderRadius: '22px 22px 0 0', maxHeight: '92vh' }}
+            style={{ borderRadius: '22px 22px 0 0', height: '92vh' }}
             className="fixed bottom-0 left-0 right-0 z-[51] bg-white flex flex-col"
             onClick={e => e.stopPropagation()}
           >
-            {/* Handle pill — tap area only, no drag (drag was blocking button clicks) */}
+            {/* Handle pill — visual only, no interaction */}
             <div className="flex justify-center pt-3 pb-0 flex-shrink-0">
               <div className="w-10 h-[4px] rounded-full bg-[#e5e5e5]" />
             </div>
@@ -3562,7 +3562,8 @@ export default function ProfilePage() {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 32, stiffness: 380 }}
-              className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-[20px] pb-10 px-5 pt-5"
+              className="fixed bottom-0 left-0 right-0 z-50 bg-white flex flex-col px-5 pt-5"
+              style={{ borderRadius: '20px 20px 0 0', height: '88vh' }}
             >
               <AnimatePresence mode="wait">
                 {askSent ? (

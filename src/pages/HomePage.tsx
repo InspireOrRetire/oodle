@@ -610,15 +610,15 @@ function HomeAskSheet({
           <motion.div key="hask-sh"
             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 36, stiffness: 400 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-white overflow-hidden"
-            style={{ borderRadius: '24px 24px 0 0', maxHeight: '88vh' }}
+            className="fixed bottom-0 left-0 right-0 z-50 bg-white flex flex-col"
+            style={{ borderRadius: '24px 24px 0 0', height: '88vh' }}
             onClick={e => e.stopPropagation()}
           >
             <div className="flex justify-center pt-3 pb-0 flex-shrink-0">
               <div className="w-10 h-[4px] rounded-full" style={{ background: '#e0e0e0' }} />
             </div>
 
-            <div className="relative overflow-hidden" style={{ minHeight: 420 }}>
+            <div className="relative overflow-hidden flex-1" style={{ minHeight: 420 }}>
               <AnimatePresence mode="wait">
 
                 {/* ── LIST ── */}
@@ -1414,11 +1414,11 @@ function NewPostSheet({
           <motion.div key="np-sh"
             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 36, stiffness: 400 }}
-            style={{ borderRadius: '22px 22px 0 0', maxHeight: '92vh' }}
+            style={{ borderRadius: '22px 22px 0 0', height: '92vh' }}
             className="fixed bottom-0 left-0 right-0 z-[51] bg-white flex flex-col"
             onClick={e => e.stopPropagation()}
           >
-            {/* Handle pill — no drag (drag was blocking button clicks) */}
+            {/* Handle pill — visual only, no drag */}
             <div className="flex justify-center pt-[10px] pb-1 flex-shrink-0">
               <div className="w-9 h-[4px] rounded-full bg-[#d8d8d8]" />
             </div>
