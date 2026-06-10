@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion'
-import { X } from 'lucide-react'
+import { Delete, X } from 'lucide-react'
 
 interface Props {
   open:          boolean
@@ -12,29 +12,44 @@ interface Props {
 const PRESETS   = [1, 5, 10, 25, 50]
 const MAX_PRICE = 500
 
+// Keypad layout — same as Apple Pay
+const KEYS = [
+  ['1', '2', '3'],
+  ['4', '5', '6'],
+  ['7', '8', '9'],
+  ['.', '0', '⌫'],
+]
+
 function haptic(pattern: number | number[]) {
   try { navigator.vibrate?.(pattern) } catch { /* noop */ }
 }
 
+// Build a formatted display from the raw typed string
+function parseAmtStr(s: string) {
+  if (!s) return 0
+  const n = parseFloat(s)
+  return isNaN(n) ? 0 : n
+}
+
 export default function PriceSetterSheet({ open, currentPrice = 0, onConfirm, onClose }: Props) {
-  const [amount,   setAmount]   = useState(currentPrice)
-  const [inputVal, setInputVal] = useState(currentPrice > 0 ? currentPrice.toFixed(2) : '')
-  const inputRef = useRef<HTMLInputElement>(null)
-  const sheetY   = useMotionValue(0)
+  // Raw string the user is building, e.g. "25", "25.", "25.5", "25.50"
+  const [amtStr, setAmtStr] = useState(currentPrice > 0 ? currentPrice.toFixed(2) : '')
+  const sheetY = useMotionValue(0)
+
+  const amount    = parseAmtStr(amtStr)
+  const hasAmount = amount > 0
 
   // Reset on open
   useEffect(() => {
     if (open) {
-      setAmount(currentPrice)
-      setInputVal(currentPrice > 0 ? currentPrice.toFixed(2) : '')
+      setAmtStr(currentPrice > 0 ? currentPrice.toFixed(2) : '')
       animate(sheetY, 0, { type: 'spring', stiffness: 400, damping: 40, mass: 1.1 })
     }
   }, [open, currentPrice])
 
   function dismiss() {
-    inputRef.current?.blur()
     onClose()
-    setTimeout(() => { setAmount(currentPrice); setInputVal('') }, 350)
+    setTimeout(() => setAmtStr(''), 350)
   }
 
   function handleDragEnd(_: unknown, info: { offset: { y: number }; velocity: { y: number } }) {
@@ -47,50 +62,56 @@ export default function PriceSetterSheet({ open, currentPrice = 0, onConfirm, on
     }
   }
 
-  const selectPreset = useCallback((val: number) => {
-    haptic(8)
-    setAmount(val)
-    setInputVal(val.toFixed(2))
-    inputRef.current?.blur()
+  // ── Keypad press ────────────────────────────────────────────────────────────
+  const pressKey = useCallback((key: string) => {
+    haptic(4)
+    setAmtStr(prev => {
+      if (key === '⌫') return prev.slice(0, -1)
+
+      if (key === '.') {
+        if (prev.includes('.')) return prev   // only one decimal
+        return (prev === '' ? '0' : prev) + '.'
+      }
+
+      // Digit key
+      if (prev === '0') return key            // replace leading zero
+      const dotIdx = prev.indexOf('.')
+      if (dotIdx !== -1 && prev.length - dotIdx > 2) return prev  // max 2 decimal places
+
+      const next = prev + key
+      if (parseFloat(next) > MAX_PRICE) return prev
+      return next
+    })
   }, [])
 
-  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    let raw = e.target.value.replace(/[^0-9.]/g, '')
-    const dot = raw.indexOf('.')
-    if (dot !== -1) {
-      raw = raw.slice(0, dot + 1) + raw.slice(dot + 1).replace(/\./g, '')
-      if (raw.length > dot + 3) raw = raw.slice(0, dot + 3)
-    }
-    setInputVal(raw)
-    const n = parseFloat(raw)
-    if (!isNaN(n) && n >= 0 && n <= MAX_PRICE) setAmount(n)
-    else if (raw === '' || raw === '.') setAmount(0)
-  }
+  // ── Preset selection ────────────────────────────────────────────────────────
+  const selectPreset = useCallback((val: number) => {
+    haptic(8)
+    setAmtStr(val.toFixed(2))
+  }, [])
 
-  function handleInputBlur() {
-    if (!inputVal || inputVal === '.') { setInputVal(''); setAmount(0); return }
-    const capped = Math.min(parseFloat(inputVal) || 0, MAX_PRICE)
-    setAmount(capped)
-    setInputVal(capped > 0 ? capped.toFixed(2) : '')
-  }
-
+  // ── Confirm ─────────────────────────────────────────────────────────────────
   function handleConfirm() {
-    if (amount <= 0) return
+    if (!hasAmount) return
     haptic([6, 40, 10])
     onConfirm(amount)
     dismiss()
   }
 
-  const [dol, cts] = (amount > 0 ? amount.toFixed(2) : '0.00').split('.')
-  const hasAmount  = amount > 0
+  // ── Display split ───────────────────────────────────────────────────────────
+  // Show exactly what the user has typed, or dim "0.00" when empty
+  const displayStr  = amtStr || '0'
+  const hasDot      = displayStr.includes('.')
+  const [rawInt, rawDec = ''] = displayStr.split('.')
+  const intPart = rawInt || '0'
 
   return (
     <AnimatePresence>
       {open && (
         <>
-          {/* Thin status-bar peek overlay */}
+          {/* Backdrop — dim peek above sheet */}
           <motion.div
-            key="pss-peek"
+            key="pss-bd"
             className="fixed inset-0 z-[70]"
             style={{ background: 'rgba(0,0,0,0.55)' }}
             initial={{ opacity: 0 }}
@@ -100,7 +121,7 @@ export default function PriceSetterSheet({ open, currentPrice = 0, onConfirm, on
             onClick={dismiss}
           />
 
-          {/* Full-height sheet — leaves ~48px peek at the top */}
+          {/* Full-height sheet */}
           <motion.div
             key="pss-sh"
             className="fixed left-0 right-0 z-[71] bg-white flex flex-col"
@@ -125,11 +146,9 @@ export default function PriceSetterSheet({ open, currentPrice = 0, onConfirm, on
           >
 
             {/* ── Header ── */}
-            <div className="flex-shrink-0 flex items-center justify-between px-5 pt-4 pb-2">
-              <div style={{ width: 36 }} /> {/* spacer */}
-              <div className="flex flex-col items-center gap-1">
-                <div className="rounded-full" style={{ width: 36, height: 4, background: '#e0e0e0' }} />
-              </div>
+            <div className="flex-shrink-0 flex items-center justify-between px-5 pt-4 pb-1">
+              <div style={{ width: 36 }} />
+              <div className="rounded-full" style={{ width: 36, height: 4, background: '#e0e0e0' }} />
               <button
                 onClick={dismiss}
                 className="flex items-center justify-center rounded-full active:opacity-60 transition-opacity"
@@ -139,84 +158,80 @@ export default function PriceSetterSheet({ open, currentPrice = 0, onConfirm, on
               </button>
             </div>
 
-            {/* ── Title + subtitle ── */}
-            <div className="flex-shrink-0 text-center px-6 pt-2 pb-0">
+            {/* ── Title ── */}
+            <div className="flex-shrink-0 text-center px-6 pt-1 pb-0">
               <p style={{ fontSize: 20, fontWeight: 800, color: '#111', letterSpacing: '-0.4px' }}>
                 Set Your Price
               </p>
-              <p style={{ fontSize: 14, color: '#aaa', marginTop: 5, lineHeight: 1.4 }}>
+              <p style={{ fontSize: 13, color: '#aaa', marginTop: 4, lineHeight: 1.4 }}>
                 Followers will pay this to unlock your answer
               </p>
             </div>
 
-            {/* ── Amount display — fills remaining vertical space ── */}
-            <div className="flex-1 flex flex-col items-center justify-center">
-              <div className="flex items-end justify-center">
+            {/* ── Amount display ── */}
+            <div className="flex-1 flex items-center justify-center">
+              <div className="flex items-end">
                 {/* $ */}
                 <span style={{
-                  fontSize:      32,
+                  fontSize:      30,
                   fontWeight:    800,
-                  color:         hasAmount ? '#111' : '#d8d8d8',
+                  color:         hasAmount ? '#111' : '#d0d0d0',
                   lineHeight:    1,
-                  paddingBottom: 14,
-                  marginRight:   4,
-                  transition:    'color 0.15s',
+                  paddingBottom: 12,
+                  marginRight:   3,
+                  transition:    'color 0.12s',
                 }}>
                   $
                 </span>
 
-                {/* Integer — pops on change */}
+                {/* Integer — animates on change */}
                 <AnimatePresence mode="popLayout">
                   <motion.span
-                    key={dol}
-                    initial={{ opacity: 0, y: 16, scale: 0.92 }}
-                    animate={{ opacity: 1, y: 0,  scale: 1    }}
-                    exit={{ opacity: 0, y: -12, scale: 0.94 }}
+                    key={intPart}
+                    initial={{ opacity: 0, y: 14, scale: 0.9 }}
+                    animate={{ opacity: 1, y: 0,  scale: 1   }}
+                    exit={{ opacity: 0, y: -10, scale: 0.92 }}
                     transition={{ type: 'spring', stiffness: 600, damping: 28 }}
                     style={{
-                      fontSize:           96,
+                      fontSize:           88,
                       fontWeight:         800,
-                      color:              hasAmount ? '#111' : '#d8d8d8',
+                      color:              hasAmount ? '#111' : '#d0d0d0',
                       lineHeight:         1,
                       letterSpacing:      '-5px',
                       fontVariantNumeric: 'tabular-nums',
-                      transition:         'color 0.15s',
+                      transition:         'color 0.12s',
                     }}
                   >
-                    {dol}
+                    {intPart}
                   </motion.span>
                 </AnimatePresence>
 
-                {/* .cents */}
-                <span style={{
-                  fontSize:      36,
-                  fontWeight:    700,
-                  color:         hasAmount ? '#aaa' : '#d8d8d8',
-                  lineHeight:    1,
-                  paddingBottom: 12,
-                  marginLeft:    5,
-                  letterSpacing: '-0.5px',
-                  transition:    'color 0.15s',
-                }}>
-                  .{cts}
-                </span>
+                {/* Decimal — only shown once dot is typed */}
+                {hasDot && (
+                  <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    style={{
+                      fontSize:      34,
+                      fontWeight:    700,
+                      color:         hasAmount ? '#aaa' : '#d0d0d0',
+                      lineHeight:    1,
+                      paddingBottom: 10,
+                      marginLeft:    4,
+                      letterSpacing: '-0.5px',
+                      transition:    'color 0.12s',
+                    }}
+                  >
+                    .{rawDec}
+                  </motion.span>
+                )}
               </div>
-
-              {/* Subtle empty-state hint */}
-              {!hasAmount && (
-                <motion.p
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  style={{ fontSize: 13, color: '#ccc', marginTop: 8 }}
-                >
-                  tap a preset or enter a custom amount
-                </motion.p>
-              )}
             </div>
 
             {/* ── Preset pills ── */}
-            <div className="flex-shrink-0 flex items-center justify-center gap-2.5 px-5 pb-5">
+            <div className="flex-shrink-0 flex items-center justify-center gap-2 px-4 pb-3">
               {PRESETS.map(p => {
-                const active = amount === p
+                const active = amount === p && amtStr === p.toFixed(2)
                 return (
                   <motion.button
                     key={p}
@@ -224,13 +239,13 @@ export default function PriceSetterSheet({ open, currentPrice = 0, onConfirm, on
                     whileTap={{ scale: 0.88 }}
                     transition={{ type: 'spring', stiffness: 700, damping: 20 }}
                     style={{
-                      height:       50,
-                      minWidth:     50,
-                      paddingLeft:  16,
-                      paddingRight: 16,
+                      height:       44,
+                      minWidth:     44,
+                      paddingLeft:  14,
+                      paddingRight: 14,
                       borderRadius: 999,
                       background:   active ? '#111' : '#f2f2f4',
-                      fontSize:     15,
+                      fontSize:     14,
                       fontWeight:   700,
                       color:        active ? 'white' : '#333',
                       cursor:       'pointer',
@@ -245,32 +260,44 @@ export default function PriceSetterSheet({ open, currentPrice = 0, onConfirm, on
               })}
             </div>
 
-            {/* ── Custom input ── */}
-            <div className="flex-shrink-0 px-5 pb-5">
-              <div
-                className="flex items-center gap-3 px-4 rounded-2xl"
-                style={{ height: 54, background: '#f5f5f7', border: '1px solid #ebebeb' }}
-              >
-                <span style={{ fontSize: 17, color: '#bbb', fontWeight: 600, flexShrink: 0 }}>$</span>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  inputMode="decimal"
-                  placeholder="Custom amount"
-                  value={inputVal}
-                  onChange={handleInputChange}
-                  onBlur={handleInputBlur}
-                  className="flex-1 bg-transparent outline-none placeholder-[#ccc]"
-                  style={{ fontSize: 16, fontWeight: 500, color: '#111' }}
-                />
-                <span className="font-mono flex-shrink-0" style={{ fontSize: 10, color: '#ccc' }}>
-                  max $500
-                </span>
-              </div>
+            {/* ── Numeric keypad ── */}
+            <div
+              className="flex-shrink-0 px-1"
+              style={{ borderTop: '0.5px solid #f0f0f0' }}
+            >
+              {KEYS.map((row, ri) => (
+                <div key={ri} className="flex">
+                  {row.map(key => (
+                    <motion.button
+                      key={key}
+                      onClick={() => pressKey(key)}
+                      whileTap={{ backgroundColor: 'rgba(0,0,0,0.07)', scale: 0.94 }}
+                      transition={{ type: 'spring', stiffness: 800, damping: 22 }}
+                      className="flex-1 flex items-center justify-center select-none"
+                      style={{
+                        height:          62,
+                        fontSize:        key === '⌫' ? 14 : 28,
+                        fontWeight:      key === '⌫' ? 400 : 400,
+                        color:           '#111',
+                        background:      'transparent',
+                        border:          'none',
+                        cursor:          'pointer',
+                        borderRadius:    8,
+                        letterSpacing:   '-0.5px',
+                      }}
+                    >
+                      {key === '⌫'
+                        ? <Delete style={{ width: 22, height: 22, color: '#111' }} strokeWidth={1.75} />
+                        : key
+                      }
+                    </motion.button>
+                  ))}
+                </div>
+              ))}
             </div>
 
             {/* ── Confirm button ── */}
-            <div className="flex-shrink-0 px-5 pb-6">
+            <div className="flex-shrink-0 px-5 pt-2 pb-6">
               <motion.button
                 onClick={handleConfirm}
                 disabled={!hasAmount}
@@ -278,7 +305,7 @@ export default function PriceSetterSheet({ open, currentPrice = 0, onConfirm, on
                 transition={{ type: 'spring', stiffness: 500, damping: 22 }}
                 className="w-full flex items-center justify-center"
                 style={{
-                  height:       60,
+                  height:       58,
                   borderRadius: 18,
                   background:   hasAmount ? '#111' : '#e8e8ea',
                   cursor:       hasAmount ? 'pointer' : 'not-allowed',
@@ -286,7 +313,7 @@ export default function PriceSetterSheet({ open, currentPrice = 0, onConfirm, on
                 }}
               >
                 <span style={{
-                  fontSize:      18,
+                  fontSize:      17,
                   fontWeight:    700,
                   letterSpacing: '-0.3px',
                   color:         hasAmount ? 'white' : '#b8b8b8',
