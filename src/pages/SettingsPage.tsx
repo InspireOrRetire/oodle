@@ -1286,12 +1286,15 @@ export default function SettingsPage() {
               <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>tokens</span>
             </div>
           </div>
-          <button onClick={() => setBuyOpen(true)}
-            className="w-full rounded-[12px] py-[11px] flex items-center justify-center gap-2 active:opacity-80 transition-opacity"
-            style={{ background: '#111' }}>
-            <Zap style={{ width: 13, height: 13, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
-            <span className="font-mono text-[12px] text-white tracking-[0.03em]">buy tokens</span>
-          </button>
+          <div className="rounded-[12px] px-4 py-3 text-center" style={{ background: '#f9f9f9', border: '0.5px solid #ebebeb' }}>
+            <p className="text-[12px] leading-[1.6]" style={{ color: '#999' }}>
+              Manage your wallet at{' '}
+              <span className="font-semibold text-[#111]">oodle.com</span>
+            </p>
+            <p className="mt-1 font-mono text-[10px]" style={{ color: '#bbb' }}>
+              Add funds via your account settings at oodle.com
+            </p>
+          </div>
         </div>
 
         {!isFan && (
@@ -1409,7 +1412,28 @@ export default function SettingsPage() {
           icon={<Smartphone style={{ width: 14, height: 14 }} strokeWidth={2} />}
           iconBg="#f4f4f6" iconColor="#555"
           label="Push notifications" sublabel="Answers, messages, activity"
-          isOn={pushOn} onToggle={v => { setPushOn(v); showToast(v ? 'Push notifications on' : 'Push notifications off') }}
+          isOn={pushOn} onToggle={async v => {
+            if (v && 'Notification' in window) {
+              const perm = await Notification.requestPermission()
+              if (perm === 'granted') {
+                setPushOn(true)
+                showToast('Push notifications on')
+                // Onboarding push sequence — wallet funding reminder after short delay
+                setTimeout(() => {
+                  new Notification('Your oodle wallet is ready', {
+                    body: 'Add funds at oodle.com to start unlocking answers.',
+                    icon: '/oodle-logo.png',
+                  })
+                }, 3000)
+              } else {
+                setPushOn(false)
+                showToast('Permission denied — enable in device settings')
+              }
+            } else {
+              setPushOn(v)
+              showToast(v ? 'Push notifications on' : 'Push notifications off')
+            }
+          }}
         />
         <Row
           icon={<Bell style={{ width: 14, height: 14 }} strokeWidth={2} />}

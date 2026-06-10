@@ -119,11 +119,17 @@ export default function PurchaseSheet({ question, post, balance, onClose, onPurc
                     Unlock for {question.price.toFixed(2)} tokens
                   </button>
                 ) : (
-                  <button className="w-full bg-red-500 py-4 rounded-2xl font-semibold text-[15px] text-white">
-                    Not enough tokens — Top up
-                  </button>
+                  <div className="rounded-[14px] px-5 py-4 text-center" style={{ background: '#f9f9f9', border: '0.5px solid #ebebeb' }}>
+                    <p className="text-[13px] font-semibold text-[#333] mb-1">Not enough tokens</p>
+                    <p className="text-[12px] leading-[1.6]" style={{ color: '#999' }}>
+                      Manage your wallet at{' '}
+                      <span className="font-semibold text-[#111]">oodle.com</span>
+                    </p>
+                    <p className="mt-2 font-mono text-[11px]" style={{ color: '#bbb' }}>
+                      Add funds via your account settings at oodle.com
+                    </p>
+                  </div>
                 )}
-                <p className="text-center text-[11px] text-gray-400 mt-3">Tokens are non-refundable</p>
               </div>
             </motion.div>
           )}
