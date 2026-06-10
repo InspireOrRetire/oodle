@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { sendInsufficientBalanceEmail } from '../../services/emailService'
 import type { CartItem } from '../../services/cartService'
+import TopUpSheet from '../Menu/TopUpSheet'
 
 interface Props {
   open:      boolean
@@ -23,6 +24,7 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
   const { user }         = useAuth()
   const [step, setStep]  = useState<Step>('summary')
   const [emailFired, setEmailFired] = useState(false)
+  const [topUpOpen, setTopUpOpen]   = useState(false)
 
   const [balance] = useState(120) // TODO: wire to real profile balance
   const total      = items.reduce((s, i) => s + i.price, 0)
@@ -30,27 +32,31 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
   const hasBalance = balance >= total
   const remaining  = balance - total
 
-  useEffect(() => { if (!open) setTimeout(() => { setStep('summary'); setEmailFired(false) }, 380) }, [open])
+  useEffect(() => { if (!open) setTimeout(() => { setStep('summary'); setEmailFired(false); setTopUpOpen(false) }, 380) }, [open])
 
   function handleClose() { onClose() }
 
   async function handleUnlock() {
-    if (!hasBalance) {
-      if (!emailFired && user?.email) {
-        setEmailFired(true)
-        sendInsufficientBalanceEmail(user.email, user.email)
-      }
-      return
-    }
+    if (!hasBalance) return
     setStep('processing')
     await new Promise(r => setTimeout(r, 1800))
     setStep('success')
+  }
+
+  function handleTopUp() {
+    if (!emailFired && user?.email) {
+      setEmailFired(true)
+      sendInsufficientBalanceEmail(user.email, user.email)
+    }
+    setTopUpOpen(true)
   }
 
   return (
     <AnimatePresence>
       {open && (
         <>
+          {topUpOpen && <TopUpSheet onClose={() => setTopUpOpen(false)} />}
+
           <motion.div key="co-bd"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-[60]" style={{ background: 'rgba(0,0,0,0.45)' }}
@@ -141,14 +147,20 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                           </span>
                         </button>
                       ) : (
-                        <div className="rounded-[14px] px-5 py-4 text-center" style={{ background: '#f9f9f9', border: '0.5px solid #ebebeb' }}>
-                          <p className="text-[13px] font-semibold text-[#333] mb-1">Not enough tokens</p>
-                          <p className="text-[12px] leading-[1.6]" style={{ color: '#999' }}>
-                            Manage your wallet at{' '}
-                            <span className="font-semibold text-[#111]">oodle.com</span>
-                          </p>
-                          <button onClick={handleUnlock} className="mt-3 font-mono text-[11px] active:opacity-60" style={{ color: '#bbb' }}>
-                            Add funds via your account settings at oodle.com
+                        <div className="flex flex-col gap-2.5">
+                          <div className="rounded-[14px] px-5 py-3 text-center" style={{ background: '#f9f9f9', border: '0.5px solid #ebebeb' }}>
+                            <p className="text-[13px] font-semibold text-[#333] mb-0.5">Not enough tokens</p>
+                            <p className="font-mono text-[11px]" style={{ color: '#bbb' }}>
+                              Add tokens to your wallet to unlock {count === 1 ? 'this answer' : 'these answers'}
+                            </p>
+                          </div>
+                          <button
+                            onClick={handleTopUp}
+                            className="w-full rounded-[14px] py-[15px] flex items-center justify-center gap-2 active:opacity-80"
+                            style={{ background: '#111' }}
+                          >
+                            <Zap style={{ width: 14, height: 14, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
+                            <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>Add tokens</span>
                           </button>
                         </div>
                       )}

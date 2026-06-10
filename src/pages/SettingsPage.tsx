@@ -943,14 +943,20 @@ function BuyTokensSheet({ open, onClose, onPurchased }: { open: boolean; onClose
             <AnimatePresence mode="wait">
               {done ? (
                 <motion.div key="done" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                  className="flex flex-col items-center py-10 px-6">
+                  className="flex flex-col items-center py-10 px-6 pb-12">
                   <div className="w-16 h-16 rounded-full bg-[#111] flex items-center justify-center mb-4">
                     <Zap style={{ width: 28, height: 28, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
                   </div>
                   <p className="text-[20px] font-bold text-[#111] mb-1">Tokens added!</p>
-                  <p className="font-mono text-[12px]" style={{ color: '#aaa' }}>
+                  <p className="font-mono text-[12px] mb-5" style={{ color: '#aaa' }}>
                     {selected.tokens} tokens added to your balance
                   </p>
+                  {/* Placement 3 — post-purchase nudge */}
+                  <div className="w-full rounded-[12px] px-4 py-3 text-center" style={{ background: '#f9f9f9', border: '0.5px solid #ebebeb' }}>
+                    <p className="font-mono text-[11px]" style={{ color: '#aaa', lineHeight: 1.55 }}>
+                      Next time, fund at oodle.com for bonus credits on every top-up
+                    </p>
+                  </div>
                 </motion.div>
               ) : (
                 <motion.div key="form" initial={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -996,15 +1002,24 @@ function BuyTokensSheet({ open, onClose, onPurchased }: { open: boolean; onClose
                       )
                     })}
                   </div>
-                  <div className="px-5 pb-10 pt-1">
+                  <div className="px-5 pb-10 pt-1 flex flex-col gap-2.5">
+                    {/* Placement 2 — above pay button */}
+                    <p className="text-center font-mono text-[11px]" style={{ color: '#bbb', lineHeight: 1.5 }}>
+                      Heads up — your credits go further when you fund at oodle.com
+                    </p>
                     <button onClick={handleBuy} disabled={loading}
-                      className="w-full rounded-[14px] py-[14px] flex items-center justify-center gap-2 active:opacity-80 disabled:opacity-70"
-                      style={{ background: '#000' }}>
+                      className="w-full rounded-[14px] flex items-center justify-center gap-2 active:opacity-80 disabled:opacity-70"
+                      style={{ background: '#000', height: 52 }}>
                       {loading
                         ? <div className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        : <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
-                            Pay ${selected.price.toFixed(2)} with Apple Pay
-                          </span>
+                        : <>
+                            <svg width="15" height="18" viewBox="0 0 17 20" fill="white" aria-hidden="true">
+                              <path d="M14.376 10.087c-.01-1.98 1.638-2.944 1.713-2.988-.937-1.37-2.386-1.555-2.899-1.574-1.227-.126-2.408.73-3.03.73-.632 0-1.589-.716-2.618-.696-1.333.02-2.572.786-3.257 1.978-1.398 2.424-.356 5.997 1 7.953.665.959 1.451 2.032 2.48 1.993.997-.039 1.372-.643 2.578-.643 1.195 0 1.54.643 2.587.622 1.074-.02 1.748-1.965 2.4-2.935-.753-.343-1.952-1.326-1.954-3.44zm-1.858-6.316c.552-.67.927-1.598.824-2.528-.797.033-1.76.533-2.33 1.202-.512.591-.96 1.534-.839 2.44.89.07 1.793-.454 2.345-1.114z" />
+                            </svg>
+                            <span style={{ fontSize: 16, fontWeight: 600, color: 'white' }}>
+                              Pay ${selected.price.toFixed(2)}
+                            </span>
+                          </>
                       }
                     </button>
                   </div>
@@ -1274,7 +1289,7 @@ export default function SettingsPage() {
       <Section title="Wallet">
         {/* Token balance */}
         <div className="px-4 py-4" style={{ borderBottom: '0.5px solid #f5f5f7' }}>
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-[9px] flex items-center justify-center" style={{ background: '#fff8ed' }}>
                 <Zap style={{ width: 15, height: 15, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
@@ -1286,15 +1301,18 @@ export default function SettingsPage() {
               <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>tokens</span>
             </div>
           </div>
-          <div className="rounded-[12px] px-4 py-3 text-center" style={{ background: '#f9f9f9', border: '0.5px solid #ebebeb' }}>
-            <p className="text-[12px] leading-[1.6]" style={{ color: '#999' }}>
-              Manage your wallet at{' '}
-              <span className="font-semibold text-[#111]">oodle.com</span>
-            </p>
-            <p className="mt-1 font-mono text-[10px]" style={{ color: '#bbb' }}>
-              Add funds via your account settings at oodle.com
-            </p>
-          </div>
+          {/* Placement 1 — below balance */}
+          <p className="font-mono text-center mb-3" style={{ fontSize: 11, color: '#bbb' }}>
+            Get more credits for your money at oodle.com
+          </p>
+          <button
+            onClick={() => setBuyOpen(true)}
+            className="w-full rounded-[12px] py-3 flex items-center justify-center gap-2 active:opacity-70 transition-opacity"
+            style={{ background: '#111' }}
+          >
+            <Zap style={{ width: 13, height: 13, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
+            <span style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>Add tokens</span>
+          </button>
         </div>
 
         {!isFan && (

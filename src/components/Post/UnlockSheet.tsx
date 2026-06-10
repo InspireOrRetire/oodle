@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Check, Zap } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { sendInsufficientBalanceEmail } from '../../services/emailService'
+import TopUpSheet from '../Menu/TopUpSheet'
 
 export interface UnlockTarget {
   creator: {
@@ -39,20 +40,16 @@ export default function UnlockSheet({ target, onClose }: { target: UnlockTarget 
   const [view, setView]           = useState<'main' | 'success'>('main')
   const [balance]                 = useState(120) // TODO: wire to real profile balance
   const [emailFired, setEmailFired] = useState(false)
+  const [topUpOpen, setTopUpOpen] = useState(false)
 
   const price      = target?.price ?? 0
   const hasBalance = balance >= price
 
   // Reset when target changes
-  useEffect(() => { setView('main'); setEmailFired(false) }, [target])
+  useEffect(() => { setView('main'); setEmailFired(false); setTopUpOpen(false) }, [target])
 
   function handleUnlockAttempt() {
-    if (hasBalance) {
-      setView('success')
-    } else if (!emailFired && user?.email) {
-      setEmailFired(true)
-      sendInsufficientBalanceEmail(user.email, user.email)
-    }
+    if (hasBalance) setView('success')
   }
 
   function handleClose() {
@@ -69,6 +66,8 @@ export default function UnlockSheet({ target, onClose }: { target: UnlockTarget 
             className="fixed inset-0 z-50" style={{ background: 'rgba(0,0,0,0.45)' }}
             onClick={handleClose}
           />
+
+          {topUpOpen && <TopUpSheet onClose={() => setTopUpOpen(false)} />}
 
           <motion.div key="ul-sh"
             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
@@ -136,21 +135,26 @@ export default function UnlockSheet({ target, onClose }: { target: UnlockTarget 
                             </span>
                           </button>
                         ) : (
-                          <div className="rounded-[14px] px-5 py-4 text-center" style={{ background: '#f9f9f9', border: '0.5px solid #ebebeb' }}>
-                            <p className="text-[13px] font-semibold text-[#333] mb-1">
-                              Not enough tokens
-                            </p>
-                            <p className="text-[12px] leading-[1.6]" style={{ color: '#999' }}>
-                              Manage your wallet at{' '}
-                              <span className="font-semibold text-[#111]">oodle.com</span>
-                            </p>
-                            {/* Tapping this surfaces the email trigger */}
+                          <div className="flex flex-col gap-2.5">
+                            <div className="rounded-[14px] px-5 py-3 text-center" style={{ background: '#f9f9f9', border: '0.5px solid #ebebeb' }}>
+                              <p className="text-[13px] font-semibold text-[#333] mb-0.5">Not enough tokens</p>
+                              <p className="font-mono text-[11px]" style={{ color: '#bbb' }}>
+                                Add tokens to your wallet to unlock this answer
+                              </p>
+                            </div>
                             <button
-                              onClick={handleUnlockAttempt}
-                              className="mt-3 font-mono text-[11px] active:opacity-60"
-                              style={{ color: '#bbb' }}
+                              onClick={() => {
+                                if (!emailFired && user?.email) {
+                                  setEmailFired(true)
+                                  sendInsufficientBalanceEmail(user.email, user.email)
+                                }
+                                setTopUpOpen(true)
+                              }}
+                              className="w-full rounded-[14px] py-[15px] flex items-center justify-center gap-2 active:opacity-80"
+                              style={{ background: '#111' }}
                             >
-                              Add funds via your account settings at oodle.com
+                              <Zap style={{ width: 14, height: 14, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
+                              <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>Add tokens</span>
                             </button>
                           </div>
                         )}
