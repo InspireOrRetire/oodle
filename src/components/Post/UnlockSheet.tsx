@@ -38,7 +38,7 @@ const Tx = { type: 'spring', stiffness: 420, damping: 42 } as const
 export default function UnlockSheet({ target, onClose }: { target: UnlockTarget | null; onClose: () => void }) {
   const { user } = useAuth()
   const [view, setView]           = useState<'main' | 'success'>('main')
-  const [balance]                 = useState(120) // TODO: wire to real profile balance
+  const [balance]                 = useState(0) // TODO: read from profile.token_balance once payment is wired
   const [emailFired, setEmailFired] = useState(false)
   const [topUpOpen, setTopUpOpen] = useState(false)
 

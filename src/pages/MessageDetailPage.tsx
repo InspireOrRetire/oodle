@@ -589,24 +589,45 @@ export default function MessageDetailPage() {
   // Bridge: AnswerComposerSheet payload → AnswerBlock[] used by threadService
   async function handleSheetSubmit(payload: AnswerSubmitPayload) {
     const blocks: AnswerBlock[] = []
+
     if (payload.answerText.trim()) {
       blocks.push({ id: 'ans-text', type: 'text', content: payload.answerText.trim() })
     }
+    if (payload.location) {
+      blocks.push({
+        id: 'ans-loc', type: 'location',
+        address: payload.location.address,
+        coords: [payload.location.lat, payload.location.lng],
+      })
+    }
+    if (payload.listItems && payload.listItems.filter(i => i.trim()).length > 0) {
+      blocks.push({
+        id: 'ans-list', type: 'list',
+        items: payload.listItems.filter(i => i.trim()),
+        ordered: false,
+      })
+    }
     if (blocks.length === 0) blocks.push({ id: 'ans-1', type: 'text', content: '(answer)' })
 
-    // Update price if changed
     if (payload.price !== thread!.price) {
       updatePrice(thread!.id, payload.price).catch(console.error)
       setThread(prev => prev ? { ...prev, price: payload.price } : prev)
     }
 
     await submitAnswer({ threadId: thread!.id, blocks, price: payload.price })
-    setThread(prev => prev ? {
-      ...prev,
-      status: 'answered',
-      answer_blocks: blocks as unknown as Json,
-      answer_text: payload.answerText.trim(),
-    } : prev)
+
+    // Re-fetch to get server's canonical state (covers any server-side transforms)
+    const fresh = await getThread(thread!.id)
+    if (fresh) {
+      setThread(fresh)
+    } else {
+      setThread(prev => prev ? {
+        ...prev,
+        status: 'answered',
+        answer_blocks: blocks as unknown as Json,
+        answer_text: payload.answerText.trim(),
+      } : prev)
+    }
     setComposing(false)
   }
 
