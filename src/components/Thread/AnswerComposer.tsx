@@ -5,6 +5,7 @@ import type { AnswerBlock, TextBlock, PhotoBlock, LocationBlock, AudioBlock, Lis
 import PlusMenu, { PlusMenuOption } from './PlusMenu'
 import LocationSearchSheet from './LocationSearchSheet'
 import TokenIcon from '../TokenIcon'
+import MapTileCard from '../UI/MapTileCard'
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -107,28 +108,14 @@ function PhotoBlockEditor({ block }: { block: PhotoBlock }) {
 function LocationBlockEditor({ block }: { block: LocationBlock }) {
   return (
     <div className="mt-1 rounded-2xl overflow-hidden border border-gray-100">
-      {/* Faux map */}
-      <div className="h-28 bg-green-50 relative overflow-hidden">
-        <div className="absolute inset-0 grid grid-cols-5 grid-rows-3 gap-px">
-          {Array.from({ length: 15 }).map((_, i) => (
-            <div key={i} className={`opacity-20 ${ ['bg-green-300','bg-green-200','bg-green-100','bg-emerald-200','bg-teal-100'][i % 5] }`} />
-          ))}
-        </div>
-        {/* Roads */}
-        <div className="absolute inset-0">
-          <div className="absolute left-0 right-0 top-1/2 h-[3px] bg-white/60 -translate-y-1/2" />
-          <div className="absolute top-0 bottom-0 left-1/3 w-[3px] bg-white/60" />
-        </div>
-        {/* Pin */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="flex flex-col items-center -translate-y-2">
-            <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center shadow-lg">
-              <MapPin className="w-4 h-4 text-white" fill="white" />
-            </div>
-            <div className="w-2 h-2 bg-red-500 rotate-45 -mt-1 shadow" />
+      {block.coords
+        ? <MapTileCard coords={block.coords} height={128} />
+        : (
+          <div className="h-28 bg-[#e8ecf0] flex items-center justify-center">
+            <MapPin className="w-6 h-6 text-gray-300" />
           </div>
-        </div>
-      </div>
+        )
+      }
       <div className="px-3 py-2.5 bg-white flex items-center gap-2">
         <MapPin className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />
         <span className="text-[13px] text-gray-700 font-medium">{block.address}</span>

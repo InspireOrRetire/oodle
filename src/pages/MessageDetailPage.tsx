@@ -13,6 +13,7 @@ import {
 import type { ThreadWithParticipants, MessageRow, AnswerBlock } from '../lib/database.types'
 import type { Json } from '../lib/database.types'
 import { MOCK_THREADS } from '../lib/mockFeed'
+import MapTileCard from '../components/UI/MapTileCard'
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -193,25 +194,16 @@ function AnswerBlockView({ block }: { block: AnswerBlock }) {
 
   if (block.type === 'location') {
     return (
-      <div className="rounded-2xl overflow-hidden border border-amber-100">
-        <div className="h-24 bg-green-50 relative overflow-hidden">
-          <div className="absolute inset-0 grid grid-cols-5 grid-rows-3 gap-px">
-            {Array.from({ length: 15 }).map((_, i) => (
-              <div key={i} className={`opacity-20 ${['bg-green-300','bg-green-200','bg-green-100','bg-emerald-200','bg-teal-100'][i % 5]}`} />
-            ))}
-          </div>
-          <div className="absolute left-0 right-0 top-1/2 h-[2px] bg-white/60 -translate-y-1/2" />
-          <div className="absolute top-0 bottom-0 left-1/3 w-[2px] bg-white/60" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex flex-col items-center -translate-y-1.5">
-              <div className="w-7 h-7 bg-red-500 rounded-full flex items-center justify-center shadow-md">
-                <MapPin className="w-3.5 h-3.5 text-white" fill="white" />
-              </div>
-              <div className="w-1.5 h-1.5 bg-red-500 rotate-45 -mt-0.5" />
+      <div className="rounded-2xl overflow-hidden border border-gray-100">
+        {block.coords
+          ? <MapTileCard coords={block.coords} height={140} />
+          : (
+            <div className="h-24 bg-[#e8ecf0] flex items-center justify-center">
+              <MapPin className="w-6 h-6 text-gray-300" />
             </div>
-          </div>
-        </div>
-        <div className="px-3 py-2 bg-white flex items-center gap-1.5">
+          )
+        }
+        <div className="px-3 py-2.5 bg-white flex items-center gap-1.5">
           <MapPin className="w-3 h-3 text-red-400 flex-shrink-0" />
           <span className="text-[13px] text-gray-700">{block.address}</span>
         </div>
