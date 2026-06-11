@@ -579,7 +579,7 @@ function PayoutSheet({ open, onClose, onSaved }: { open: boolean; onClose: () =>
                                                             <Building2 style={{ width: 18, height: 18, color: 'white' }} strokeWidth={1.75} />
                                               </div>
                                               <div>
-                                                            <p className="text-[15px] font-semibold text-[#111]">Stripe Connect</p>p>
+                                                            <p className="text-[15px] font-semibold text-[#111]">Stripe Connect</p>
                                                             <p className="font-mono text-[11px]" style={{ color: statusColor }}>
                                                               {status === 'loading' ? 'Checking…' : statusLabel}
                                                             </p>
