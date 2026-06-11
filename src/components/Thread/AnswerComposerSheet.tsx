@@ -645,7 +645,10 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
                               className="w-full text-left px-3 py-2.5 flex items-start gap-2 active:bg-gray-50"
                               style={{ borderTop: i > 0 ? '0.5px solid #f0f0f0' : 'none' }}>
                               <MapPin style={{ width: 12, height: 12, color: '#aaa', flexShrink: 0, marginTop: 1 }} strokeWidth={2} />
-                              <p className="text-[12px] text-gray-700 leading-snug line-clamp-2">{r.display_name}</p>
+                              <div className="flex flex-col min-w-0">
+                                <p className="text-[12px] text-gray-700 leading-snug">{formatNominatim(r)}</p>
+                                <p className="text-[11px] text-gray-400 leading-snug truncate">{r.display_name.split(',').slice(1, 3).join(',').trim()}</p>
+                              </div>
                             </button>
                           ))}
                         </div>
