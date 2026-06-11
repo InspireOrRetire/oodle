@@ -577,18 +577,18 @@ function PayoutSheet({ open, onClose, onSaved }: { open: boolean; onClose: () =>
                                   <div className="flex items-center gap-3 mb-3">
                                               <div className="w-10 h-10 rounded-[10px] bg-[#111] flex items-center justify-center flex-shrink-0">
                                                             <Building2 style={{ width: 18, height: 18, color: 'white' }} strokeWidth={1.75} />
-                                              </div>div>
+                                              </div>
                                               <div>
                                                             <p className="text-[15px] font-semibold text-[#111]">Stripe Connect</p>p>
                                                             <p className="font-mono text-[11px]" style={{ color: statusColor }}>
                                                               {status === 'loading' ? 'Checking…' : statusLabel}
-                                                            </p>p>
-                                              </div>div>
-                                  </div>div>
+                                                            </p>
+                                              </div>
+                                  </div>
                                   <p className="font-mono text-[11px]" style={{ color: '#aaa' }}>
                                               Payouts sent every Monday · 2–3 business days
-                                  </p>p>
-                        </div>div>
+                                  </p>
+                        </div>
                 
                   {/* ── CTA ── */}
                   {status !== 'connected' && (
