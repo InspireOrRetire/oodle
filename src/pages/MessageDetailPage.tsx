@@ -279,7 +279,7 @@ function Avatar({ url, name, size = 9 }: { url: string | null | undefined; name:
 export default function MessageDetailPage() {
   const { id }   = useParams()
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, isExploreMode } = useAuth()
 
   const [thread,       setThread]       = useState<ThreadWithParticipants | null>(null)
   const [loading,      setLoading]      = useState(true)
@@ -400,7 +400,10 @@ export default function MessageDetailPage() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
   }, [thread?.messages.length])
 
-  const isCreator = !!(thread && user && thread.creator_id === user.id)
+  // In explore mode all mock threads show the full creator experience
+  const isCreator = isExploreMode
+    ? !!(thread)
+    : !!(thread && user && thread.creator_id === user.id)
 
   // Mark viewed when fan opens answered thread
   useEffect(() => {
