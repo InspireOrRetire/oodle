@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, Check, CreditCard, Shield, Zap } from 'lucide-react'
+import { supabase } from '../../lib/supabase'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -66,7 +67,7 @@ export default function UnlockSheet({
   onClose: () => void
 }) {
   const [view,     setView]     = useState<UView>('main')
-  const [balance]               = useState(120)
+    const [balance,    setBalance]   = useState(0)
   const [pack,     setPack]     = useState<TokenPack>(TOKEN_PACKS[1])
   const [cardCtx,  setCardCtx]  = useState<'unlock' | 'tokens'>('unlock')
   const [cardNum,  setCardNum]  = useState('')
@@ -75,6 +76,16 @@ export default function UnlockSheet({
   const [cardName, setCardName] = useState('')
   const [paying,   setPaying]   = useState(false)
   const [appling,  setAppling]  = useState(false)
+
+    useEffect(() => {
+          supabase
+            .from('profiles')
+            .select('token_balance')
+            .single()
+            .then(({ data }) => {
+                      if (data) setBalance(data.token_balance ?? 0)
+            })
+    }, [])
 
   const price      = target?.price ?? 0
   const hasBalance = balance >= price
@@ -88,12 +99,28 @@ export default function UnlockSheet({
     nav('success')
   }
 
-  async function handleCardPay() {
-    setPaying(true)
-    await new Promise(r => setTimeout(r, 1900))
-    setPaying(false)
-    nav('success')
-  }
+async function openUnlockCheckout() {
+      setPaying(true)
+      try {
+              const { data: { session } } = await supabase.auth.getSession()
+              const resp = await supabase.functions.invoke('stripe-checkout', {
+                        body: {
+                                    post_id:    target?.question ? undefined : undefined,
+                                    creator_id: target?.creator?.username,
+                                    price_cents: Math.round(price * 100),
+                                    pack_id:    cardCtx === 'tokens' ? pack.id : undefined,
+                        },
+                        headers: { Authorization: `Bearer ${session?.access_token}` },
+              })
+              if (resp.error) throw resp.error
+              if (resp.data?.url) window.location.href = resp.data.url
+              else nav('success')
+      } catch (err) {
+              console.error('Checkout error', err)
+      } finally {
+              setPaying(false)
+      }
+}
 
   function handleClose() {
     onClose()
@@ -373,7 +400,7 @@ export default function UnlockSheet({
                           ${cardCtx === 'tokens' ? pack.price.toFixed(2) : price.toFixed(2)}
                         </span>
                       </div>
-                      <button onClick={handleCardPay} disabled={!cardComplete || paying}
+                      <button onClick={openUnlockCheckout} disabled={!cardComplete || paying}
                         className="w-full rounded-[14px] py-[15px] mt-3 flex items-center justify-center gap-2 active:opacity-80 disabled:opacity-30"
                         style={{ background: '#111' }}>
                         {paying
