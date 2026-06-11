@@ -57,12 +57,20 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const [splashDone, setSplashDone] = useState(false)
+  // Persist across bfcache restores (mobile back button) so splash only shows once per session
+  const [splashDone, setSplashDone] = useState(
+    () => sessionStorage.getItem('oodle_splash_done') === '1'
+  )
+
+  function handleSplashDone() {
+    sessionStorage.setItem('oodle_splash_done', '1')
+    setSplashDone(true)
+  }
 
   return (
     <LayoutProvider>
       <AnimatePresence>
-        {!splashDone && <SplashScreen onDone={() => setSplashDone(true)} />}
+        {!splashDone && <SplashScreen onDone={handleSplashDone} />}
       </AnimatePresence>
       <Routes>
         <Route path="/auth" element={<AuthPage />} />
