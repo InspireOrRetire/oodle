@@ -262,7 +262,7 @@ export default function PriceSetterSheet({ open, currentPrice = 0, onConfirm, on
 
             {/* ── Numeric keypad ── */}
             <div
-              className="flex-shrink-0 px-1"
+              className="flex-shrink-0 px-14"
               style={{ borderTop: '0.5px solid #f0f0f0' }}
             >
               {KEYS.map((row, ri) => (
@@ -271,25 +271,44 @@ export default function PriceSetterSheet({ open, currentPrice = 0, onConfirm, on
                     <motion.button
                       key={key}
                       onClick={() => pressKey(key)}
-                      whileTap={{ backgroundColor: 'rgba(0,0,0,0.07)', scale: 0.94 }}
                       transition={{ type: 'spring', stiffness: 800, damping: 22 }}
                       className="flex-1 flex items-center justify-center select-none"
                       style={{
-                        height:          62,
-                        fontSize:        key === '⌫' ? 14 : 28,
-                        fontWeight:      key === '⌫' ? 400 : 400,
-                        color:           '#111',
-                        background:      'transparent',
-                        border:          'none',
-                        cursor:          'pointer',
-                        borderRadius:    8,
-                        letterSpacing:   '-0.5px',
+                        height:     72,
+                        background: 'transparent',
+                        border:     'none',
+                        cursor:     'pointer',
+                        padding:    0,
                       }}
                     >
-                      {key === '⌫'
-                        ? <Delete style={{ width: 22, height: 22, color: '#111' }} strokeWidth={1.75} />
-                        : key
-                      }
+                      {key === '⌫' ? (
+                        <motion.span
+                          whileTap={{ scale: 0.82, opacity: 0.5 }}
+                          transition={{ type: 'spring', stiffness: 800, damping: 22 }}
+                          className="flex items-center justify-center"
+                          style={{ width: 62, height: 62, borderRadius: '50%' }}
+                        >
+                          <Delete style={{ width: 22, height: 22, color: '#111' }} strokeWidth={1.75} />
+                        </motion.span>
+                      ) : (
+                        <motion.span
+                          whileTap={{ backgroundColor: '#d1d1d6', scale: 0.91 }}
+                          transition={{ type: 'spring', stiffness: 800, damping: 22 }}
+                          className="flex items-center justify-center select-none"
+                          style={{
+                            width:        62,
+                            height:       62,
+                            borderRadius: '50%',
+                            background:   '#e9e9ec',
+                            fontSize:     key === '.' ? 32 : 28,
+                            fontWeight:   500,
+                            color:        '#111',
+                            letterSpacing: '-0.5px',
+                          }}
+                        >
+                          {key}
+                        </motion.span>
+                      )}
                     </motion.button>
                   ))}
                 </div>

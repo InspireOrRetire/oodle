@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react'
+import { AnimatePresence } from 'framer-motion'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './contexts/AuthContext'
 import { LayoutProvider } from './contexts/LayoutContext'
@@ -14,11 +16,28 @@ import SettingsPage from './pages/SettingsPage'
 import PostDetailPage from './pages/PostDetailPage'
 import CartPage from './pages/CartPage'
 import OnboardingFlow from './components/Onboarding/OnboardingFlow'
+import SplashScreen from './components/UI/SplashScreen'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, loading, profile, isExploreMode } = useAuth()
 
-  if (loading && !isExploreMode) return (
+  // If auth tokens are in the URL (email confirmation link), hold the spinner
+  // while Supabase exchanges the code for a session. Without this, getSession()
+  // resolves null before the exchange finishes → redirect to /auth → user sees
+  // the sign-in form and the confirmation link is wasted.
+  // The timeout clears the hold after 8s so a failed exchange never hangs forever.
+  const [waitingForAuthUrl, setWaitingForAuthUrl] = useState(() =>
+    window.location.search.includes('code=') ||
+    window.location.hash.includes('access_token')
+  )
+  useEffect(() => {
+    if (!waitingForAuthUrl) return
+    if (user) { setWaitingForAuthUrl(false); return }
+    const t = setTimeout(() => setWaitingForAuthUrl(false), 8000)
+    return () => clearTimeout(t)
+  }, [user, waitingForAuthUrl])
+
+  if ((loading || waitingForAuthUrl) && !isExploreMode && !user) return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="w-6 h-6 border-2 border-gray-200 border-t-gray-900 rounded-full animate-spin" />
     </div>
@@ -38,8 +57,13 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const [splashDone, setSplashDone] = useState(false)
+
   return (
     <LayoutProvider>
+      <AnimatePresence>
+        {!splashDone && <SplashScreen onDone={() => setSplashDone(true)} />}
+      </AnimatePresence>
       <Routes>
         <Route path="/auth" element={<AuthPage />} />
         <Route element={<RequireAuth><Layout /></RequireAuth>}>
