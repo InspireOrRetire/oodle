@@ -2720,7 +2720,7 @@ function CreatePostSheet({
           <motion.div key="cp-sh"
             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 32, stiffness: 380 }}
-            style={{ borderRadius: '22px 22px 0 0', height: '92vh' }}
+            style={{ borderRadius: '22px 22px 0 0', height: '92dvh' }}
             className="fixed bottom-0 left-0 right-0 z-[51] bg-white flex flex-col"
             onClick={e => e.stopPropagation()}
           >
@@ -2790,7 +2790,6 @@ function CreatePostSheet({
                   <AnimatePresence mode="wait">
                     <motion.div key={mode} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.12 }}>
                       <textarea
-                        autoFocus
                         value={caption}
                         onChange={e => setCaption(e.target.value)}
                         placeholder={isAnswerMode ? 'Tease what you know. Fans pay to unlock the full answer…' : 'Post something that gets people asking…'}
@@ -3125,6 +3124,22 @@ function CreatePostSheet({
                   )}
                 </>
               )}
+            </div>
+
+            {/* Sticky post button — always visible above keyboard */}
+            <div className="flex-shrink-0 px-5 py-3" style={{ borderTop: '0.5px solid #f2f2f2' }}>
+              <button
+                onClick={handlePost}
+                disabled={!canPost}
+                className="w-full rounded-[14px] py-[14px] text-[15px] font-semibold transition-all active:opacity-70"
+                style={canPost
+                  ? (isAnswerMode
+                    ? { background: '#E8B800', color: '#111' }
+                    : { background: '#111111', color: '#fff' })
+                  : { background: '#f0f0f0', color: '#c0c0c0' }}
+              >
+                {saving ? 'Posting…' : isAnswerMode ? 'Price & post' : 'Post'}
+              </button>
             </div>
 
             {/* Hidden file inputs */}
