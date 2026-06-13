@@ -46,10 +46,6 @@ export default function Layout() {
           transition={{ type: 'spring', damping: 28, stiffness: 320 }}
           className="fixed bottom-0 left-0 right-0 z-30"
           style={{
-            background: 'rgba(245,245,245,0.55)',
-            backdropFilter: 'blur(24px) saturate(1.8)',
-            WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
-            borderTop: '0.5px solid rgba(255,255,255,0.55)',
             paddingBottom: 'env(safe-area-inset-bottom)',
             willChange: 'transform',
           }}
@@ -57,7 +53,13 @@ export default function Layout() {
           <div className="px-3 py-2">
             <div
               className="flex items-center justify-around px-1 py-1.5 rounded-[30px]"
-              style={{ background: 'rgba(235,235,235,0.65)', border: '0.5px solid rgba(255,255,255,0.5)' }}
+              style={{
+                background: 'rgba(235,235,235,0.72)',
+                border: '0.5px solid rgba(255,255,255,0.6)',
+                backdropFilter: 'blur(24px) saturate(1.8)',
+                WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.08)',
+              }}
             >
               {tabs.map(tab => {
                 const active = isActive(tab.path)
