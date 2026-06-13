@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, ChevronRight, Zap, TrendingUp, CreditCard, Bell, Lock,
@@ -525,97 +525,98 @@ function EditProfileSheet({
 // ─── Payout settings sheet (creator) ─────────────────────────────────────────
 
 function PayoutSheet({ open, onClose, onSaved }: { open: boolean; onClose: () => void; onSaved: () => void }) {
-  const [editing, setEditing]   = useState(false)
-  const [bankName, setBankName] = useState('Chase Bank')
-  const [routing, setRouting]   = useState('••••••••2847')
-  const [account, setAccount]   = useState('••••4821')
-  const [newBank, setNewBank]   = useState('')
-  const [newRoute, setNewRoute] = useState('')
-  const [newAcct, setNewAcct]   = useState('')
-  const [loading, setLoading]   = useState(false)
+    const [status,     setStatus]     = useState<'idle'|'loading'|'connected'|'pending'>('idle')
+    const [onboarding, setOnboarding] = useState(false)
 
-  const canSave = newBank.trim().length > 0 && newRoute.replace(/\D/g,'').length >= 9 && newAcct.replace(/\D/g,'').length >= 6
+    // ── Fetch Stripe Connect status on open ──────────────────────────────────
+    useEffect(() => {
+          if (!open) return
+          getStripeConnectStatus()
+    }, [open])
 
-  async function handleSave() {
-    if (!canSave) return
-    setLoading(true)
-    await new Promise(r => setTimeout(r, 1200))
-    setBankName(newBank.trim())
-    setRouting('••••••••' + newRoute.replace(/\D/g,'').slice(-4))
-    setAccount('••••' + newAcct.replace(/\D/g,'').slice(-4))
-    setNewBank(''); setNewRoute(''); setNewAcct('')
-    setLoading(false); setEditing(false)
-    onClose(); onSaved()
-  }
+    async function getStripeConnectStatus() {
+          setStatus('loading')
+          try {
+                  const { data: { session } } = await supabase.auth.getSession()
+                  const resp = await supabase.functions.invoke('stripe-connect-status', {
+                            headers: { Authorization: `Bearer ${session?.access_token}` },
+                  })
+                  if (resp.error) throw resp.error
+                  const s = resp.data?.status
+                  setStatus(s === 'active' ? 'connected' : s === 'pending' ? 'pending' : 'idle')
+          } catch {
+                  setStatus('idle')
+          }
+    }
 
-  return (
-    <SheetShell open={open} onClose={onClose} title="Payout settings">
-      <div className="px-5 pt-5 pb-10">
-        {!editing ? (
-          <div>
-            <div className="rounded-[14px] p-4 mb-5" style={{ background: '#f5f5f7', border: '0.5px solid #ebebeb' }}>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-[10px] bg-[#111] flex items-center justify-center flex-shrink-0">
-                  <Building2 style={{ width: 18, height: 18, color: 'white' }} strokeWidth={1.75} />
+    async function startStripeOnboarding() {
+          setOnboarding(true)
+          try {
+                  const { data: { session } } = await supabase.auth.getSession()
+                  const resp = await supabase.functions.invoke('stripe-connect-onboard', {
+                            headers: { Authorization: `Bearer ${session?.access_token}` },
+                  })
+                  if (resp.error) throw resp.error
+                  if (resp.data?.url) window.location.href = resp.data.url
+          } catch (err) {
+                  console.error('Onboarding error', err)
+          } finally {
+                  setOnboarding(false)
+          }
+    }
+
+    const statusLabel = status === 'connected' ? 'Connected' : status === 'pending' ? 'Pending verification' : 'Not connected'
+    const statusColor = status === 'connected' ? '#16a34a' : status === 'pending' ? '#ca8a04' : '#999'
+
+    return (
+          <SheetShell open={open} onClose={onClose} title="Payout settings">
+                <div className="px-5 pt-5 pb-10 flex flex-col gap-5">
+                
+                  {/* ── Status card ── */}
+                        <div className="rounded-[14px] p-4" style={{ background: '#f5f5f7', border: '0.5px solid #ebebeb' }}>
+                                  <div className="flex items-center gap-3 mb-3">
+                                              <div className="w-10 h-10 rounded-[10px] bg-[#111] flex items-center justify-center flex-shrink-0">
+                                                            <Building2 style={{ width: 18, height: 18, color: 'white' }} strokeWidth={1.75} />
+                                              </div>
+                                              <div>
+                                                            <p className="text-[15px] font-semibold text-[#111]">Stripe Connect</p>
+                                                            <p className="font-mono text-[11px]" style={{ color: statusColor }}>
+                                                              {status === 'loading' ? 'Checking…' : statusLabel}
+                                                            </p>
+                                              </div>
+                                  </div>
+                                  <p className="font-mono text-[11px]" style={{ color: '#aaa' }}>
+                                              Payouts sent every Monday · 2–3 business days
+                                  </p>
+                        </div>
+                
+                  {/* ── CTA ── */}
+                  {status !== 'connected' && (
+                      <button
+                                    onClick={startStripeOnboarding}
+                                    disabled={onboarding || status === 'loading'}
+                                    className="w-full rounded-[14px] py-[15px] flex items-center justify-center active:opacity-70 transition-opacity"
+                                    style={{ background: '#111' }}
+                                  >
+                        {onboarding
+                                        ? <div className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        : <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
+                                          {status === 'pending' ? 'Continue setup' : 'Set up payouts'}
+                                        </span>
+                        }
+                      </button
+                        )}
+                
+                  {status === 'connected' && (
+                      <div className="flex items-center gap-2 rounded-[12px] px-4 py-3" style={{ background: '#f0fdf4', border: '0.5px solid #bbf7d0' }}>
+                                  <Check style={{ width: 14, height: 14, color: '#16a34a', flexShrink: 0 }} strokeWidth={2.5} />
+                                  <span className="font-mono text-[12px]" style={{ color: '#16a34a' }}>Payouts enabled</span>span>
+                      </div>
+                        )}
+                
                 </div>
-                <div>
-                  <p className="text-[15px] font-semibold text-[#111]">{bankName}</p>
-                  <p className="font-mono text-[11px]" style={{ color: '#aaa' }}>Checking account</p>
-                </div>
-              </div>
-              {[
-                { label: 'Routing number', value: routing },
-                { label: 'Account number', value: account },
-              ].map(r => (
-                <div key={r.label} className="flex justify-between py-2" style={{ borderTop: '0.5px solid #ebebeb' }}>
-                  <span className="font-mono text-[11px]" style={{ color: '#aaa' }}>{r.label}</span>
-                  <span className="font-mono text-[12px] text-[#111]">{r.value}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="rounded-[14px] px-4 py-3 mb-5 flex items-start gap-3"
-              style={{ background: '#f0faf0', border: '0.5px solid #c8e6c9' }}>
-              <Check style={{ width: 14, height: 14, color: '#3a9a4a', flexShrink: 0, marginTop: 1 }} strokeWidth={2.5} />
-              <p className="font-mono text-[11px]" style={{ color: '#3a9a4a' }}>
-                Payouts sent every Monday · 2–3 business days
-              </p>
-            </div>
-
-            <button onClick={() => setEditing(true)}
-              className="w-full rounded-[14px] py-[13px] active:opacity-80 transition-opacity"
-              style={{ border: '1px solid #ebebeb', background: 'white' }}>
-              <span style={{ fontSize: 14, fontWeight: 500, color: '#111' }}>Update bank account</span>
-            </button>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-4">
-            <Field label="Bank name"      value={newBank}  onChange={setNewBank}  placeholder="e.g. Chase Bank" />
-            <Field label="Routing number" value={newRoute} onChange={v => setNewRoute(v.replace(/\D/g,'').slice(0,9))}
-              placeholder="9-digit routing number" hint="Found at the bottom of a check" />
-            <Field label="Account number" value={newAcct}  onChange={v => setNewAcct(v.replace(/\D/g,'').slice(0,17))}
-              placeholder="Account number" />
-
-            <div className="flex gap-3 mt-2">
-              <button onClick={() => setEditing(false)}
-                className="flex-1 rounded-[14px] py-[13px] active:opacity-80"
-                style={{ background: '#f5f5f7' }}>
-                <span style={{ fontSize: 14, fontWeight: 500, color: '#555' }}>Cancel</span>
-              </button>
-              <button onClick={handleSave} disabled={!canSave || loading}
-                className="flex-1 rounded-[14px] py-[13px] flex items-center justify-center active:opacity-80 disabled:opacity-30"
-                style={{ background: '#111' }}>
-                {loading
-                  ? <div className="w-[16px] h-[16px] border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  : <span style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>Save</span>
-                }
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </SheetShell>
-  )
+          </SheetShell>
+        )
 }
 
 // ─── Payment methods sheet (fan) ─────────────────────────────────────────────
