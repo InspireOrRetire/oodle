@@ -429,7 +429,7 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
                       {coverThumb ? 'Change cover thumbnail' : 'Add cover thumbnail'}
                     </p>
                     <p className="text-[11px]" style={{ color: '#aaa' }}>
-                      Shown to fans before they unlock your answer
+                      Shown to peers before they unlock your answer
                     </p>
                   </div>
                   {coverThumb && (

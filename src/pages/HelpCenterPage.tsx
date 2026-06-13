@@ -15,8 +15,8 @@ const SECTIONS: Section[] = [
         body: [
           'Download the OODLE app and tap "Sign up". You can register using your email address or continue with Apple or Google.',
           'Once registered you will receive a verification email. Tap the link inside to activate your account before logging in.',
-          'After activating, complete your profile by adding a display name, profile photo, and a short bio so fans can find and recognise you.',
-          'You can start as a fan right away. To unlock creator features and earn from answered questions, head to Settings → Creator Mode and complete the onboarding steps.',
+          'After activating, complete your profile by adding a display name, profile photo, and a short bio so peers can find and recognise you.',
+          'You can start as a peer right away. To unlock creator features and earn from answered questions, head to Settings → Creator Mode and complete the onboarding steps.',
         ],
       },
       {
@@ -31,7 +31,7 @@ const SECTIONS: Section[] = [
       {
         title: 'ID verification: Data protection and usage',
         body: [
-          'OODLE requires ID verification before you can receive payouts or unlock higher earning limits. This protects creators and fans from fraud.',
+          'OODLE requires ID verification before you can receive payouts or unlock higher earning limits. This protects creators and peers from fraud.',
           'We accept a government-issued photo ID such as a passport, driving licence, or national identity card. The document must be current and not expired.',
           'Your ID images are encrypted in transit and at rest. They are reviewed by our identity partner and are not stored on OODLE servers once verification is complete.',
           'Verification typically takes 10–30 minutes. If your submission is rejected, you will be told why and can resubmit with a clearer image or a different document.',
@@ -66,19 +66,19 @@ const SECTIONS: Section[] = [
       {
         title: 'Creating & editing your creator profile',
         body: [
-          'Your creator profile is the first thing fans see. Add a high-quality profile photo, a concise bio that explains who you are, and at least one piece of content to get started.',
+          'Your creator profile is the first thing peers see. Add a high-quality profile photo, a concise bio that explains who you are, and at least one piece of content to get started.',
           'Tap your avatar → Edit profile to update your display name, bio, links, and cover image at any time.',
           'Verified creators receive a badge on their profile which increases trust and helps them appear higher in search results.',
-          'Link your social accounts (Instagram, X, TikTok) from Settings → Linked accounts so fans can follow you across platforms.',
+          'Link your social accounts (Instagram, X, TikTok) from Settings → Linked accounts so peers can follow you across platforms.',
           'Consistency in your posting niche helps the algorithm recommend your content to the right audience.',
         ],
       },
       {
         title: 'Creating a Listing (how answered questions appear)',
         body: [
-          'On OODLE, your "listings" are your answered questions. When you post a photo or video and a fan asks a question, you can reply via DM with a paid answer.',
+          'On OODLE, your "listings" are your answered questions. When you post a photo or video and a peer asks a question, you can reply via DM with a paid answer.',
           'Switch to Answer Mode inside the DM thread, compose your answer (text, photo, or video), and set your price in tokens before sending.',
-          'Once you send the answer it is locked. The fan who asked is notified and can purchase it. Other fans who see the question under your post can also purchase the same answer.',
+          'Once you send the answer it is locked. The peer who asked is notified and can purchase it. Other peers who see the question under your post can also purchase the same answer.',
           'Think of each answered question as evergreen content — the more people who purchase it, the more you earn from a single answer.',
           'Set a default answer price in Settings → Creator → Default answer price so every new question starts with your preferred rate pre-filled.',
         ],
@@ -86,7 +86,7 @@ const SECTIONS: Section[] = [
       {
         title: 'Managing your answered questions',
         body: [
-          'Head to your Inbox to see all incoming questions. Unanswered questions sit in the queue. Once you answer and a fan purchases it, it becomes visible under your post on the timeline.',
+          'Head to your Inbox to see all incoming questions. Unanswered questions sit in the queue. Once you answer and a peer purchases it, it becomes visible under your post on the timeline.',
           'You can decline a question if it violates community guidelines or if you simply do not want to answer it. Declined questions are removed from your queue.',
           'To edit the price on a pending (unanswered) question, open the DM thread and tap the price badge in the header.',
           'Answered questions that have been purchased can no longer be edited or deleted. If a question contains sensitive information, contact support before answering.',
@@ -95,7 +95,7 @@ const SECTIONS: Section[] = [
       {
         title: "Can't find your answered question under a post?",
         body: [
-          'Answered questions only appear under a post once at least one fan has purchased the answer. If no one has bought it yet, it will not be visible on the timeline.',
+          'Answered questions only appear under a post once at least one peer has purchased the answer. If no one has bought it yet, it will not be visible on the timeline.',
           'Check that the question is linked to the correct post. Open the DM thread and confirm the post thumbnail shown at the top of the conversation is the right one.',
           'If a question was answered but the purchase was refunded, the answer returns to a locked state and is removed from the public timeline.',
           'Content moderation review can temporarily hide an answered question if it was flagged. You will be notified if this happens.',
@@ -104,7 +104,7 @@ const SECTIONS: Section[] = [
       {
         title: "Understanding OODLE's creator levels",
         body: [
-          'OODLE has four creator levels: Newcomer, Rising, Established, and Top Creator. Your level is calculated monthly based on earnings, response rate, content quality, and fan engagement.',
+          'OODLE has four creator levels: Newcomer, Rising, Established, and Top Creator. Your level is calculated monthly based on earnings, response rate, content quality, and peer engagement.',
           'Higher levels unlock benefits including lower platform fees, earlier access to new features, priority support, and increased visibility in search and the Explore feed.',
           'Your level is reviewed on the 1st of each month. A drop in activity or an increase in negative reports can lower your level.',
           'To see your current level and progress metrics, go to your profile → Creator stats.',
@@ -120,27 +120,27 @@ const SECTIONS: Section[] = [
       {
         title: "Managing your orders: A creator's guide to the OODLE process",
         body: [
-          'When a fan purchases an answered question, it appears in your Earnings page as a completed order with the token amount, the buyer, and a timestamp.',
+          'When a peer purchases an answered question, it appears in your Earnings page as a completed order with the token amount, the buyer, and a timestamp.',
           'You do not need to do anything after a sale — the answer is automatically delivered to the buyer and unlocked on the post timeline.',
-          'If the same question is purchased by multiple fans, each purchase is recorded as a separate order. You earn the full token price for every buyer.',
+          'If the same question is purchased by multiple peers, each purchase is recorded as a separate order. You earn the full token price for every buyer.',
           'Purchases enter a short holding period (typically 24 hours) before the tokens are added to your available balance, allowing time for the buyer to raise any concerns.',
         ],
       },
       {
         title: 'Reviews and ratings explained',
         body: [
-          'After purchasing and viewing an answer, fans can leave a star rating (1–5) and an optional written review. These appear on your creator profile.',
+          'After purchasing and viewing an answer, peers can leave a star rating (1–5) and an optional written review. These appear on your creator profile.',
           'Your overall rating is the rolling average of all reviews received in the past 90 days. Older reviews carry less weight over time.',
           'You can respond publicly to any review from your Earnings page. Keep responses professional — responses are visible to all visitors of your profile.',
           'Reviews that contain personal information, offensive language, or false claims can be reported to OODLE for removal review.',
-          'A rating below 4.0 sustained over 30 days may result in reduced visibility. If you receive a negative review, reach out to the fan through the resolution centre first.',
+          'A rating below 4.0 sustained over 30 days may result in reduced visibility. If you receive a negative review, reach out to the peer through the resolution centre first.',
         ],
       },
       {
         title: 'Using the Resolution Centre',
         body: [
-          'The Resolution Centre is where disputes between creators and fans are handled. Access it via Settings → Support → Resolution Centre.',
-          'A fan can open a dispute if they believe the answer they purchased did not match what was described, or if content was misleading.',
+          'The Resolution Centre is where disputes between creators and peers are handled. Access it via Settings → Support → Resolution Centre.',
+          'A peer can open a dispute if they believe the answer they purchased did not match what was described, or if content was misleading.',
           'You will receive a notification when a dispute is opened. You have 48 hours to respond with your side of the story and any supporting evidence.',
           'If both parties cannot reach an agreement, OODLE support steps in to make a final decision. This process usually takes 3–5 business days.',
           'Repeated unresolved disputes can affect your creator level and, in serious cases, result in account restrictions.',
@@ -220,7 +220,7 @@ const SECTIONS: Section[] = [
         body: [
           'OODLE Boosts let you pay to increase the visibility of a specific post or answered question in the Explore feed and search results.',
           'Set a daily budget (minimum $1.00), choose a duration (1, 3, or 7 days), and target by interest category or location.',
-          'Boosted posts are marked with a small "Promoted" label so fans know they are sponsored. This keeps trust with your audience.',
+          'Boosted posts are marked with a small "Promoted" label so peers know they are sponsored. This keeps trust with your audience.',
           'Track boost performance from your Earnings page → Promotions tab to see reach, click-through rate, and additional purchases generated.',
         ],
       },
@@ -230,7 +230,7 @@ const SECTIONS: Section[] = [
           'The Portfolio section on your profile lets you pin up to 12 posts that best represent your content and expertise.',
           'Pinned portfolio posts appear in a featured grid at the top of your profile above your regular feed.',
           'To add a post to your portfolio, open the post, tap the three-dot menu, and select "Add to portfolio".',
-          'Portfolio posts are a great way to showcase your most-answered, highest-rated questions so new fans immediately see the value you offer.',
+          'Portfolio posts are a great way to showcase your most-answered, highest-rated questions so new peers immediately see the value you offer.',
         ],
       },
       {
@@ -239,7 +239,7 @@ const SECTIONS: Section[] = [
           'Creators can set themselves as Available or Away from Settings → Creator → Availability.',
           'When set to Away, your profile shows an availability badge and incoming questions are paused. You will not appear in the Explore feed during this period.',
           'You can schedule availability in advance — for example, set yourself as Away for a week-long holiday and it will reactivate automatically.',
-          'Questions asked while you are Away are queued and delivered when you return. Fans are shown your next available date so expectations are managed.',
+          'Questions asked while you are Away are queued and delivered when you return. Peers are shown your next available date so expectations are managed.',
         ],
       },
     ],
@@ -251,7 +251,7 @@ const SECTIONS: Section[] = [
       {
         title: 'Our Community Standards',
         body: [
-          'OODLE is built on respect, authenticity, and creative freedom. All users — creators and fans — are expected to treat each other with dignity.',
+          'OODLE is built on respect, authenticity, and creative freedom. All users — creators and peers — are expected to treat each other with dignity.',
           'Prohibited behaviour includes harassment, hate speech, impersonation, distributing explicit content without proper age gates, and any form of financial fraud.',
           'Content that depicts violence, exploitation, or illegal activity will be removed immediately and may result in a permanent ban without refund.',
           'Our standards apply to posts, DMs, answers, reviews, and profile information. No part of OODLE is exempt.',
@@ -290,7 +290,7 @@ const SECTIONS: Section[] = [
       {
         title: 'ID verification: Data protection and usage',
         body: [
-          'Identity verification is required for all creators who want to receive payouts. It is optional for fans unless they wish to spend above a certain token threshold.',
+          'Identity verification is required for all creators who want to receive payouts. It is optional for peers unless they wish to spend above a certain token threshold.',
           'We partner with an FCA-regulated identity verification provider. Your document images are processed securely and are not visible to OODLE employees.',
           'OODLE is fully compliant with GDPR and CCPA. You have the right to request deletion of your personal data at any time from Settings → Privacy → Data requests.',
           'Verified identity information is used solely to comply with financial regulations (KYC/AML). It is never sold or shared with advertisers.',

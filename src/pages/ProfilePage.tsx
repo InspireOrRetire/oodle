@@ -2094,7 +2094,7 @@ function EditPriceSheet({
                 </div>
               </div>
               <p className="font-mono text-[11px] mb-5" style={{ color: '#aaa' }}>
-                Set how many tokens fans pay to unlock this answer
+                Set how many tokens peers pay to unlock this answer
               </p>
 
               {/* Token input */}
@@ -2782,7 +2782,7 @@ function CreatePostSheet({
                       <textarea
                         value={caption}
                         onChange={e => setCaption(e.target.value)}
-                        placeholder={isAnswerMode ? 'Tease what you know. Fans pay to unlock the full answer…' : 'Post something that gets people asking…'}
+                        placeholder={isAnswerMode ? 'Tease what you know. Peers pay to unlock the full answer…' : 'Post something that gets people asking…'}
                         rows={isAnswerMode ? 3 : 4}
                         className="w-full text-[15px] text-[#111] placeholder-[#c0c0c0] outline-none resize-none leading-relaxed mb-4"
                         style={isAnswerMode
@@ -2947,7 +2947,7 @@ function CreatePostSheet({
                                   type="url"
                                   value={gatedLink}
                                   onChange={e => setGatedLink(e.target.value)}
-                                  placeholder="Paste any URL — fans unlock after purchase"
+                                  placeholder="Paste any URL — peers unlock after purchase"
                                   className="flex-1 py-3 bg-transparent text-[14px] text-[#111] placeholder-[#c0c0c0] outline-none"
                                 />
                                 {gatedLink && (
@@ -2957,7 +2957,7 @@ function CreatePostSheet({
                                 )}
                               </div>
                               <p className="px-4 py-2 text-[11px] font-mono" style={{ color: '#c0c0c0' }}>
-                                Link is hidden until the fan completes purchase
+                                Link is hidden until the peer completes purchase
                               </p>
                             </motion.div>
                           )}
