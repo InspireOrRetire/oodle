@@ -9,6 +9,7 @@ import {
   Camera, Video, Mic, Image as ImageIcon, Zap, ChevronUp, X, Check,
   FileText, Link as LinkIcon, MapPin, AlignLeft, Plus,
 } from 'lucide-react'
+import PriceSetterSheet from '../UI/PriceSetterSheet'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -45,7 +46,6 @@ type NominatimResult = {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const PRICE_PRESETS = [0, 5, 10, 15, 20, 25, 30, 50]
 
 function Av({ url, name, size = 24 }: { url?: string | null; name: string; size?: number }) {
   if (url) return (
@@ -68,7 +68,7 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
   // Core
   const [answerText, setAnswerText] = useState('')
   const [price,      setPrice]      = useState<number>(defaultPrice ?? 0)
-  const [priceOpen,  setPriceOpen]  = useState(false)
+  const [priceOpen,  setPriceOpen]  = useState(false)  // now drives PriceSetterSheet
   const [coverThumb, setCoverThumb] = useState<File | null>(null)
   const [sending,    setSending]    = useState(false)
   const [sent,       setSent]       = useState(false)
@@ -455,43 +455,17 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
                       <p className="font-mono text-[10px]" style={{ color: '#bbb' }}>after 20% platform fee</p>
                     )}
                   </div>
-                  <div className="relative">
-                    <button
-                      onClick={() => setPriceOpen(v => !v)}
-                      className="flex items-center gap-1.5 rounded-full px-3.5 py-2"
-                      style={{ background: '#111' }}
-                    >
-                      {price > 0 && <Zap style={{ width: 12, height: 12, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />}
-                      <span className="font-mono text-[13px] font-semibold text-white">
-                        {price === 0 ? 'Free' : `${price}`}
-                      </span>
-                      <ChevronUp style={{ width: 13, height: 13, color: '#aaa', transform: priceOpen ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} strokeWidth={2} />
-                    </button>
-                    <AnimatePresence>
-                      {priceOpen && (
-                        <motion.div key="price-pop"
-                          initial={{ opacity: 0, scale: 0.92, y: 8 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.92, y: 8 }}
-                          transition={{ type: 'spring', stiffness: 480, damping: 28 }}
-                          className="absolute bottom-full right-0 mb-2 z-10"
-                          style={{ background: 'white', borderRadius: 16, boxShadow: '0 8px 40px rgba(0,0,0,0.16)', padding: 8, width: 200 }}
-                          onClick={e => e.stopPropagation()}
-                        >
-                          <p className="text-[10px] font-semibold uppercase tracking-widest text-center mb-2" style={{ color: '#bbb' }}>Set price</p>
-                          <div className="grid grid-cols-4 gap-1.5">
-                            {PRICE_PRESETS.map(p => (
-                              <button key={p} onClick={() => { setPrice(p); setPriceOpen(false) }}
-                                className="py-2 rounded-[10px] text-[13px] font-semibold"
-                                style={{ background: price === p ? '#111' : '#f5f5f5', color: price === p ? 'white' : '#333' }}>
-                                {p === 0 ? 'Free' : `${p}`}
-                              </button>
-                            ))}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
+                  <button
+                    onClick={() => setPriceOpen(true)}
+                    className="flex items-center gap-1.5 rounded-full px-3.5 py-2"
+                    style={{ background: '#111' }}
+                  >
+                    {price > 0 && <Zap style={{ width: 12, height: 12, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />}
+                    <span className="font-mono text-[13px] font-semibold text-white">
+                      {price === 0 ? 'Free' : `$${price}`}
+                    </span>
+                    <ChevronUp style={{ width: 13, height: 13, color: '#aaa', transform: 'rotate(180deg)' }} strokeWidth={2} />
+                  </button>
                 </div>
 
                 {/* ── 5. Media pills ───────────────────────────────────────── */}
@@ -671,7 +645,10 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
                               className="w-full text-left px-3 py-2.5 flex items-start gap-2 active:bg-gray-50"
                               style={{ borderTop: i > 0 ? '0.5px solid #f0f0f0' : 'none' }}>
                               <MapPin style={{ width: 12, height: 12, color: '#aaa', flexShrink: 0, marginTop: 1 }} strokeWidth={2} />
-                              <p className="text-[12px] text-gray-700 leading-snug line-clamp-2">{r.display_name}</p>
+                              <div className="flex flex-col min-w-0">
+                                <p className="text-[12px] text-gray-700 leading-snug">{formatNominatim(r)}</p>
+                                <p className="text-[11px] text-gray-400 leading-snug truncate">{r.display_name.split(',').slice(1, 3).join(',').trim()}</p>
+                              </div>
                             </button>
                           ))}
                         </div>
@@ -791,6 +768,13 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
           </>
         )}
       </AnimatePresence>
+
+      <PriceSetterSheet
+        open={priceOpen}
+        currentPrice={price}
+        onConfirm={p => setPrice(Math.round(p))}
+        onClose={() => setPriceOpen(false)}
+      />
     </>
   )
 }

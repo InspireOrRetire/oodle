@@ -607,25 +607,58 @@ function NewMessageCompose({
   threads: ThreadWithParticipants[]
 }) {
   const navigate = useNavigate()
-  const [query, setQuery]       = useState('')
-  const [results, setResults]   = useState<UserResult[]>([])
-  const [searching, setSearching] = useState(false)
-  const [selected, setSelected] = useState<UserResult | null>(null)
+  const [query, setQuery]           = useState('')
+  const [results, setResults]       = useState<UserResult[]>([])
+  const [suggested, setSuggested]   = useState<UserResult[]>([])
+  const [searching, setSearching]   = useState(false)
+  const [selected, setSelected]     = useState<UserResult | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Reset on open
+  // Reset on open + load suggested users (people you follow or have threaded with)
   useEffect(() => {
     if (open) {
       setQuery(''); setResults([]); setSelected(null); setSearching(false)
       setTimeout(() => inputRef.current?.focus(), 320)
+      // Suggest: people already in threads, then followers/following
+      const threadUsers: UserResult[] = threads
+        .map(t => {
+          const other = t.fan?.id === currentUserId ? t.creator : t.fan
+          return other ? { id: other.id, username: other.username ?? null, display_name: other.display_name ?? null, avatar_url: other.avatar_url ?? null } : null
+        })
+        .filter((u): u is UserResult => !!u && u.id !== currentUserId)
+        // deduplicate
+        .filter((u, i, arr) => arr.findIndex(x => x.id === u.id) === i)
+        .slice(0, 12)
+      setSuggested(threadUsers)
+      // Also pull people I'm following from the DB for a richer list
+      if (currentUserId) {
+        supabase
+          .from('user_following')
+          .select('creator_id, users!user_following_creator_id_fkey(id, username, display_name, avatar_url)')
+          .eq('follower_id', currentUserId)
+          .limit(20)
+          .then(({ data }) => {
+            if (!data) return
+            const followed = data
+              .map((r: any) => r.users)
+              .filter((u: any): u is UserResult => !!u && u.id !== currentUserId)
+            setSuggested(prev => {
+              const ids = new Set(prev.map(u => u.id))
+              const merged = [...prev, ...followed.filter((u: UserResult) => !ids.has(u.id))]
+              return merged.slice(0, 16)
+            })
+          })
+          .catch(() => {})
+      }
     }
-  }, [open])
+  }, [open, currentUserId, threads])
 
   // Debounced Supabase search
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    const q = query.trim()
+    // Strip leading @ so typing "@johndoe" finds the user stored as "johndoe"
+    const q = query.trim().replace(/^@/, '')
     if (!q) { setResults([]); setSearching(false); return }
     setSearching(true)
     debounceRef.current = setTimeout(async () => {
@@ -721,7 +754,33 @@ function NewMessageCompose({
               </div>
             )}
 
-            {!searching && query.trim() === '' && (
+            {!searching && query.trim() === '' && suggested.length > 0 && (
+              <>
+                <p className="px-4 pt-4 pb-2 text-[12px] font-semibold text-[#aaa] uppercase tracking-wider">Suggested</p>
+                {suggested.map(u => (
+                  <button
+                    key={u.id}
+                    onClick={() => handleSelect(u)}
+                    className="w-full flex items-center gap-3.5 px-4 py-3 active:bg-[#f9f9f9] text-left"
+                    style={{ borderBottom: '0.5px solid #f5f5f7' }}
+                  >
+                    {u.avatar_url ? (
+                      <img src={u.avatar_url} alt="" className="w-[46px] h-[46px] rounded-full object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="w-[46px] h-[46px] rounded-full bg-[#111] flex items-center justify-center flex-shrink-0">
+                        <span className="text-white font-semibold text-[15px]">{nameInitials(u)}</span>
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[15px] font-semibold text-[#111] truncate">{u.display_name ?? u.username}</p>
+                      {u.username && <p className="text-[13px] text-[#aaa] truncate">@{u.username}</p>}
+                    </div>
+                  </button>
+                ))}
+              </>
+            )}
+
+            {!searching && query.trim() === '' && suggested.length === 0 && (
               <div className="flex flex-col items-center justify-center pt-20 px-8 text-center">
                 <div className="w-14 h-14 rounded-full bg-[#f5f5f7] flex items-center justify-center mb-4">
                   <Search className="w-6 h-6 text-[#bbb]" strokeWidth={1.75} />

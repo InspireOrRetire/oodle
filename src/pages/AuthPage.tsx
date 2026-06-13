@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { supabase } from '../lib/supabase'
 
 export default function AuthPage() {
   const { signIn, signUp, user, isExploreMode, enterExploreMode } = useAuth()
@@ -12,6 +13,33 @@ export default function AuthPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
+  const [resendCooldown, setResendCooldown] = useState(0)
+  const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => () => { if (cooldownRef.current) clearInterval(cooldownRef.current) }, [])
+
+  async function handleResend() {
+    if (resendCooldown > 0 || resendStatus === 'sending') return
+    setResendStatus('sending')
+    try {
+      const { error } = await supabase.auth.resend({ type: 'signup', email })
+      if (error) throw error
+      setResendStatus('sent')
+      setResendCooldown(60)
+      cooldownRef.current = setInterval(() => {
+        setResendCooldown(s => {
+          if (s <= 1) { clearInterval(cooldownRef.current!); cooldownRef.current = null; return 0 }
+          return s - 1
+        })
+      }, 1000)
+    } catch {
+      setResendStatus('error')
+      // Rate limited — Supabase silently succeeds but nothing sends within the hour window.
+      // Show a friendly message rather than a generic error.
+      setTimeout(() => setResendStatus('idle'), 4000)
+    }
+  }
 
   // Clear explore mode the instant someone lands on the auth page —
   // they want to sign in for real, so the mock user must not redirect them.
@@ -49,8 +77,38 @@ export default function AuthPage() {
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 text-center">
       <div className="text-4xl mb-4">✉️</div>
       <h2 className="text-xl font-semibold mb-2">Check your email</h2>
-      <p className="text-gray-500 text-sm">We sent a confirmation link to <strong>{email}</strong></p>
-      <button onClick={() => { setDone(false); setTab('in') }} className="mt-6 text-sm text-gray-500 underline">Back to sign in</button>
+      <p className="text-gray-500 text-sm mb-6">
+        We sent a confirmation link to <strong>{email}</strong>.<br />
+        Click it to finish creating your account.
+      </p>
+
+      {resendStatus === 'sent' && (
+        <p className="text-green-600 text-sm mb-3">Email resent — check your inbox.</p>
+      )}
+      {resendStatus === 'error' && (
+        <p className="text-amber-600 text-sm mb-3">
+          Email limit reached. You can request another in about an hour.
+        </p>
+      )}
+
+      <button
+        onClick={handleResend}
+        disabled={resendCooldown > 0 || resendStatus === 'sending'}
+        className="w-full max-w-xs bg-gray-900 text-white py-3 rounded-xl text-sm font-medium disabled:opacity-40"
+      >
+        {resendStatus === 'sending'
+          ? 'Sending…'
+          : resendCooldown > 0
+            ? `Resend in ${resendCooldown}s`
+            : 'Resend confirmation email'}
+      </button>
+
+      <button
+        onClick={() => { setDone(false); setTab('in'); setResendStatus('idle'); setResendCooldown(0) }}
+        className="mt-4 text-sm text-gray-400 underline"
+      >
+        Back to sign in
+      </button>
     </div>
   )
 

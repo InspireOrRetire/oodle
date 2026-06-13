@@ -13,6 +13,7 @@ import {
 import type { ThreadWithParticipants, MessageRow, AnswerBlock } from '../lib/database.types'
 import type { Json } from '../lib/database.types'
 import { MOCK_THREADS } from '../lib/mockFeed'
+import MapTileCard from '../components/UI/MapTileCard'
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -193,25 +194,16 @@ function AnswerBlockView({ block }: { block: AnswerBlock }) {
 
   if (block.type === 'location') {
     return (
-      <div className="rounded-2xl overflow-hidden border border-amber-100">
-        <div className="h-24 bg-green-50 relative overflow-hidden">
-          <div className="absolute inset-0 grid grid-cols-5 grid-rows-3 gap-px">
-            {Array.from({ length: 15 }).map((_, i) => (
-              <div key={i} className={`opacity-20 ${['bg-green-300','bg-green-200','bg-green-100','bg-emerald-200','bg-teal-100'][i % 5]}`} />
-            ))}
-          </div>
-          <div className="absolute left-0 right-0 top-1/2 h-[2px] bg-white/60 -translate-y-1/2" />
-          <div className="absolute top-0 bottom-0 left-1/3 w-[2px] bg-white/60" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex flex-col items-center -translate-y-1.5">
-              <div className="w-7 h-7 bg-red-500 rounded-full flex items-center justify-center shadow-md">
-                <MapPin className="w-3.5 h-3.5 text-white" fill="white" />
-              </div>
-              <div className="w-1.5 h-1.5 bg-red-500 rotate-45 -mt-0.5" />
+      <div className="rounded-2xl overflow-hidden border border-gray-100">
+        {block.coords
+          ? <MapTileCard coords={block.coords} height={140} />
+          : (
+            <div className="h-24 bg-[#e8ecf0] flex items-center justify-center">
+              <MapPin className="w-6 h-6 text-gray-300" />
             </div>
-          </div>
-        </div>
-        <div className="px-3 py-2 bg-white flex items-center gap-1.5">
+          )
+        }
+        <div className="px-3 py-2.5 bg-white flex items-center gap-1.5">
           <MapPin className="w-3 h-3 text-red-400 flex-shrink-0" />
           <span className="text-[13px] text-gray-700">{block.address}</span>
         </div>
@@ -279,7 +271,7 @@ function Avatar({ url, name, size = 9 }: { url: string | null | undefined; name:
 export default function MessageDetailPage() {
   const { id }   = useParams()
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, isExploreMode } = useAuth()
 
   const [thread,       setThread]       = useState<ThreadWithParticipants | null>(null)
   const [loading,      setLoading]      = useState(true)
@@ -400,7 +392,10 @@ export default function MessageDetailPage() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
   }, [thread?.messages.length])
 
-  const isCreator = !!(thread && user && thread.creator_id === user.id)
+  // In explore mode all mock threads show the full creator experience
+  const isCreator = isExploreMode
+    ? !!(thread)
+    : !!(thread && user && thread.creator_id === user.id)
 
   // Mark viewed when fan opens answered thread
   useEffect(() => {
@@ -594,24 +589,45 @@ export default function MessageDetailPage() {
   // Bridge: AnswerComposerSheet payload → AnswerBlock[] used by threadService
   async function handleSheetSubmit(payload: AnswerSubmitPayload) {
     const blocks: AnswerBlock[] = []
+
     if (payload.answerText.trim()) {
       blocks.push({ id: 'ans-text', type: 'text', content: payload.answerText.trim() })
     }
+    if (payload.location) {
+      blocks.push({
+        id: 'ans-loc', type: 'location',
+        address: payload.location.address,
+        coords: [payload.location.lat, payload.location.lng],
+      })
+    }
+    if (payload.listItems && payload.listItems.filter(i => i.trim()).length > 0) {
+      blocks.push({
+        id: 'ans-list', type: 'list',
+        items: payload.listItems.filter(i => i.trim()),
+        ordered: false,
+      })
+    }
     if (blocks.length === 0) blocks.push({ id: 'ans-1', type: 'text', content: '(answer)' })
 
-    // Update price if changed
     if (payload.price !== thread!.price) {
       updatePrice(thread!.id, payload.price).catch(console.error)
       setThread(prev => prev ? { ...prev, price: payload.price } : prev)
     }
 
     await submitAnswer({ threadId: thread!.id, blocks, price: payload.price })
-    setThread(prev => prev ? {
-      ...prev,
-      status: 'answered',
-      answer_blocks: blocks as unknown as Json,
-      answer_text: payload.answerText.trim(),
-    } : prev)
+
+    // Re-fetch to get server's canonical state (covers any server-side transforms)
+    const fresh = await getThread(thread!.id)
+    if (fresh) {
+      setThread(fresh)
+    } else {
+      setThread(prev => prev ? {
+        ...prev,
+        status: 'answered',
+        answer_blocks: blocks as unknown as Json,
+        answer_text: payload.answerText.trim(),
+      } : prev)
+    }
     setComposing(false)
   }
 
@@ -775,12 +791,15 @@ export default function MessageDetailPage() {
         >
           <ArrowLeft className="w-5 h-5 text-gray-900" strokeWidth={2} />
         </button>
-        <div className="flex-1 flex flex-col items-center">
+        <button
+          className="flex-1 flex flex-col items-center active:opacity-70"
+          onClick={() => navigate(`/u/${otherProfile.username ?? otherName}`)}
+        >
           <Avatar url={otherProfile.avatar_url} name={otherName} size={9} />
           <p className="font-semibold text-[13px] text-gray-900 leading-tight mt-0.5">
             @{otherName}
           </p>
-        </div>
+        </button>
         <div className="w-9 flex-shrink-0" />
       </div>
 
@@ -844,9 +863,14 @@ export default function MessageDetailPage() {
           <p className="text-[17px] text-gray-900 leading-snug">{question}</p>
         </motion.div>
 
-        {!isAnswered && (
+        {!isAnswered && isCreator && (
           <p className="text-[13px] text-gray-400 leading-relaxed">
             @{askerName} will be able to view your answer after purchase.
+          </p>
+        )}
+        {!isAnswered && !isCreator && (
+          <p className="text-[13px] text-gray-400 leading-relaxed">
+            You'll be notified as soon as @{creatorName} answers.
           </p>
         )}
 

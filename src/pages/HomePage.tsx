@@ -2324,7 +2324,7 @@ export default function HomePage() {
                     {/* Popular answers */}
                     <div className="px-5 pb-3 flex-shrink-0">
                       <div className="flex items-center justify-between mb-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: '#bbb' }}>Popular answers</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: '#bbb' }}>Trending answers</p>
                         <button
                           onClick={() => { navigate('/'); closeMenu() }}
                           className="text-[12px] font-semibold" style={{ color: '#111' }}
@@ -3043,7 +3043,7 @@ export default function HomePage() {
               />
             ))}
             <div className="py-10 flex justify-center">
-              <p className="font-mono text-[10px] uppercase tracking-[0.1em]" style={{ color: '#e0e0e0' }}>
+              <p className="font-mono text-[10px] uppercase tracking-[0.1em]" style={{ color: '#999' }}>
                 you're all caught up
               </p>
             </div>

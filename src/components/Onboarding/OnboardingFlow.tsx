@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Zap } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
+import { sendWelcomeEmail } from '../../services/emailService'
 
 // ── Step dots ─────────────────────────────────────────────────────────────────
 
@@ -271,6 +272,8 @@ export default function OnboardingFlow() {
     setCompleting(true)
     try {
       await supabase.from('users').update({ onboarding_completed: true }).eq('id', user.id)
+      // Fire welcome email in background — non-blocking
+      if (user.email) sendWelcomeEmail(user.email, user.email)
       await reloadProfile()
     } catch {
       setCompleting(false)

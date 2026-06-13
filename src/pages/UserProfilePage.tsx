@@ -104,6 +104,17 @@ export default function UserProfilePage() {
         setPosts(userPosts ?? [])
         setLoading(false)
 
+        // Check follow status
+        if (currentUser && currentUser.id !== user.id) {
+          supabase
+            .from('user_following')
+            .select('follower_id')
+            .eq('follower_id', currentUser.id)
+            .eq('creator_id', user.id)
+            .maybeSingle()
+            .then(({ data }) => { if (!cancelled) setFollowing(!!data) })
+        }
+
         // Load questions for this creator
         setQuestionsLoading(true)
         fetchQuestions(user.id)
@@ -262,7 +273,24 @@ export default function UserProfilePage() {
         {/* Follow + Message */}
         <div className="flex items-center gap-2 mt-3.5">
           <button
-            onClick={() => setFollowing(f => !f)}
+            onClick={async () => {
+              if (!currentUser || !profile) return
+              const next = !following
+              setFollowing(next)
+              // Optimistically update displayed count
+              setProfile(prev => prev ? {
+                ...prev,
+                followers_count: (prev.followers_count ?? 0) + (next ? 1 : -1)
+              } : prev)
+              if (next) {
+                await supabase.from('user_following').insert({ follower_id: currentUser.id, creator_id: profile.id })
+                await supabase.from('users').update({ followers_count: (profile.followers_count ?? 0) + 1 }).eq('id', profile.id)
+              } else {
+                await supabase.from('user_following').delete()
+                  .eq('follower_id', currentUser.id).eq('creator_id', profile.id)
+                await supabase.from('users').update({ followers_count: Math.max(0, (profile.followers_count ?? 0) - 1) }).eq('id', profile.id)
+              }
+            }}
             className="flex-1 rounded-[8px] py-[7px] text-[14px] font-semibold transition-all"
             style={following
               ? { background: '#f2f2f2', color: '#111', border: '0.5px solid #d1d5db' }
