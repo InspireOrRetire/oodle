@@ -58,6 +58,7 @@ export default function UserProfilePage() {
   const [tab, setTab] = useState<GridTab>('posts')
 
   const [amaOpen, setAmaOpen] = useState(false)
+  const [avatarOpen, setAvatarOpen] = useState(false)
 
   useEffect(() => {
     if (!username) return
@@ -185,20 +186,26 @@ export default function UserProfilePage() {
 
         {/* Avatar + stats row */}
         <div className="flex items-center gap-5 mb-4">
-          {profile.avatar_url ? (
-            <img
-              src={profile.avatar_url}
-              alt={displayName}
-              className="w-[86px] h-[86px] rounded-full object-cover flex-shrink-0"
-            />
-          ) : (
-            <div
-              className="w-[86px] h-[86px] rounded-full flex items-center justify-center flex-shrink-0 text-white font-semibold text-[28px] tracking-tight"
-              style={{ background: '#111' }}
-            >
-              {userInitials}
-            </div>
-          )}
+          <button
+            onClick={() => profile.avatar_url && setAvatarOpen(true)}
+            className="flex-shrink-0 active:opacity-80 transition-opacity"
+            style={{ cursor: profile.avatar_url ? 'pointer' : 'default' }}
+          >
+            {profile.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt={displayName}
+                className="w-[86px] h-[86px] rounded-full object-cover"
+              />
+            ) : (
+              <div
+                className="w-[86px] h-[86px] rounded-full flex items-center justify-center text-white font-semibold text-[28px] tracking-tight"
+                style={{ background: '#111' }}
+              >
+                {userInitials}
+              </div>
+            )}
+          </button>
 
           {/* Stats */}
           <div className="flex flex-1 justify-around text-center">
@@ -337,6 +344,23 @@ export default function UserProfilePage() {
           currentUserId={currentUser.id}
           creatorId={profile.id}
         />
+      )}
+
+      {/* ── Avatar lightbox ── */}
+      {avatarOpen && profile.avatar_url && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center"
+          style={{ background: 'rgba(0,0,0,0.88)' }}
+          onClick={() => setAvatarOpen(false)}
+        >
+          <img
+            src={profile.avatar_url}
+            alt={displayName}
+            className="rounded-full object-cover"
+            style={{ width: 'min(80vw, 320px)', height: 'min(80vw, 320px)' }}
+            onClick={e => e.stopPropagation()}
+          />
+        </div>
       )}
 
     </div>

@@ -192,13 +192,18 @@ export default function PostDetailPage() {
 
           {/* Avatar + meta row */}
           <div className="flex items-start gap-3 mb-3">
-            <Av
-              url={item.creator.avatar_url}
-              name={item.creator.display_name}
-              color={item.creator.color}
-              initials={item.creator.initials}
-              size={44}
-            />
+            <button
+              onClick={() => navigate(`/u/${item.creator.username}`)}
+              className="flex-shrink-0 active:opacity-75 transition-opacity"
+            >
+              <Av
+                url={item.creator.avatar_url}
+                name={item.creator.display_name}
+                color={item.creator.color}
+                initials={item.creator.initials}
+                size={44}
+              />
+            </button>
             <div className="flex-1 min-w-0 pt-0.5">
               <div className="flex items-center gap-1.5">
                 <span className="text-[14px] font-semibold text-[#111] leading-tight truncate">
