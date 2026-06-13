@@ -5,15 +5,6 @@ import { supabase } from '../lib/supabase'
 import type { UserRow, PostRow } from '../lib/database.types'
 import { useAuth } from '../contexts/AuthContext'
 import AMASheet from '../components/Profile/AMASheet'
-import QuestionQueue from '../components/Profile/QuestionQueue'
-import {
-  fetchQuestions,
-  fetchMyUpvotes,
-  upvoteQuestion,
-  unvoteQuestion,
-  type ProfileQuestion,
-} from '../services/profileQuestionService'
-import { MOCK_PROFILE_QUESTIONS } from '../lib/mockFeed'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -66,11 +57,7 @@ export default function UserProfilePage() {
   const [following, setFollowing] = useState(false)
   const [tab, setTab] = useState<GridTab>('posts')
 
-  // AMA state
-  const [amaOpen, setAmaOpen]             = useState(false)
-  const [questions, setQuestions]         = useState<ProfileQuestion[]>([])
-  const [upvotedIds, setUpvotedIds]       = useState<Set<string>>(new Set())
-  const [questionsLoading, setQuestionsLoading] = useState(false)
+  const [amaOpen, setAmaOpen] = useState(false)
 
   useEffect(() => {
     if (!username) return
@@ -115,21 +102,6 @@ export default function UserProfilePage() {
             .then(({ data }) => { if (!cancelled) setFollowing(!!data) })
         }
 
-        // Load questions for this creator
-        setQuestionsLoading(true)
-        fetchQuestions(user.id)
-          .then(async qs => {
-            if (cancelled) return
-            const result = qs.length > 0 ? qs : MOCK_PROFILE_QUESTIONS
-            setQuestions(result)
-            if (currentUser && result.length) {
-              const ids = result.map(q => q.id)
-              const voted = await fetchMyUpvotes(ids, currentUser.id)
-              if (!cancelled) setUpvotedIds(voted)
-            }
-          })
-          .catch(() => { if (!cancelled) setQuestions(MOCK_PROFILE_QUESTIONS) })
-          .finally(() => { if (!cancelled) setQuestionsLoading(false) })
       }
     }
 
@@ -190,27 +162,6 @@ export default function UserProfilePage() {
   const userInitials = initials(displayName)
   // Treat creators as verified (no dedicated verified field in schema)
   const isVerified = profile.role === 'creator'
-
-  // ── Upvote / unvote handlers ──
-  function handleUpvote(id: string) {
-    if (!currentUser) return
-    setUpvotedIds(prev => new Set([...prev, id]))
-    setQuestions(prev => prev.map(q => q.id === id ? { ...q, upvote_count: q.upvote_count + 1 } : q))
-    upvoteQuestion(id, currentUser.id).catch(() => {
-      setUpvotedIds(prev => { const s = new Set(prev); s.delete(id); return s })
-      setQuestions(prev => prev.map(q => q.id === id ? { ...q, upvote_count: Math.max(0, q.upvote_count - 1) } : q))
-    })
-  }
-
-  function handleUnvote(id: string) {
-    if (!currentUser) return
-    setUpvotedIds(prev => { const s = new Set(prev); s.delete(id); return s })
-    setQuestions(prev => prev.map(q => q.id === id ? { ...q, upvote_count: Math.max(0, q.upvote_count - 1) } : q))
-    unvoteQuestion(id, currentUser.id).catch(() => {
-      setUpvotedIds(prev => new Set([...prev, id]))
-      setQuestions(prev => prev.map(q => q.id === id ? { ...q, upvote_count: q.upvote_count + 1 } : q))
-    })
-  }
 
   return (
     <div className="min-h-screen bg-white pb-28">
@@ -319,20 +270,6 @@ export default function UserProfilePage() {
           </button>
         )}
       </div>
-
-      {/* ── Question queue ── */}
-      {!questionsLoading && (questions.length > 0) && (
-        <QuestionQueue
-          questions={questions}
-          currentUserId={currentUser?.id ?? ''}
-          upvotedIds={upvotedIds}
-          isCreator={false}
-          onUpvote={handleUpvote}
-          onUnvote={handleUnvote}
-          onAnswer={() => {}}
-          onDismiss={() => {}}
-        />
-      )}
 
       {/* ── Grid tabs ── */}
       <div
