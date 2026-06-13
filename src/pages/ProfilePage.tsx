@@ -3584,31 +3584,30 @@ export default function ProfilePage() {
           </div>
 
           {/* Social proof row */}
-          {(followerAvatars.length > 0 || recentAnswerCount > 0) && (
-            <button
-              onClick={() => recentAnswerCount > 0 && setRecentAnswersInfoOpen(true)}
-              className="flex items-center gap-2 mt-2.5 active:opacity-60 transition-opacity"
-              style={{ cursor: recentAnswerCount > 0 ? 'pointer' : 'default' }}
-            >
-              {followerAvatars.length > 0 && (
-                <div className="flex -space-x-2">
-                  {followerAvatars.map((url, i) => (
-                    <img key={i} src={url} alt="" className="w-[20px] h-[20px] rounded-full object-cover ring-2 ring-white"
-                      style={{ zIndex: followerAvatars.length - i }} />
-                  ))}
-                </div>
+          <button
+            onClick={() => recentAnswerCount > 0 && setRecentAnswersInfoOpen(true)}
+            className="flex items-center gap-2 mt-2.5 active:opacity-60 transition-opacity"
+            style={{ cursor: recentAnswerCount > 0 ? 'pointer' : 'default' }}
+          >
+            {followerAvatars.length > 0 && (
+              <div className="flex -space-x-2">
+                {followerAvatars.map((url, i) => (
+                  <img key={i} src={url} alt="" className="w-[20px] h-[20px] rounded-full object-cover ring-2 ring-white"
+                    style={{ zIndex: followerAvatars.length - i }} />
+                ))}
+              </div>
+            )}
+            <span className="text-[12px]" style={{ color: '#888' }}>
+              {activeProfile.followers_count >= 1000
+                ? `${(activeProfile.followers_count / 1000).toFixed(1)}K`
+                : activeProfile.followers_count} followers
+              {recentAnswerCount > 0 && (
+                <> · <span className="font-semibold text-[#111]">
+                  {recentAnswerCount >= 1000 ? `${(recentAnswerCount / 1000).toFixed(1)}K` : recentAnswerCount} recent answers
+                </span></>
               )}
-              <span className="text-[12px]" style={{ color: '#888' }}>
-                {followerAvatars.length > 0 && `${activeProfile.followers_count >= 1000 ? `${(activeProfile.followers_count / 1000).toFixed(1)}K` : activeProfile.followers_count} followers`}
-                {followerAvatars.length > 0 && recentAnswerCount > 0 && ' · '}
-                {recentAnswerCount > 0 && (
-                  <span className="font-semibold text-[#111]">
-                    {recentAnswerCount >= 1000 ? `${(recentAnswerCount / 1000).toFixed(1)}K` : recentAnswerCount} recent answers
-                  </span>
-                )}
-              </span>
-            </button>
-          )}
+            </span>
+          </button>
 
           {/* CTA */}
           {!isOwnProfile ? (
