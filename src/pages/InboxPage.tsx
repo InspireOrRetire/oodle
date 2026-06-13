@@ -657,7 +657,8 @@ function NewMessageCompose({
   // Debounced Supabase search
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    const q = query.trim()
+    // Strip leading @ so typing "@johndoe" finds the user stored as "johndoe"
+    const q = query.trim().replace(/^@/, '')
     if (!q) { setResults([]); setSearching(false); return }
     setSearching(true)
     debounceRef.current = setTimeout(async () => {
