@@ -46,8 +46,10 @@ export default function Layout() {
           transition={{ type: 'spring', damping: 28, stiffness: 320 }}
           className="fixed bottom-0 left-0 right-0 z-30"
           style={{
-            background: '#ffffff',
-            borderTop: '0.5px solid #f0f0f0',
+            background: 'rgba(250,250,250,0.78)',
+            backdropFilter: 'blur(24px) saturate(1.8)',
+            WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+            borderTop: '0.5px solid rgba(255,255,255,0.55)',
             paddingBottom: 'env(safe-area-inset-bottom)',
             willChange: 'transform',
           }}
@@ -55,7 +57,7 @@ export default function Layout() {
           <div className="px-3 py-2">
             <div
               className="flex items-center justify-around px-1 py-1.5 rounded-[30px]"
-              style={{ background: '#f4f4f4', border: '0.5px solid #ebebeb' }}
+              style={{ background: 'rgba(235,235,235,0.65)', border: '0.5px solid rgba(255,255,255,0.5)' }}
             >
               {tabs.map(tab => {
                 const active = isActive(tab.path)
@@ -81,7 +83,7 @@ export default function Layout() {
                     }}
                     className="flex flex-col items-center gap-[3px] rounded-[24px] px-[22px] py-[5px] transition-all"
                     style={active
-                      ? { background: '#ffffff', border: '0.5px solid #e8e8e8' }
+                      ? { background: 'rgba(255,255,255,0.9)', border: '0.5px solid rgba(255,255,255,0.7)', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }
                       : { background: 'transparent', border: '0.5px solid transparent' }
                     }
                   >

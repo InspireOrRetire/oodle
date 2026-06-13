@@ -77,7 +77,7 @@ export default function TopUpSheet({ onClose }: Props) {
 
         {/* Sheet */}
         <motion.div
-          className="fixed inset-x-0 bottom-0 bg-white z-[201]"
+          className="fixed inset-x-0 bottom-0 glass-sheet z-[201]"
           style={{ borderRadius: '24px 24px 0 0' }}
           initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
           transition={{ type: 'spring', damping: 36, stiffness: 400 }}

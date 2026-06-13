@@ -318,7 +318,7 @@ function AnswerComposeSheet({
             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 32, stiffness: 380 }}
             style={{ borderRadius: '22px 22px 0 0', height: '92vh' }}
-            className="fixed bottom-0 left-0 right-0 z-[60] bg-white flex flex-col overflow-hidden"
+            className="fixed bottom-0 left-0 right-0 z-[60] glass-sheet flex flex-col overflow-hidden"
           >
             {/* Handle */}
             <div className="flex justify-center pt-3 pb-1 flex-shrink-0">

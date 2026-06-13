@@ -826,7 +826,7 @@ function PurchaseSheet({
             key="pur-sheet"
             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 36, stiffness: 400 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-white overflow-hidden"
+            className="fixed bottom-0 left-0 right-0 z-50 glass-sheet overflow-hidden"
             style={{ borderRadius: '24px 24px 0 0', maxHeight: '90vh' }}
             onClick={e => e.stopPropagation()}
           >
@@ -1588,7 +1588,7 @@ function AskSheet({
             key="ask-sheet"
             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 36, stiffness: 400 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-white flex flex-col overflow-hidden"
+            className="fixed bottom-0 left-0 right-0 z-50 glass-sheet flex flex-col overflow-hidden"
             style={{ borderRadius: '24px 24px 0 0', height: '88vh' }}
             onClick={e => e.stopPropagation()}
           >
@@ -2711,7 +2711,7 @@ function CreatePostSheet({
             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 32, stiffness: 380 }}
             style={{ borderRadius: '22px 22px 0 0', height: '92dvh' }}
-            className="fixed bottom-0 left-0 right-0 z-[51] bg-white flex flex-col"
+            className="fixed bottom-0 left-0 right-0 z-[51] glass-sheet flex flex-col"
             onClick={e => e.stopPropagation()}
           >
             {/* Handle pill — visual only, no interaction */}
@@ -3504,7 +3504,7 @@ export default function ProfilePage() {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 32, stiffness: 380 }}
-              className="fixed bottom-0 left-0 right-0 z-50 bg-white flex flex-col px-5 pt-5"
+              className="fixed bottom-0 left-0 right-0 z-50 glass-sheet flex flex-col px-5 pt-5"
               style={{ borderRadius: '20px 20px 0 0', height: '88vh' }}
             >
               <AnimatePresence mode="wait">

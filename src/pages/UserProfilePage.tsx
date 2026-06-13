@@ -1,14 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Grid3X3, Play, Tag, MoreHorizontal } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, MapPin } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { UserRow, PostRow } from '../lib/database.types'
 import { useAuth } from '../contexts/AuthContext'
 import AMASheet from '../components/Profile/AMASheet'
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type GridTab = 'posts' | 'reels' | 'tagged'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -16,6 +12,14 @@ function fmt(n: number) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
   if (n >= 1000)      return `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}K`
   return String(n)
+}
+
+function timeAgo(iso: string): string {
+  const secs = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
+  if (secs < 60)   return `${secs}s ago`
+  if (secs < 3600) return `${Math.floor(secs / 60)}m ago`
+  if (secs < 86400) return `${Math.floor(secs / 3600)}h ago`
+  return `${Math.floor(secs / 86400)}d ago`
 }
 
 function initials(name: string | null): string {
@@ -32,13 +36,67 @@ function VerifiedBadge() {
   )
 }
 
-function EmptyTab({ icon, label }: { icon: React.ReactNode; label: string }) {
+// ─── Profile post card (timeline style) ──────────────────────────────────────
+
+function ProfilePostCard({ post, profile, navigate }: { post: PostRow; profile: UserRow; navigate: (path: string) => void }) {
+  const displayName = profile.display_name || profile.username || 'User'
+  const images: string[] = post.image_urls ?? []
+  const ago = timeAgo(post.created_at)
+
   return (
-    <div className="flex flex-col items-center justify-center pt-24 text-center px-8">
-      <div className="w-16 h-16 rounded-full flex items-center justify-center mb-3" style={{ background: '#f2f2f2' }}>
-        {icon}
+    <div
+      onClick={() => navigate(`/post/${post.id}`)}
+      className="px-4 pt-3 pb-0 cursor-pointer"
+      style={{ borderBottom: '0.5px solid #f0f0f0' }}
+    >
+      {/* Creator row */}
+      <div className="flex items-center gap-3 mb-2.5">
+        {profile.avatar_url ? (
+          <img src={profile.avatar_url} alt={displayName}
+            className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+        ) : (
+          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-white font-semibold text-[14px]"
+            style={{ background: '#111' }}>
+            {(displayName[0] ?? '?').toUpperCase()}
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <span className="text-[14px] font-semibold text-[#111]">{displayName}</span>
+          <span className="font-mono text-[11px] ml-2" style={{ color: '#bbb' }}>· {ago}</span>
+        </div>
       </div>
-      <p className="text-[14px] font-semibold text-[#111]">{label}</p>
+
+      {/* Caption */}
+      {post.caption && (
+        <p className="text-[14px] text-[#111] leading-[1.55] mb-2.5">{post.caption}</p>
+      )}
+
+      {/* Media */}
+      {images.length > 0 && (
+        <div className="mb-2.5 rounded-[14px] overflow-hidden bg-[#f5f5f7]">
+          <img src={images[0]} alt="" className="w-full object-cover" style={{ maxHeight: 360 }} />
+        </div>
+      )}
+
+      {/* Location */}
+      {post.location_address && (
+        <div className="flex items-center gap-1.5 mb-2.5">
+          <MapPin style={{ width: 13, height: 13, color: '#10b981', flexShrink: 0 }} strokeWidth={1.75} />
+          <span className="text-[13px]" style={{ color: '#666' }}>📍 {post.location_address}</span>
+        </div>
+      )}
+
+      {/* Meta row */}
+      <div className="flex items-center gap-3 pb-3">
+        {(post.question_count ?? 0) > 0 && (
+          <span className="text-[11px]" style={{ color: '#bbb' }}>
+            {post.question_count} question{post.question_count !== 1 ? 's' : ''}
+          </span>
+        )}
+        {post.price != null && post.price > 0 && (
+          <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>⚡{post.price}</span>
+        )}
+      </div>
     </div>
   )
 }
@@ -55,7 +113,6 @@ export default function UserProfilePage() {
   const [loading, setLoading]   = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [following, setFollowing] = useState(false)
-  const [tab, setTab] = useState<GridTab>('posts')
 
   const [amaOpen, setAmaOpen] = useState(false)
   const [avatarOpen, setAvatarOpen] = useState(false)
@@ -278,61 +335,18 @@ export default function UserProfilePage() {
         )}
       </div>
 
-      {/* ── Grid tabs ── */}
-      <div
-        className="flex items-center"
-        style={{ borderTop: '0.5px solid #f2f2f2', borderBottom: '0.5px solid #f2f2f2' }}
-      >
-        {([
-          { id: 'posts',  Icon: Grid3X3 },
-          { id: 'reels',  Icon: Play    },
-          { id: 'tagged', Icon: Tag     },
-        ] as { id: GridTab; Icon: React.ElementType }[]).map(({ id, Icon }) => (
-          <button
-            key={id}
-            onClick={() => setTab(id)}
-            className="flex-1 flex items-center justify-center py-3 relative"
-            style={{ color: tab === id ? '#111' : '#bbb' }}
-          >
-            <Icon className="w-[22px] h-[22px]" strokeWidth={1.75} />
-            {tab === id && (
-              <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-[#111]" />
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* ── 3-col photo grid ── */}
-      {tab === 'posts' && (
-        posts.length > 0 ? (
-          <div className="grid grid-cols-3" style={{ gap: '1.5px' }}>
-            {posts.map(post => {
-              const thumb = post.image_urls?.[0]
-              return (
-                <div key={post.id} className="aspect-square overflow-hidden bg-[#f5f5f7]">
-                  {thumb ? (
-                    <img src={thumb} alt="" className="w-full h-full object-cover" loading="lazy" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-[#f0f0f0]">
-                      <Grid3X3 className="w-6 h-6 text-[#ccc]" strokeWidth={1.5} />
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
+      {/* ── Post timeline ── */}
+      <div style={{ borderTop: '0.5px solid #f0f0f0' }}>
+        {posts.length > 0 ? (
+          posts.map(post => (
+            <ProfilePostCard key={post.id} post={post} profile={profile} navigate={navigate} />
+          ))
         ) : (
-          <EmptyTab icon={<Grid3X3 className="w-7 h-7 text-[#ccc]" strokeWidth={1.5} />} label="No posts yet" />
-        )
-      )}
-
-      {tab === 'reels' && (
-        <EmptyTab icon={<Play className="w-7 h-7 text-[#ccc]" strokeWidth={1.5} />} label="No reels yet" />
-      )}
-
-      {tab === 'tagged' && (
-        <EmptyTab icon={<Tag className="w-7 h-7 text-[#ccc]" strokeWidth={1.5} />} label="No tagged posts" />
-      )}
+          <div className="flex flex-col items-center justify-center pt-24 pb-16 text-center px-8">
+            <p className="text-[14px] font-semibold text-[#111]">No posts yet</p>
+          </div>
+        )}
+      </div>
 
       {/* ── AMASheet ── */}
       {profile && currentUser && (

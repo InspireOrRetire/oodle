@@ -115,7 +115,7 @@ export default function AMASheet({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 34, stiffness: 380 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-white"
+            className="fixed bottom-0 left-0 right-0 z-50 glass-sheet"
             style={{ borderRadius: '24px 24px 0 0', paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}
             onClick={e => e.stopPropagation()}
           >
