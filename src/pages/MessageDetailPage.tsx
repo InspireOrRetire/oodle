@@ -868,6 +868,11 @@ export default function MessageDetailPage() {
             @{askerName} will be able to view your answer after purchase.
           </p>
         )}
+        {!isAnswered && !isCreator && (
+          <p className="text-[13px] text-gray-400 leading-relaxed">
+            You'll be notified as soon as @{creatorName} answers.
+          </p>
+        )}
 
         {/* Clarification notes */}
         {noteMessages.length > 0 && (
