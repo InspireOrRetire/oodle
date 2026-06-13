@@ -191,13 +191,59 @@ export async function fetchComposedFeed(userId: string): Promise<ComposedPost[]>
   if (error) throw error
   if (!data)  return []
 
-  // The RPC returns JSON; double-cast through unknown since the generated
-  // type is Json (not the detailed return shape).
   const result = (data as unknown) as {
     followedPosts:             import('../lib/feedComposer').RawPost[]
     discoveryPosts:            import('../lib/feedComposer').RawPost[]
     followedCreatorCategories: string[]
     followedCreatorCount:      number
+  }
+
+  // If the RPC's time window excluded all followed posts but the user does
+  // follow creators, fall back to a direct query with no time limit so the
+  // feed is never empty for a user with real follows.
+  if (result.followedPosts.length === 0 && result.followedCreatorCount > 0) {
+    const { data: followRows } = await supabase
+      .from('user_following')
+      .select('creator_id')
+      .eq('follower_id', userId)
+      .limit(100)
+
+    const creatorIds = (followRows ?? []).map((r: any) => r.creator_id as string)
+
+    if (creatorIds.length > 0) {
+      const { data: posts } = await supabase
+        .from('posts')
+        .select(`
+          id, creator_id, caption, image_urls, price,
+          location_address, question_count, answer_count, created_at,
+          users!creator_id (
+            id, username, display_name, avatar_url, categories, response_rate
+          )
+        `)
+        .in('creator_id', creatorIds)
+        .order('created_at', { ascending: false })
+        .limit(60)
+
+      if (posts && posts.length > 0) {
+        result.followedPosts = (posts as any[]).map(p => ({
+          id:                 p.id,
+          creator_id:         p.creator_id,
+          creator_username:   (p.users as any)?.username ?? '',
+          creator_display_name: (p.users as any)?.display_name ?? '',
+          creator_avatar_url: (p.users as any)?.avatar_url ?? null,
+          categories:         (p.users as any)?.categories ?? [],
+          creator_response_rate: (p.users as any)?.response_rate ?? null,
+          created_at:         p.created_at,
+          caption:            p.caption ?? '',
+          image_urls:         p.image_urls ?? [],
+          question_count:     p.question_count ?? 0,
+          answer_count:       p.answer_count ?? 0,
+          price:              p.price ?? 0,
+          location_address:   p.location_address ?? null,
+          is_purchased:       false,
+        }))
+      }
+    }
   }
 
   return composeFeed(result)
