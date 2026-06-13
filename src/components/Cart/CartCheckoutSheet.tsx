@@ -66,7 +66,7 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
           <motion.div key="co-sh"
             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 36, stiffness: 400 }}
-            className="fixed bottom-0 inset-x-0 z-[61] bg-white overflow-hidden"
+            className="fixed bottom-0 inset-x-0 z-[61] glass-sheet overflow-hidden"
             style={{ borderRadius: '24px 24px 0 0', maxHeight: '92vh' }}
             onClick={e => e.stopPropagation()}
           >

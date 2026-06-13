@@ -192,13 +192,18 @@ export default function PostDetailPage() {
 
           {/* Avatar + meta row */}
           <div className="flex items-start gap-3 mb-3">
-            <Av
-              url={item.creator.avatar_url}
-              name={item.creator.display_name}
-              color={item.creator.color}
-              initials={item.creator.initials}
-              size={44}
-            />
+            <button
+              onClick={() => navigate(`/u/${item.creator.username}`)}
+              className="flex-shrink-0 active:opacity-75 transition-opacity"
+            >
+              <Av
+                url={item.creator.avatar_url}
+                name={item.creator.display_name}
+                color={item.creator.color}
+                initials={item.creator.initials}
+                size={44}
+              />
+            </button>
             <div className="flex-1 min-w-0 pt-0.5">
               <div className="flex items-center gap-1.5">
                 <span className="text-[14px] font-semibold text-[#111] leading-tight truncate">
@@ -329,11 +334,13 @@ export default function PostDetailPage() {
                 <div className="flex gap-3">
                   {/* Avatar col */}
                   <div className="flex flex-col items-center flex-shrink-0 w-10">
-                    <img
-                      src={reply.avatar_url}
-                      alt={reply.username}
-                      className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-                    />
+                    <button onClick={() => navigate(`/u/${reply.username}`)} className="active:opacity-75 transition-opacity flex-shrink-0">
+                      <img
+                        src={reply.avatar_url}
+                        alt={reply.username}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    </button>
                     {/* Connector to creator node */}
                     <div className="w-0.5 flex-1 mt-2 min-h-[48px]" style={{ background: '#e5e7eb' }} />
                   </div>
@@ -382,13 +389,15 @@ export default function PostDetailPage() {
                 {/* ── Node 2: Creator locked answer ── */}
                 <div className="flex gap-3">
                   <div className="flex-shrink-0 w-10">
-                    <Av
-                      url={item.creator.avatar_url}
-                      name={item.creator.display_name}
-                      color={item.creator.color}
-                      initials={item.creator.initials}
-                      size={40}
-                    />
+                    <button onClick={() => navigate(`/u/${item.creator.username}`)} className="active:opacity-75 transition-opacity">
+                      <Av
+                        url={item.creator.avatar_url}
+                        name={item.creator.display_name}
+                        color={item.creator.color}
+                        initials={item.creator.initials}
+                        size={40}
+                      />
+                    </button>
                   </div>
 
                   <div className="flex-1 min-w-0 pb-6">
@@ -437,11 +446,13 @@ export default function PostDetailPage() {
                   <div key={reply.username + i} className="flex gap-3">
                     {/* Avatar + connector line */}
                     <div className="flex flex-col items-center flex-shrink-0 w-10">
-                      <img
-                        src={reply.avatar_url}
-                        alt={reply.username}
-                        className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-                      />
+                      <button onClick={e => { e.stopPropagation(); navigate(`/u/${reply.username}`) }} className="active:opacity-75 transition-opacity flex-shrink-0">
+                        <img
+                          src={reply.avatar_url}
+                          alt={reply.username}
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                      </button>
                       {!isLast && (
                         <div className="w-0.5 flex-1 mt-1 min-h-[20px]" style={{ background: '#e5e7eb' }} />
                       )}
@@ -546,7 +557,7 @@ export default function PostDetailPage() {
               key="ask-sh"
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 36, stiffness: 400 }}
-              className="fixed bottom-0 left-0 right-0 z-50 bg-white flex flex-col"
+              className="fixed bottom-0 left-0 right-0 z-50 glass-sheet flex flex-col"
               style={{ borderRadius: '24px 24px 0 0', height: '88vh' }}
               onClick={e => e.stopPropagation()}
             >

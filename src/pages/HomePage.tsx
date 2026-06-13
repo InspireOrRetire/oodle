@@ -193,9 +193,21 @@ function FeedCard({
         {isPost ? (
           <div className="flex gap-3 pb-3">
             <div className="flex flex-col items-center flex-shrink-0 w-10">
-              <button onClick={() => onProfile(item.creator.username)}>
-                <Av creator={item.creator} size={40} />
-              </button>
+              <div className="relative">
+                <button onClick={() => onProfile(item.creator.username)}>
+                  <Av creator={item.creator} size={40} />
+                </button>
+                {/* Threads-style follow + badge */}
+                {!followedUsers.has(item.creator.id) && (
+                  <button
+                    onClick={e => { e.stopPropagation(); onFollow(item.creator.username) }}
+                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-[18px] h-[18px] rounded-full flex items-center justify-center"
+                    style={{ background: '#111', border: '2px solid white' }}
+                  >
+                    <span className="text-white leading-none" style={{ fontSize: 11, fontWeight: 700, marginTop: -1 }}>+</span>
+                  </button>
+                )}
+              </div>
             </div>
             <div className="flex-1 min-w-0">
               {/* Name row */}

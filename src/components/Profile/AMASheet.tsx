@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { submitQuestion } from '../../services/profileQuestionService'
+import { useNavigate } from 'react-router-dom'
+import { createThreadWithMedia } from '../../services/threadService'
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -36,26 +37,57 @@ export default function AMASheet({
   currentUserId,
   creatorId,
 }: AMASheetProps) {
+  const navigate = useNavigate()
   const [text, setText] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [sending, setSending] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  async function handleSubmit() {
-    const trimmed = text.trim()
-    if (!trimmed || loading) return
-    setLoading(true)
+  const hasPill       = text.includes('$?')
+  const cleanQuestion = text.replace(/\$\?/g, '').trim()
+  const readyToSend   = hasPill && cleanQuestion.length > 0
+
+  async function handleSend() {
+    if (!readyToSend || sending) return
+    setSending(true)
     try {
-      await submitQuestion(creatorId, currentUserId, trimmed)
+      const threadId = await createThreadWithMedia({
+        creatorId,
+        fanId:    currentUserId,
+        question: cleanQuestion,
+        price:    0,
+      })
       setText('')
       onClose()
+      navigate(`/inbox/${threadId}`)
     } catch (err) {
-      console.error('AMASheet submit error', err)
-    } finally {
-      setLoading(false)
+      console.error('AMASheet send error', err)
+      setSending(false)
     }
   }
 
+  function insertPill() {
+    const ta = textareaRef.current
+    if (!ta) {
+      setText(prev => prev + (prev.endsWith(' ') || prev === '' ? '' : ' ') + '$? ')
+      return
+    }
+    const start = ta.selectionStart
+    const end   = ta.selectionEnd
+    const before = text.slice(0, start)
+    const after  = text.slice(end)
+    const pad    = before.length > 0 && !before.endsWith(' ') ? ' ' : ''
+    const next   = before + pad + '$? ' + after
+    setText(next.slice(0, MAX_CHARS))
+    // Restore cursor after pill
+    requestAnimationFrame(() => {
+      const pos = (before + pad + '$? ').length
+      ta.setSelectionRange(pos, pos)
+      ta.focus()
+    })
+  }
+
   function handleClose() {
-    if (loading) return
+    if (sending) return
     setText('')
     onClose()
   }
@@ -83,7 +115,7 @@ export default function AMASheet({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 34, stiffness: 380 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-white"
+            className="fixed bottom-0 left-0 right-0 z-50 glass-sheet"
             style={{ borderRadius: '24px 24px 0 0', paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}
             onClick={e => e.stopPropagation()}
           >
@@ -113,7 +145,7 @@ export default function AMASheet({
                   <p className="text-[15px] font-semibold text-[#111]">
                     Ask @{creatorUsername} anything
                   </p>
-                  <p className="text-[12px] text-[#aaa]">Questions are public</p>
+                  <p className="text-[12px] text-[#aaa]">Private — only you and @{creatorUsername} will see this</p>
                 </div>
                 <button
                   className="ml-auto w-7 h-7 rounded-full flex items-center justify-center"
@@ -127,7 +159,7 @@ export default function AMASheet({
               {/* Textarea */}
               <div className="relative">
                 <textarea
-                  autoFocus
+                  ref={textareaRef}
                   value={text}
                   onChange={e => setText(e.target.value.slice(0, MAX_CHARS))}
                   placeholder="What do you want to know?"
@@ -143,24 +175,42 @@ export default function AMASheet({
                 </span>
               </div>
 
-              {/* Submit */}
+              {/* $? pill + hint */}
+              <div className="mt-3 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={insertPill}
+                  disabled={hasPill}
+                  className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-semibold transition-all active:opacity-60"
+                  style={hasPill
+                    ? { background: '#E8B800', color: '#111' }
+                    : { background: '#f0f0f0', color: '#555' }}
+                >
+                  <span>$?</span>
+                  <span>{hasPill ? 'Committed to pay' : 'Commit to pay'}</span>
+                </button>
+                {!hasPill && (
+                  <p className="text-[12px] text-[#bbb] leading-tight">
+                    Tap to commit — question won't send without it
+                  </p>
+                )}
+              </div>
+
+              {/* Send button */}
               <button
-                onClick={handleSubmit}
-                disabled={!text.trim() || loading}
+                onClick={handleSend}
+                disabled={!readyToSend || sending}
                 className="w-full mt-4 rounded-[12px] py-[14px] text-[15px] font-semibold transition-all flex items-center justify-center gap-2"
-                style={{
-                  background: text.trim() ? '#111' : '#e5e5e5',
-                  color: text.trim() ? '#fff' : '#aaa',
-                }}
+                style={readyToSend
+                  ? { background: '#111', color: '#fff' }
+                  : { background: '#e5e5e5', color: '#aaa' }}
               >
-                {loading ? (
+                {sending ? (
                   <>
-                    <span
-                      className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin"
-                    />
+                    <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
                     Sending…
                   </>
-                ) : 'Submit question'}
+                ) : 'Send question'}
               </button>
             </div>
           </motion.div>

@@ -104,7 +104,7 @@ export default function ClarifyOrUnlockSheet({ target, onClose, onUnlock }: Prop
       <motion.div
         initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 32, stiffness: 320 }}
-        className="fixed bottom-0 inset-x-0 z-[56] bg-white"
+        className="fixed bottom-0 inset-x-0 z-[56] glass-sheet"
         style={{ borderRadius: '24px 24px 0 0' }}
         onClick={e => e.stopPropagation()}
       >

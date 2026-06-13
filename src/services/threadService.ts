@@ -39,19 +39,18 @@ function blocksToText(blocks: AnswerBlock[]): string {
 // Returns the new thread id.
 
 export async function createThread(params: {
-  postId:    string
+  postId?:   string        // optional — undefined for profile-level AMA threads
   creatorId: string
   fanId:     string
-  question:  string   // first message content
-  price:     number   // initial suggested price (creator can change later)
+  question:  string
+  price:     number
 }): Promise<string> {
   const { postId, creatorId, fanId, question, price } = params
 
-  // Insert thread
   const { data: thread, error: tErr } = await supabase
     .from('threads')
     .insert({
-      post_id:    postId,
+      ...(postId ? { post_id: postId } : {}),
       creator_id: creatorId,
       fan_id:     fanId,
       price,
@@ -73,14 +72,15 @@ export async function createThread(params: {
 
   if (mErr) throw mErr
 
-  // Increment question_count on the post so the card shows total questions asked
-  await supabase.rpc('increment_question_count', { post_id: postId }).catch(() => {
-    // Fallback: direct update if RPC not available
-    supabase.from('posts').select('question_count').eq('id', postId).single()
-      .then(({ data }) => {
-        if (data) supabase.from('posts').update({ question_count: (data.question_count ?? 0) + 1 }).eq('id', postId)
-      })
-  })
+  // Only increment question_count when this thread is tied to a specific post
+  if (postId) {
+    await supabase.rpc('increment_question_count', { post_id: postId }).catch(() => {
+      supabase.from('posts').select('question_count').eq('id', postId).single()
+        .then(({ data }) => {
+          if (data) supabase.from('posts').update({ question_count: (data.question_count ?? 0) + 1 }).eq('id', postId)
+        })
+    })
+  }
 
   return thread.id
 }
@@ -354,7 +354,7 @@ export async function uploadQuestionMedia(
 // Each media file is uploaded then sent as a follow-up message in the thread.
 
 export async function createThreadWithMedia(params: {
-  postId:      string | null
+  postId?:     string | null
   creatorId:   string
   fanId:       string
   question:    string
@@ -363,11 +363,10 @@ export async function createThreadWithMedia(params: {
 }): Promise<string> {
   const { postId, creatorId, fanId, question, price, mediaFiles = [] } = params
 
-  // Insert thread
   const { data: thread, error: tErr } = await supabase
     .from('threads')
     .insert({
-      post_id:    postId as string,
+      ...(postId ? { post_id: postId } : {}),
       creator_id: creatorId,
       fan_id:     fanId,
       price,
@@ -397,6 +396,15 @@ export async function createThreadWithMedia(params: {
         console.error(e)
       }
     }
+  }
+
+  if (postId) {
+    await supabase.rpc('increment_question_count', { post_id: postId }).catch(() => {
+      supabase.from('posts').select('question_count').eq('id', postId).single()
+        .then(({ data }) => {
+          if (data) supabase.from('posts').update({ question_count: (data.question_count ?? 0) + 1 }).eq('id', postId)
+        })
+    })
   }
 
   return threadId
