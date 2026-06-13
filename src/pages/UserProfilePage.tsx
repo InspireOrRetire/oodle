@@ -393,7 +393,7 @@ export default function UserProfilePage() {
   const [recentAnswersOpen, setRecentAnswersOpen] = useState(false)
 
   // Follower avatars + recent answers count
-  const [followerAvatars, setFollowerAvatars] = useState<string[]>([])
+  const [followerAvatars, setFollowerAvatars] = useState<{ url: string | null; ini: string }[]>([])
   const [recentAnswerCount, setRecentAnswerCount] = useState(0)
 
   useEffect(() => {
@@ -438,18 +438,23 @@ export default function UserProfilePage() {
             .then(({ data }) => { if (!cancelled) setFollowing(!!data) })
         }
 
-        // Fetch a few follower avatars for the social proof row
+        // Fetch a few followers for the social proof row (avatar or initials fallback)
         supabase
           .from('user_following')
-          .select('users!user_following_follower_id_fkey(avatar_url)')
+          .select('users!user_following_follower_id_fkey(avatar_url, display_name, username)')
           .eq('creator_id', user.id)
           .limit(4)
           .then(({ data }) => {
             if (cancelled || !data) return
-            const avatars = (data as any[])
-              .map((r: any) => r.users?.avatar_url)
-              .filter(Boolean) as string[]
-            setFollowerAvatars(avatars.slice(0, 3))
+            const items = (data as any[])
+              .map((r: any) => {
+                const u = r.users
+                if (!u) return null
+                const name: string = u.display_name ?? u.username ?? '?'
+                return { url: u.avatar_url ?? null, ini: name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2) || '?' }
+              })
+              .filter(Boolean) as { url: string | null; ini: string }[]
+            setFollowerAvatars(items.slice(0, 3))
           })
 
         // Count recent answers (last 30 days)
@@ -594,40 +599,33 @@ export default function UserProfilePage() {
         )}
 
         {/* Social proof row: follower avatars · recent answers */}
-        {(followerAvatars.length > 0 || recentAnswerCount > 0) && (
-          <button
-            onClick={() => recentAnswerCount > 0 && setRecentAnswersOpen(true)}
-            className="flex items-center gap-2 mt-2 mb-1 active:opacity-60 transition-opacity"
-            style={{ cursor: recentAnswerCount > 0 ? 'pointer' : 'default' }}
-          >
-            {/* Stacked avatars */}
-            {followerAvatars.length > 0 && (
-              <div className="flex -space-x-2">
-                {followerAvatars.map((url, i) => (
-                  <img
-                    key={i}
-                    src={url}
-                    alt=""
-                    className="w-[20px] h-[20px] rounded-full object-cover ring-2 ring-white"
-                    style={{ zIndex: followerAvatars.length - i }}
-                  />
-                ))}
-              </div>
+        <button
+          onClick={() => recentAnswerCount > 0 && setRecentAnswersOpen(true)}
+          className="flex items-center gap-2 mt-2 mb-1 active:opacity-60 transition-opacity"
+          style={{ cursor: recentAnswerCount > 0 ? 'pointer' : 'default' }}
+        >
+          {followerAvatars.length > 0 && (
+            <div className="flex -space-x-2">
+              {followerAvatars.map((f, i) => (
+                f.url
+                  ? <img key={i} src={f.url} alt=""
+                      className="w-[20px] h-[20px] rounded-full object-cover ring-2 ring-white"
+                      style={{ zIndex: followerAvatars.length - i }} />
+                  : <div key={i}
+                      className="w-[20px] h-[20px] rounded-full ring-2 ring-white flex items-center justify-center"
+                      style={{ background: '#111', zIndex: followerAvatars.length - i }}>
+                      <span className="text-white font-semibold" style={{ fontSize: 7 }}>{f.ini}</span>
+                    </div>
+              ))}
+            </div>
+          )}
+          <span className="text-[12px]" style={{ color: '#888' }}>
+            {fmt(profile.followers_count ?? 0)} followers
+            {recentAnswerCount > 0 && (
+              <> · <span className="font-semibold text-[#111]">{fmt(recentAnswerCount)} recent answers</span></>
             )}
-            <span className="text-[12px]" style={{ color: '#888' }}>
-              {followerAvatars.length > 0 && recentAnswerCount > 0
-                ? `${fmt(profile.followers_count ?? 0)} followers · `
-                : followerAvatars.length > 0
-                  ? `${fmt(profile.followers_count ?? 0)} followers`
-                  : ''}
-              {recentAnswerCount > 0 && (
-                <span>
-                  <span className="font-semibold text-[#111]">{fmt(recentAnswerCount)} recent answers</span>
-                </span>
-              )}
-            </span>
-          </button>
-        )}
+          </span>
+        </button>
 
         {/* Follow + Inbox */}
         <div className="flex items-center gap-2 mt-3.5">
