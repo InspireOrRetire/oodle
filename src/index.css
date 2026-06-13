@@ -82,9 +82,9 @@ input[type=number] { -moz-appearance: textfield; }
 
 /* ── Glass surfaces ────────────────────────────────────────────────────────── */
 .glass-sheet {
-  background: rgba(251, 251, 253, 0.92) !important;
-  backdrop-filter: blur(32px) saturate(1.8);
-  -webkit-backdrop-filter: blur(32px) saturate(1.8);
+  background: rgba(252, 252, 254, 0.82) !important;
+  backdrop-filter: blur(40px) saturate(2);
+  -webkit-backdrop-filter: blur(40px) saturate(2);
 }
 
 .glass-bar {

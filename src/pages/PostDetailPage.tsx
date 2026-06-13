@@ -608,44 +608,12 @@ export default function PostDetailPage() {
 
                       {/* Textarea */}
                       {(() => {
-                        const hasPill   = askText.includes('$?')
-                        const cleanText = askText.replace(/\$\?/g, '').trimEnd()
-                        const canSend   = hasPill && cleanText.trim().length >= 5
+                        const canSend = askText.trim().length >= 3
 
                         return (
                           <>
-                            {/* Two-layer textarea: transparent input + rendered display */}
-                            <div className="relative w-full rounded-[12px] overflow-visible"
+                            <div className="relative w-full rounded-[12px] overflow-hidden"
                               style={{ background: '#f5f5f7', minHeight: 112 }}>
-
-                              {/* Display layer — text with $? replaced by inline badge */}
-                              <div
-                                aria-hidden="true"
-                                className="px-4 py-3 text-[14px] leading-[1.5] whitespace-pre-wrap break-words pointer-events-none select-none"
-                                style={{ color: '#111', minHeight: 112, wordBreak: 'break-word' }}
-                              >
-                                {cleanText || <span style={{ color: '#ccc' }}>What do you want to know? Type $? to commit to paying.</span>}
-                                {hasPill && (
-                                  <span
-                                    className="inline-flex items-center align-middle mx-[3px]"
-                                    style={{
-                                      background: '#E5E5EA',
-                                      borderRadius: 10,
-                                      padding: '2px 8px',
-                                      fontSize: 11,
-                                      fontWeight: 600,
-                                      lineHeight: 1.5,
-                                      color: '#3C3C43',
-                                      letterSpacing: '0.01em',
-                                    }}
-                                  >
-                                    $?
-                                  </span>
-                                )}
-                                {'​'}
-                              </div>
-
-                              {/* Input layer — transparent overlay */}
                               <textarea
                                 ref={askTextareaRef}
                                 autoFocus
@@ -653,32 +621,22 @@ export default function PostDetailPage() {
                                 onChange={e => { setAskText(e.target.value); setAskError(null) }}
                                 rows={4}
                                 maxLength={280}
-                                className="absolute inset-0 w-full h-full px-4 py-3 text-[14px] leading-[1.5] resize-none outline-none bg-transparent"
-                                style={{ color: hasPill ? 'transparent' : '#111', caretColor: '#111' }}
+                                placeholder="What do you want to know?"
+                                className="w-full h-full px-4 py-3 text-[14px] leading-[1.5] resize-none outline-none bg-transparent"
+                                style={{ color: '#111', minHeight: 112 }}
                               />
                             </div>
 
-                            {/* Counter + remove */}
-                            <div className="flex items-center justify-between mt-1.5 mb-4">
-                              {hasPill ? (
-                                <button
-                                  onClick={() => setAskText(t => t.replace('$?', ''))}
-                                  className="flex items-center gap-1 text-[11px]"
-                                  style={{ color: '#aaa' }}
-                                >
-                                  <XIcon style={{ width: 10, height: 10 }} strokeWidth={2.5} />
-                                  Remove $?
-                                </button>
-                              ) : <span />}
+                            <div className="flex justify-end mt-1.5 mb-4">
                               <p className="font-mono text-[10px]" style={{ color: '#bbb' }}>
-                                {cleanText.length}/280
+                                {askText.length}/280
                               </p>
                             </div>
 
                             <motion.button
                               onClick={async () => {
                                 if (!canSend || askSending) return
-                                const question = askText.trim().replace(/\$\?$/, '').trim() + '?'
+                                const question = askText.trim()
                                 setAskSending(true)
                                 try {
                                   if (!isExploreMode && user && item.creator.id) {
@@ -690,7 +648,6 @@ export default function PostDetailPage() {
                                       price:      price ?? 4,
                                       mediaFiles: [],
                                     })
-                                    // Save to My Questions store immediately
                                     myQuestionsStore.add({
                                       threadId:        tid,
                                       postId:          item.id,
@@ -709,7 +666,6 @@ export default function PostDetailPage() {
                                       navigate(`/inbox/${tid}`)
                                     }, 1800)
                                   } else {
-                                    // Explore / mock mode
                                     await new Promise(r => setTimeout(r, 900))
                                     setAskSending(false)
                                     setAskSent(true)
@@ -730,9 +686,7 @@ export default function PostDetailPage() {
                                 ? <div className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                 : <>
                                     <MessageCircle style={{ width: 15, height: 15, color: 'white' }} strokeWidth={1.75} />
-                                    <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
-                                      {hasPill ? 'Send question' : 'Type $? to send'}
-                                    </span>
+                                    <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>Send question</span>
                                   </>
                               }
                             </motion.button>

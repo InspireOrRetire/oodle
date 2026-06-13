@@ -21,10 +21,8 @@ export default function AskQuestionSheet({ post, onClose }: Props) {
   const vidRef  = useRef<HTMLInputElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const hasPill       = text.includes('$?')
-  const cleanQuestion = text.replace(/\$\?/g, '').trim()
-  const readyToSend   = hasPill && cleanQuestion.length > 0
-  const allMedia      = mediaFiles
+  const canSend  = text.trim().length > 0
+  const allMedia = mediaFiles
 
   function removeMedia(i: number) {
     setMediaFiles(p => p.filter((_, j) => j !== i))
@@ -38,7 +36,7 @@ export default function AskQuestionSheet({ post, onClose }: Props) {
         postId:     post.id,
         creatorId:  post.creator_id,
         fanId:      user.id,
-        question:   cleanQuestion,
+        question:   text.trim(),
         price:      0,
         mediaFiles: allMedia,
       })
@@ -83,50 +81,14 @@ export default function AskQuestionSheet({ post, onClose }: Props) {
               autoFocus
               value={text}
               onChange={e => setText(e.target.value)}
-              placeholder="What do you want to know? Type $? to commit to paying."
+              placeholder="What do you want to know?"
               className="w-full border border-gray-200 rounded-xl p-3.5 text-[14px] text-gray-900 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-gray-900"
               rows={4}
               maxLength={280}
             />
 
-            {/* $? badge + counter */}
-            <div className="flex items-center justify-between mt-1.5">
-              <AnimatePresence>
-                {hasPill && (
-                  <motion.div
-                    key="pill"
-                    initial={{ opacity: 0, scale: 0.85, x: -4 }}
-                    animate={{ opacity: 1, scale: 1, x: 0 }}
-                    exit={{ opacity: 0, scale: 0.85, x: -4 }}
-                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                    className="flex items-center gap-1.5"
-                  >
-                    <span
-                      className="inline-flex items-center"
-                      style={{
-                        background: '#E5E5EA',
-                        borderRadius: 10,
-                        padding: '2px 8px',
-                        fontSize: 11,
-                        fontWeight: 600,
-                        lineHeight: 1.5,
-                        color: '#3C3C43',
-                        letterSpacing: '0.01em',
-                      }}
-                    >
-                      $?
-                    </span>
-                    <button
-                      onClick={() => setText(t => t.replace('$?', ''))}
-                      className="text-[11px]"
-                      style={{ color: '#aaa' }}
-                    >
-                      × remove
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              <p className="text-[11px] text-gray-400 ml-auto">{cleanQuestion.length}/280</p>
+            <div className="flex justify-end mt-1.5">
+              <p className="text-[11px] text-gray-400">{text.length}/280</p>
             </div>
 
             {/* Media row */}
@@ -202,13 +164,13 @@ export default function AskQuestionSheet({ post, onClose }: Props) {
             <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.txt,.csv" hidden onChange={e => { if (e.target.files?.[0]) setMediaFiles(p => [...p, e.target.files![0]]); e.target.value = '' }} />
 
             <button
-              onClick={() => { if (readyToSend) setStep('confirm') }}
-              disabled={!readyToSend}
+              onClick={() => { if (canSend) setStep('confirm') }}
+              disabled={!canSend}
               className={`w-full py-4 rounded-2xl text-[15px] font-semibold mt-4 transition-all duration-200 ${
-                readyToSend ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                canSend ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
               }`}
             >
-              {!hasPill ? 'Type $? to commit' : 'Continue'}
+              Continue
             </button>
           </motion.div>
         )}
@@ -229,7 +191,7 @@ export default function AskQuestionSheet({ post, onClose }: Props) {
             {/* Question preview */}
             <div className="bg-gray-50 rounded-2xl px-4 py-3 mb-4">
               <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Your question</p>
-              <p className="text-[14px] text-gray-800 leading-snug">"{cleanQuestion}"</p>
+              <p className="text-[14px] text-gray-800 leading-snug">"{text.trim()}"</p>
             </div>
 
             {/* Attached media summary */}

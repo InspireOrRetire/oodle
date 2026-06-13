@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { createThreadWithMedia } from '../../services/threadService'
@@ -40,20 +40,17 @@ export default function AMASheet({
   const navigate = useNavigate()
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const hasPill       = text.includes('$?')
-  const cleanQuestion = text.replace(/\$\?/g, '').trim()
-  const readyToSend   = hasPill && cleanQuestion.length > 0
+  const canSend = text.trim().length > 0
 
   async function handleSend() {
-    if (!readyToSend || sending) return
+    if (!canSend || sending) return
     setSending(true)
     try {
       const threadId = await createThreadWithMedia({
         creatorId,
         fanId:    currentUserId,
-        question: cleanQuestion,
+        question: text.trim(),
         price:    0,
       })
       setText('')
@@ -63,27 +60,6 @@ export default function AMASheet({
       console.error('AMASheet send error', err)
       setSending(false)
     }
-  }
-
-  function insertPill() {
-    const ta = textareaRef.current
-    if (!ta) {
-      setText(prev => prev + (prev.endsWith(' ') || prev === '' ? '' : ' ') + '$? ')
-      return
-    }
-    const start = ta.selectionStart
-    const end   = ta.selectionEnd
-    const before = text.slice(0, start)
-    const after  = text.slice(end)
-    const pad    = before.length > 0 && !before.endsWith(' ') ? ' ' : ''
-    const next   = before + pad + '$? ' + after
-    setText(next.slice(0, MAX_CHARS))
-    // Restore cursor after pill
-    requestAnimationFrame(() => {
-      const pos = (before + pad + '$? ').length
-      ta.setSelectionRange(pos, pos)
-      ta.focus()
-    })
   }
 
   function handleClose() {
@@ -175,33 +151,12 @@ export default function AMASheet({
                 </span>
               </div>
 
-              {/* $? pill + hint */}
-              <div className="mt-3 flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={insertPill}
-                  disabled={hasPill}
-                  className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-semibold transition-all active:opacity-60"
-                  style={hasPill
-                    ? { background: '#E8B800', color: '#111' }
-                    : { background: '#f0f0f0', color: '#555' }}
-                >
-                  <span>$?</span>
-                  <span>{hasPill ? 'Committed to pay' : 'Commit to pay'}</span>
-                </button>
-                {!hasPill && (
-                  <p className="text-[12px] text-[#bbb] leading-tight">
-                    Tap to commit — question won't send without it
-                  </p>
-                )}
-              </div>
-
               {/* Send button */}
               <button
                 onClick={handleSend}
-                disabled={!readyToSend || sending}
+                disabled={!canSend || sending}
                 className="w-full mt-4 rounded-[12px] py-[14px] text-[15px] font-semibold transition-all flex items-center justify-center gap-2"
-                style={readyToSend
+                style={canSend
                   ? { background: '#111', color: '#fff' }
                   : { background: '#e5e5e5', color: '#aaa' }}
               >
