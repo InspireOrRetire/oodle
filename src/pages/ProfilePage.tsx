@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Share2, Menu, Eye, Plus, Minus, MoreHorizontal, Link, Zap, Bookmark, Check, ArrowLeft, CreditCard, Shield, Mail, Heart, MessageCircle, ChevronUp, ChevronDown, Copy, AtSign, Camera, ChevronRight as ChevronRightIcon, Image, Video, MapPin, List, Type, FileText, X } from 'lucide-react'
+import { Share2, Menu, Eye, Plus, Minus, MoreHorizontal, Link, Zap, Bookmark, Check, ArrowLeft, CreditCard, Shield, Mail, Heart, MessageCircle, ChevronUp, ChevronDown, Copy, AtSign, Camera, ChevronRight as ChevronRightIcon, Image, Video, MapPin, List, Type, FileText, X, Search } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
@@ -12,6 +12,139 @@ import PostMediaCarousel from '../components/Post/PostMediaCarousel'
 import TokenKeypad from '../components/Post/TokenKeypad'
 import { formatDistanceToNow } from '../lib/time'
 import { useLayout } from '../contexts/LayoutContext'
+
+// ─── Followers / Following Sheet ─────────────────────────────────────────────
+
+type FollowUser = { id: string; username: string | null; display_name: string | null; avatar_url: string | null }
+
+function FollowersSheetProfile({
+  open, onClose, profileId, profileUsername, initialTab, currentUserId,
+}: {
+  open: boolean; onClose: () => void; profileId: string; profileUsername: string
+  initialTab: 'followers' | 'following'; currentUserId: string | null
+}) {
+  const navigate = useNavigate()
+  const [tab, setTab]             = useState<'followers' | 'following'>(initialTab)
+  const [query, setQuery]         = useState('')
+  const [followers, setFollowers] = useState<FollowUser[]>([])
+  const [following, setFollowing] = useState<FollowUser[]>([])
+  const [loading, setLoading]     = useState(false)
+  const [myFollowing, setMyFollowing] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    if (!open) return
+    setTab(initialTab); setQuery(''); setLoading(true)
+    Promise.all([
+      supabase.from('user_following')
+        .select('users!user_following_follower_id_fkey(id, username, display_name, avatar_url)')
+        .eq('creator_id', profileId).limit(200),
+      supabase.from('user_following')
+        .select('users!user_following_creator_id_fkey(id, username, display_name, avatar_url)')
+        .eq('follower_id', profileId).limit(200),
+      currentUserId
+        ? supabase.from('user_following').select('creator_id').eq('follower_id', currentUserId).limit(500)
+        : Promise.resolve({ data: [] }),
+    ]).then(([frs, fing, mine]) => {
+      setFollowers(((frs.data ?? []) as any[]).map((r: any) => r.users).filter(Boolean))
+      setFollowing(((fing.data ?? []) as any[]).map((r: any) => r.users).filter(Boolean))
+      setMyFollowing(new Set(((mine as any).data ?? []).map((r: any) => r.creator_id)))
+      setLoading(false)
+    }).catch(() => setLoading(false))
+  }, [open, profileId, initialTab, currentUserId])
+
+  const list = tab === 'followers' ? followers : following
+  const q = query.trim().toLowerCase()
+  const filtered = q ? list.filter(u => (u.display_name ?? '').toLowerCase().includes(q) || (u.username ?? '').toLowerCase().includes(q)) : list
+
+  async function toggleFollow(u: FollowUser) {
+    if (!currentUserId) return
+    const isF = myFollowing.has(u.id)
+    setMyFollowing(prev => { const n = new Set(prev); isF ? n.delete(u.id) : n.add(u.id); return n })
+    if (isF) await supabase.from('user_following').delete().eq('follower_id', currentUserId).eq('creator_id', u.id)
+    else await supabase.from('user_following').insert({ follower_id: currentUserId, creator_id: u.id })
+  }
+
+  const ini = (u: FollowUser) => ((u.display_name ?? u.username ?? '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()) || '?'
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div key="fw-sheet" initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+          transition={{ type: 'spring', damping: 32, stiffness: 380 }}
+          className="fixed inset-0 z-[60] bg-white flex flex-col"
+          style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+          <div className="flex items-center justify-between px-4 pt-4 pb-2 flex-shrink-0">
+            <button onClick={onClose} className="text-[15px] text-[#111] font-normal px-1">Cancel</button>
+            <p className="text-[15px] font-bold text-[#111]">@{profileUsername}</p>
+            <div className="w-16" />
+          </div>
+          <div className="flex flex-shrink-0" style={{ borderBottom: '0.5px solid #f0f0f0' }}>
+            {(['followers', 'following'] as const).map(t => (
+              <button key={t} onClick={() => setTab(t)} className="flex-1 py-3 text-[14px] font-semibold relative"
+                style={{ color: tab === t ? '#111' : '#aaa' }}>
+                {t.charAt(0).toUpperCase() + t.slice(1)}
+                {tab === t && <motion.div layoutId="fw-underline" className="absolute bottom-0 left-0 right-0 h-[2px] rounded-full" style={{ background: '#111' }} />}
+              </button>
+            ))}
+          </div>
+          <div className="px-4 py-2.5 flex-shrink-0" style={{ borderBottom: '0.5px solid #f5f5f7' }}>
+            <div className="flex items-center gap-2.5 bg-[#F2F2F7] rounded-[12px] px-3.5 py-2.5">
+              <Search className="w-4 h-4 text-gray-400 flex-shrink-0" strokeWidth={2} />
+              <input type="text" placeholder="Search" value={query} onChange={e => setQuery(e.target.value)}
+                className="flex-1 bg-transparent text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none" />
+              {query && <button onClick={() => setQuery('')}><X className="w-4 h-4 text-gray-400" /></button>}
+            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            {loading ? (
+              [0,1,2,3].map(i => (
+                <div key={i} className="flex items-center gap-3.5 px-4 py-3" style={{ borderBottom: '0.5px solid #f5f5f7' }}>
+                  <div className="w-[46px] h-[46px] rounded-full bg-gray-100 animate-pulse flex-shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3 bg-gray-100 rounded animate-pulse w-1/3" />
+                    <div className="h-3 bg-gray-100 rounded animate-pulse w-1/4" />
+                  </div>
+                </div>
+              ))
+            ) : filtered.length === 0 ? (
+              <div className="flex flex-col items-center justify-center pt-20 px-8 text-center">
+                <p className="text-[15px] font-semibold text-[#111] mb-1">
+                  {q ? 'No results' : tab === 'followers' ? 'No followers yet' : 'Not following anyone yet'}
+                </p>
+              </div>
+            ) : filtered.map(u => (
+              <div key={u.id} className="flex items-center gap-3.5 px-4 py-3" style={{ borderBottom: '0.5px solid #f5f5f7' }}>
+                <button onClick={() => { onClose(); navigate(`/u/${u.username ?? u.id}`) }}
+                  className="flex items-center gap-3.5 flex-1 min-w-0 text-left">
+                  {u.avatar_url ? (
+                    <img src={u.avatar_url} alt="" className="w-[46px] h-[46px] rounded-full object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-[46px] h-[46px] rounded-full bg-[#111] flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-semibold text-[15px]">{ini(u)}</span>
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[15px] font-semibold text-[#111] truncate">{u.display_name ?? u.username}</p>
+                    {u.username && <p className="font-mono text-[12px] text-[#aaa] truncate">@{u.username}</p>}
+                  </div>
+                </button>
+                {currentUserId && u.id !== currentUserId && (
+                  <button onClick={() => toggleFollow(u)}
+                    className="flex-shrink-0 rounded-[8px] px-4 py-1.5 text-[13px] font-semibold transition-all"
+                    style={myFollowing.has(u.id)
+                      ? { background: '#f2f2f2', color: '#111', border: '0.5px solid #d1d5db' }
+                      : { background: '#111', color: '#fff' }}>
+                    {myFollowing.has(u.id) ? 'Following' : 'Follow'}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
 
 // Placeholder profiles kept only for legacy mock data objects defined below.
 const CREATOR_PROFILE = { display_name: '', username: '', avatar_url: '' }
@@ -3279,6 +3412,39 @@ export default function ProfilePage() {
 
   const answeredCount = realThreads.filter(t => t.type !== 'post').length
 
+  // Followers sheet + social proof
+  const [followersSheetOpen, setFollowersSheetOpen] = useState(false)
+  const [followersSheetTab, setFollowersSheetTab]   = useState<'followers' | 'following'>('followers')
+  const [followerAvatars, setFollowerAvatars]       = useState<string[]>([])
+  const [recentAnswerCount, setRecentAnswerCount]   = useState(0)
+  const [recentAnswersInfoOpen, setRecentAnswersInfoOpen] = useState(false)
+
+  useEffect(() => {
+    if (!user || !realProfile?.id) return
+    const uid = realProfile.id
+    // Fetch a few follower avatars
+    supabase
+      .from('user_following')
+      .select('users!user_following_follower_id_fkey(avatar_url)')
+      .eq('creator_id', uid)
+      .limit(4)
+      .then(({ data }) => {
+        const avatars = ((data ?? []) as any[])
+          .map((r: any) => r.users?.avatar_url)
+          .filter(Boolean) as string[]
+        setFollowerAvatars(avatars.slice(0, 3))
+      })
+    // Count recent answers (last 30 days)
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+    supabase
+      .from('threads')
+      .select('id', { count: 'exact', head: true })
+      .eq('creator_id', uid)
+      .eq('status', 'answered')
+      .gte('updated_at', thirtyDaysAgo)
+      .then(({ count }) => setRecentAnswerCount(count ?? 0))
+  }, [user?.id, realProfile?.id])
+
   const [askOpen, setAskOpen] = useState(false)
   const [askText, setAskText] = useState('')
   const [askSent, setAskSent] = useState(false)
@@ -3397,23 +3563,52 @@ export default function ProfilePage() {
 
           {/* Stats row */}
           <div className="flex" style={{ borderTop: '0.5px solid #f2f2f2', paddingTop: 10 }}>
-            {[
-              { num: activeProfile.followers_count >= 1000 ? `${(activeProfile.followers_count / 1000).toFixed(1)}K` : activeProfile.followers_count, label: 'followers' },
-              { num: activeProfile.following_count,   label: 'following' },
-              { num: answeredCount,                    label: 'answers'   },
-            ].map((s, i) => (
-              <div
-                key={i}
-                className="flex-1 text-center"
-                style={i > 0 ? { borderLeft: '0.5px solid #f2f2f2' } : {}}
-              >
-                <p className="text-[14px] font-semibold text-[#111]">{s.num}</p>
-                <p className="font-mono text-[9px] text-[#bbb] uppercase tracking-[0.05em] mt-[1px]">
-                  {s.label}
-                </p>
-              </div>
-            ))}
+            <div className="flex-1 text-center">
+              <p className="text-[14px] font-semibold text-[#111]">{activeProfile.followers_count >= 1000 ? `${(activeProfile.followers_count / 1000).toFixed(1)}K` : activeProfile.followers_count}</p>
+              <button
+                onClick={() => { setFollowersSheetTab('followers'); setFollowersSheetOpen(true) }}
+                className="font-mono text-[9px] text-[#bbb] uppercase tracking-[0.05em] mt-[1px] active:opacity-60"
+              >followers</button>
+            </div>
+            <div className="flex-1 text-center" style={{ borderLeft: '0.5px solid #f2f2f2' }}>
+              <p className="text-[14px] font-semibold text-[#111]">{activeProfile.following_count}</p>
+              <button
+                onClick={() => { setFollowersSheetTab('following'); setFollowersSheetOpen(true) }}
+                className="font-mono text-[9px] text-[#bbb] uppercase tracking-[0.05em] mt-[1px] active:opacity-60"
+              >following</button>
+            </div>
+            <div className="flex-1 text-center" style={{ borderLeft: '0.5px solid #f2f2f2' }}>
+              <p className="text-[14px] font-semibold text-[#111]">{answeredCount}</p>
+              <p className="font-mono text-[9px] text-[#bbb] uppercase tracking-[0.05em] mt-[1px]">answers</p>
+            </div>
           </div>
+
+          {/* Social proof row */}
+          {(followerAvatars.length > 0 || recentAnswerCount > 0) && (
+            <button
+              onClick={() => recentAnswerCount > 0 && setRecentAnswersInfoOpen(true)}
+              className="flex items-center gap-2 mt-2.5 active:opacity-60 transition-opacity"
+              style={{ cursor: recentAnswerCount > 0 ? 'pointer' : 'default' }}
+            >
+              {followerAvatars.length > 0 && (
+                <div className="flex -space-x-2">
+                  {followerAvatars.map((url, i) => (
+                    <img key={i} src={url} alt="" className="w-[20px] h-[20px] rounded-full object-cover ring-2 ring-white"
+                      style={{ zIndex: followerAvatars.length - i }} />
+                  ))}
+                </div>
+              )}
+              <span className="text-[12px]" style={{ color: '#888' }}>
+                {followerAvatars.length > 0 && `${activeProfile.followers_count >= 1000 ? `${(activeProfile.followers_count / 1000).toFixed(1)}K` : activeProfile.followers_count} followers`}
+                {followerAvatars.length > 0 && recentAnswerCount > 0 && ' · '}
+                {recentAnswerCount > 0 && (
+                  <span className="font-semibold text-[#111]">
+                    {recentAnswerCount >= 1000 ? `${(recentAnswerCount / 1000).toFixed(1)}K` : recentAnswerCount} recent answers
+                  </span>
+                )}
+              </span>
+            </button>
+          )}
 
           {/* CTA */}
           {!isOwnProfile ? (
@@ -3732,6 +3927,57 @@ export default function ProfilePage() {
         document.body
       )}
 
+      {/* ── Followers / Following Sheet ── */}
+      {realProfile?.id && (
+        <FollowersSheetProfile
+          open={followersSheetOpen}
+          onClose={() => setFollowersSheetOpen(false)}
+          profileId={realProfile.id}
+          profileUsername={activeProfile.username}
+          initialTab={followersSheetTab}
+          currentUserId={user?.id ?? null}
+        />
+      )}
+
+      {/* ── Recent Answers Info Sheet ── */}
+      <AnimatePresence>
+        {recentAnswersInfoOpen && (
+          <>
+            <motion.div
+              key="ra-bd-profile"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              className="fixed inset-0 z-[70]"
+              style={{ background: 'rgba(0,0,0,0.4)' }}
+              onClick={() => setRecentAnswersInfoOpen(false)}
+            />
+            <motion.div
+              key="ra-sheet-profile"
+              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 34, stiffness: 380 }}
+              className="fixed bottom-0 left-0 right-0 z-[71] bg-white text-center"
+              style={{ borderRadius: '22px 22px 0 0', paddingBottom: 'max(32px, env(safe-area-inset-bottom))' }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex justify-center pt-3 pb-1">
+                <div className="w-9 h-1 rounded-full bg-gray-200" />
+              </div>
+              <div className="px-6 pt-5 pb-2">
+                <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: '#f5f5f7' }}>
+                  <span style={{ fontSize: 26 }}>💬</span>
+                </div>
+                <p className="text-[22px] font-bold text-[#111] mb-1">
+                  {recentAnswerCount >= 1000 ? `${(recentAnswerCount / 1000).toFixed(1)}K` : recentAnswerCount} recent answers
+                </p>
+                <p className="text-[14px] leading-relaxed" style={{ color: '#888' }}>
+                  Recent answers are the number of questions answered by{' '}
+                  <span className="font-semibold text-[#111]">@{activeProfile.username}</span> on Oodle in the last 30 days.
+                </p>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
     </div>
   )
