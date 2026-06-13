@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLayout } from '../contexts/LayoutContext'
-import { Edit, Search, Pin, Flag, X, ChevronRight, Camera, Video, FileText, Bell, MapPin, AlignLeft } from 'lucide-react'
+import { Edit, Search, Pin, Flag, X, ChevronRight, Camera, Video, FileText, Bell, MapPin, AlignLeft, Trash2 } from 'lucide-react'
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
 import { getThreads, subscribeToThreadUpdates, submitAnswer } from '../services/threadService'
@@ -14,15 +14,15 @@ type PostMode   = 'questions' | 'answer'
 type ListRow    = { type: 'title' | 'line'; text: string }
 type AnswerTarget = { id: string; question: string; askerName: string; askerAvatar: string | null }
 
-const REVEAL_W = 144
+const REVEAL_W = 204
 
 function ChatRow({
-  id, isPinned, isFlagged, onPin, onFlag, onClick,
+  id, isPinned, isFlagged, onPin, onFlag, onDelete, onClick,
   avatar, name, preview, time, unread, showUnread, status, price,
   mediaPreview, source, badge,
 }: {
   id: string; isPinned: boolean; isFlagged: boolean
-  onPin: (id: string) => void; onFlag: (id: string) => void; onClick: () => void
+  onPin: (id: string) => void; onFlag: (id: string) => void; onDelete: (id: string) => void; onClick: () => void
   avatar: React.ReactNode; name: string; preview: string; time: string
   unread?: boolean; showUnread?: boolean; status?: string; price?: number
   mediaPreview?: string | null; source?: 'post' | 'dm'
@@ -47,6 +47,12 @@ function ChatRow({
           style={{ background: isFlagged ? '#c05621' : '#f5a623' }}>
           <Flag style={{ width: 16, height: 16, color: 'white' }} strokeWidth={2} fill={isFlagged ? 'white' : 'none'} />
           <span className="font-mono text-[9px] text-white">{isFlagged ? 'Unflag' : 'Flag'}</span>
+        </button>
+        <button onClick={() => { snap(0); setTimeout(() => onDelete(id), 160) }}
+          className="flex-1 h-[52px] rounded-[14px] flex flex-col items-center justify-center gap-1"
+          style={{ background: '#e53e3e' }}>
+          <Trash2 style={{ width: 16, height: 16, color: 'white' }} strokeWidth={2} />
+          <span className="font-mono text-[9px] text-white">Delete</span>
         </button>
       </div>
       <motion.div drag="x" dragConstraints={{ left: -REVEAL_W, right: 0 }}
@@ -137,6 +143,69 @@ function Toast({ message }: { message: string | null }) {
             <span className="font-mono text-[12px] text-white">{message}</span>
           </div>
         </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
+
+function ConfirmDeleteSheet({
+  name,
+  onConfirm,
+  onCancel,
+}: {
+  name: string | null
+  onConfirm: () => void
+  onCancel: () => void
+}) {
+  return (
+    <AnimatePresence>
+      {name !== null && (
+        <>
+          <motion.div
+            key="del-bd"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="fixed inset-0 z-[70]"
+            style={{ background: 'rgba(0,0,0,0.38)' }}
+            onClick={onCancel}
+          />
+          <motion.div
+            key="del-sheet"
+            initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 34, stiffness: 380 }}
+            className="fixed bottom-0 left-0 right-0 z-[71] bg-white"
+            style={{ borderRadius: '22px 22px 0 0', paddingBottom: 'max(24px, env(safe-area-inset-bottom))' }}
+          >
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-9 h-1 rounded-full bg-gray-200" />
+            </div>
+            <div className="px-5 pt-4 pb-2 text-center">
+              <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" style={{ background: '#fef2f2' }}>
+                <Trash2 style={{ width: 22, height: 22, color: '#e53e3e' }} strokeWidth={1.75} />
+              </div>
+              <p className="text-[17px] font-bold text-[#111] mb-1.5">Delete conversation?</p>
+              <p className="text-[13px] leading-snug" style={{ color: '#888' }}>
+                Your conversation with <span className="font-semibold text-[#111]">{name}</span> and all its messages will be permanently lost.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2.5 px-5 pt-4">
+              <button
+                onClick={onConfirm}
+                className="w-full rounded-[14px] py-[15px] text-[15px] font-semibold text-white"
+                style={{ background: '#e53e3e' }}
+              >
+                Delete forever
+              </button>
+              <button
+                onClick={onCancel}
+                className="w-full rounded-[14px] py-[15px] text-[15px] font-semibold"
+                style={{ background: '#f5f5f7', color: '#111' }}
+              >
+                Cancel
+              </button>
+            </div>
+          </motion.div>
+        </>
       )}
     </AnimatePresence>
   )
@@ -904,6 +973,7 @@ export default function InboxPage() {
   const [toast, setToast]         = useState<string | null>(null)
   const [composing, setComposing]       = useState(false)
   const [answerTarget, setAnswerTarget] = useState<AnswerTarget | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null)
   const toastRef                        = useRef<ReturnType<typeof setTimeout> | null>(null)
   const allConvosRef                    = useRef<HTMLDivElement>(null)
   const [scrollY, setScrollY]           = useState(0)
@@ -958,6 +1028,24 @@ export default function InboxPage() {
 
   const handlePin  = useCallback((id: string) => { setPinned(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); showToast(n.has(id) ? 'Pinned to top' : 'Unpinned'); return n }) }, [])
   const handleFlag = useCallback((id: string) => { setFlagged(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); showToast(n.has(id) ? 'Flagged' : 'Flag removed'); return n }) }, [])
+
+  function handleDeleteRequest(id: string) {
+    const thread = threads.find(t => t.id === id)
+    if (!thread || !user) return
+    const isCreator = thread.creator_id === user.id
+    const other = isCreator ? thread.fan : thread.creator
+    const name = other?.display_name ?? other?.username ?? 'this person'
+    setDeleteConfirm({ id, name })
+  }
+
+  async function handleDeleteConfirm() {
+    if (!deleteConfirm) return
+    const { id } = deleteConfirm
+    setDeleteConfirm(null)
+    setThreads(prev => prev.filter(t => t.id !== id))
+    await supabase.from('threads').delete().eq('id', id)
+    showToast('Conversation deleted')
+  }
 
   function handleItemClick(item: ReturnType<typeof threadToItem>) {
     navigate(`/inbox/${item.id}`)
@@ -1045,7 +1133,7 @@ export default function InboxPage() {
               <SectionLabel label="Pinned" count={pinnedItems.length} />
               {pinnedItems.map(item => (
                 <ChatRow key={item.id} id={item.id} isPinned isFlagged={flagged.has(item.id)}
-                  onPin={handlePin} onFlag={handleFlag} onClick={() => handleItemClick(item)}
+                  onPin={handlePin} onFlag={handleFlag} onDelete={handleDeleteRequest} onClick={() => handleItemClick(item)}
                   avatar={item.avatarUrl
                     ? <img src={item.avatarUrl} alt="" className="w-[54px] h-[54px] rounded-full object-cover" />
                     : <div className="w-[54px] h-[54px] rounded-full bg-gray-200 flex items-center justify-center"><span className="text-gray-500 font-semibold text-lg">{item.name[0]}</span></div>}
@@ -1063,7 +1151,7 @@ export default function InboxPage() {
               <SectionLabel label="Needs your reply" count={actionNeeded.length} />
               {actionNeeded.map(item => (
                 <ChatRow key={item.id} id={item.id} isPinned={false} isFlagged={flagged.has(item.id)}
-                  onPin={handlePin} onFlag={handleFlag} onClick={() => handleItemClick(item)}
+                  onPin={handlePin} onFlag={handleFlag} onDelete={handleDeleteRequest} onClick={() => handleItemClick(item)}
                   avatar={item.avatarUrl
                     ? <img src={item.avatarUrl} alt="" className="w-[54px] h-[54px] rounded-full object-cover" />
                     : <div className="w-[54px] h-[54px] rounded-full bg-gray-200 flex items-center justify-center"><span className="text-gray-500 font-semibold text-lg">{item.name[0]}</span></div>}
@@ -1082,7 +1170,7 @@ export default function InboxPage() {
                 : null}
               {otherThreads.map(item => (
                 <ChatRow key={item.id} id={item.id} isPinned={false} isFlagged={flagged.has(item.id)}
-                  onPin={handlePin} onFlag={handleFlag} onClick={() => handleItemClick(item)}
+                  onPin={handlePin} onFlag={handleFlag} onDelete={handleDeleteRequest} onClick={() => handleItemClick(item)}
                   avatar={item.avatarUrl
                     ? <img src={item.avatarUrl} alt="" className="w-[54px] h-[54px] rounded-full object-cover" />
                     : <div className="w-[54px] h-[54px] rounded-full bg-gray-200 flex items-center justify-center"><span className="text-gray-500 font-semibold text-lg">{item.name[0]}</span></div>}
@@ -1131,6 +1219,12 @@ export default function InboxPage() {
       </AnimatePresence>
 
       <Toast message={toast} />
+
+      <ConfirmDeleteSheet
+        name={deleteConfirm?.name ?? null}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteConfirm(null)}
+      />
 
       <NewMessageCompose
         open={composing}
