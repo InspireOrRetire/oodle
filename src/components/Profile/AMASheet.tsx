@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { createThreadWithMedia } from '../../services/threadService'
@@ -40,6 +40,7 @@ export default function AMASheet({
   const navigate = useNavigate()
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const canSend = text.trim().length > 0
 
