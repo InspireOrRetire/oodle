@@ -46,7 +46,7 @@ export default function Layout() {
           transition={{ type: 'spring', damping: 28, stiffness: 320 }}
           className="fixed bottom-0 left-0 right-0 z-30"
           style={{
-            background: 'rgba(250,250,250,0.78)',
+            background: 'rgba(245,245,245,0.55)',
             backdropFilter: 'blur(24px) saturate(1.8)',
             WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
             borderTop: '0.5px solid rgba(255,255,255,0.55)',
