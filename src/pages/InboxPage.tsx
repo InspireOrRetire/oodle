@@ -9,7 +9,6 @@ import { MOCK_THREADS } from '../lib/mockFeed'
 import { formatDistanceToNow } from '../lib/time'
 import { supabase } from '../lib/supabase'
 
-type Tab = 'pending' | 'answered'
 type PostMode   = 'questions' | 'answer'
 type ListRow    = { type: 'title' | 'line'; text: string }
 type AnswerTarget = { id: string; question: string; askerName: string; askerAvatar: string | null }
@@ -19,13 +18,14 @@ const REVEAL_W = 144
 function ChatRow({
   id, isPinned, isFlagged, onPin, onFlag, onClick,
   avatar, name, preview, time, unread, showUnread, status, price,
-  mediaPreview, source,
+  mediaPreview, source, badge,
 }: {
   id: string; isPinned: boolean; isFlagged: boolean
   onPin: (id: string) => void; onFlag: (id: string) => void; onClick: () => void
   avatar: React.ReactNode; name: string; preview: string; time: string
   unread?: boolean; showUnread?: boolean; status?: string; price?: number
   mediaPreview?: string | null; source?: 'post' | 'dm'
+  badge?: 'action' | 'waiting' | 'answered'
 }) {
   const x = useMotionValue(0)
   function snap(to: number) { animate(x, to, { type: 'spring', stiffness: 420, damping: 34 }) }
@@ -99,9 +99,18 @@ function ChatRow({
             )}
           </div>
         )}
-        <div className="flex items-center gap-1.5 flex-shrink-0">
+        <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
           {isFlagged && <Flag style={{ width: 13, height: 13, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />}
           {showUnread && unread && <div className="w-[9px] h-[9px] rounded-full bg-gray-900" />}
+          {badge === 'action' && (
+            <span className="font-mono text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: '#fff3e0', color: '#e65100' }}>reply</span>
+          )}
+          {badge === 'waiting' && (
+            <span className="font-mono text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: '#f5f5f7', color: '#aaa' }}>waiting</span>
+          )}
+          {badge === 'answered' && (
+            <span className="font-mono text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: '#e8f5e9', color: '#2e7d32' }}>answered</span>
+          )}
         </div>
       </motion.div>
     </div>
@@ -877,7 +886,8 @@ function threadToItem(t: ThreadWithParticipants, userId: string) {
     time: formatDistanceToNow(t.updated_at),
     unread, status: t.status as 'clarification' | 'answered',
     price: t.price, created_at: t.created_at,
-    mediaPreview, source,
+    updated_at: t.updated_at,
+    mediaPreview, source, isCreator,
   }
 }
 
@@ -886,7 +896,6 @@ export default function InboxPage() {
   const { user, profile, loading: authLoading, isExploreMode } = useAuth()
   const [threads, setThreads] = useState<ThreadWithParticipants[]>([])
   const [loading, setLoading] = useState(true)
-  const [tab, setTab]         = useState<Tab>('pending')
   const [search, setSearch]   = useState('')
   const [pinned, setPinned]       = useState<Set<string>>(new Set())
   const [flagged, setFlagged]     = useState<Set<string>>(new Set())
@@ -936,15 +945,17 @@ export default function InboxPage() {
     .map(t => threadToItem(t, user!.id))
     .filter(i => !q || i.name.toLowerCase().includes(q) || i.preview.toLowerCase().includes(q))
 
-  const pendingItems  = allItems.filter(i => i.status === 'clarification').sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-  const answeredItems = allItems.filter(i => i.status === 'answered').sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-  const activeList    = tab === 'pending' ? pendingItems : answeredItems
-  const pinnedItems   = activeList.filter(i => pinned.has(i.id))
-  const regularItems  = activeList.filter(i => !pinned.has(i.id))
+  // Threads where YOU need to act: you're the creator and haven't answered yet
+  const actionNeeded = allItems
+    .filter(i => i.isCreator && i.status === 'clarification' && !pinned.has(i.id))
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
 
-  // For pending tab: split by source
-  const postQuestions = pendingItems.filter(i => !pinned.has(i.id) && i.source === 'post')
-  const dmQuestions   = pendingItems.filter(i => !pinned.has(i.id) && i.source === 'dm')
+  // Everything else: questions you asked + answered threads
+  const otherThreads = allItems
+    .filter(i => !(i.isCreator && i.status === 'clarification') && !pinned.has(i.id))
+    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+
+  const pinnedItems = allItems.filter(i => pinned.has(i.id))
 
   return (
     <div className="min-h-screen bg-white pb-24">
@@ -986,27 +997,8 @@ export default function InboxPage() {
         </div>
       </div>
 
-      <div className="flex px-4 mt-3" style={{ borderBottom: '0.5px solid #f0f0f0' }}>
-        {(['pending', 'answered'] as Tab[]).map(t => (
-          <button key={t} onClick={() => setTab(t)} className={`mr-6 pb-3 relative ${t === 'answered' ? 'mr-0' : ''}`}>
-            <span className="flex items-center gap-[6px]">
-              <span className="text-[15px] font-semibold" style={{ color: tab === t ? '#111' : '#bbb' }}>
-                {t === 'pending' ? 'Needs a reply' : 'Answered'}
-              </span>
-              {t === 'pending' && pendingItems.length > 0 && (
-                <span className="font-mono text-[9px] rounded-full flex items-center justify-center"
-                  style={{ minWidth: 16, height: 16, paddingInline: 5, background: tab === 'pending' ? '#111' : '#e5e5ea', color: tab === 'pending' ? 'white' : '#999' }}>
-                  {pendingItems.length}
-                </span>
-              )}
-            </span>
-            {tab === t && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#111] rounded-full" />}
-          </button>
-        ))}
-      </div>
-
       {loading ? (
-        <div className="flex flex-col gap-0">
+        <div className="flex flex-col gap-0 mt-3">
           {[0,1,2,3].map(i => (
             <div key={i} className="flex items-center gap-3.5 px-4 py-3.5" style={{ borderBottom: '0.5px solid #f5f5f7' }}>
               <div className="w-[54px] h-[54px] rounded-full bg-gray-100 animate-pulse flex-shrink-0" />
@@ -1017,18 +1009,14 @@ export default function InboxPage() {
             </div>
           ))}
         </div>
-      ) : activeList.length === 0 ? (
+      ) : allItems.length === 0 ? (
         <div className="flex flex-col items-center justify-center pt-24 px-8 text-center">
-          <p className="text-[15px] font-semibold text-gray-900 mb-1">
-            {tab === 'pending' ? 'All caught up' : 'No answered threads yet'}
-          </p>
-          <p className="text-[14px] text-gray-400 leading-snug">
-            {tab === 'pending' ? 'Questions waiting for your reply will appear here' : 'Once you answer a question it moves here'}
-          </p>
+          <p className="text-[15px] font-semibold text-gray-900 mb-1">No messages yet</p>
+          <p className="text-[14px] text-gray-400 leading-snug">Ask someone a question or share a post to get started</p>
         </div>
       ) : (
-        <>
-          {/* Pinned — always shown first */}
+        <div className="mt-3">
+          {/* Pinned */}
           {pinnedItems.length > 0 && (
             <>
               <SectionLabel label="Pinned" count={pinnedItems.length} />
@@ -1040,56 +1028,17 @@ export default function InboxPage() {
                     : <div className="w-[54px] h-[54px] rounded-full bg-gray-200 flex items-center justify-center"><span className="text-gray-500 font-semibold text-lg">{item.name[0]}</span></div>}
                   name={item.name} preview={item.preview} time={item.time}
                   unread={item.unread} showUnread status={item.status} price={item.price}
-                  mediaPreview={item.mediaPreview} source={item.source} />
+                  mediaPreview={item.mediaPreview} source={item.source}
+                  badge={item.isCreator && item.status === 'clarification' ? 'action' : item.status === 'answered' ? 'answered' : 'waiting'} />
               ))}
             </>
           )}
 
-          {/* Pending tab: grouped by source */}
-          {tab === 'pending' ? (
+          {/* Action needed — questions people sent you, waiting on your reply */}
+          {actionNeeded.length > 0 && (
             <>
-              {postQuestions.length > 0 && (
-                <>
-                  <SectionLabel label="Post questions" count={postQuestions.length} />
-                  {postQuestions.map(item => (
-                    <ChatRow key={item.id} id={item.id} isPinned={false} isFlagged={flagged.has(item.id)}
-                      onPin={handlePin} onFlag={handleFlag} onClick={() => handleItemClick(item)}
-                      avatar={item.avatarUrl
-                        ? <img src={item.avatarUrl} alt="" className="w-[54px] h-[54px] rounded-full object-cover" />
-                        : <div className="w-[54px] h-[54px] rounded-full bg-gray-200 flex items-center justify-center"><span className="text-gray-500 font-semibold text-lg">{item.name[0]}</span></div>}
-                      name={item.name} preview={item.preview} time={item.time}
-                      unread={item.unread} showUnread status={item.status} price={item.price}
-                      mediaPreview={item.mediaPreview} source={item.source} />
-                  ))}
-                </>
-              )}
-              {dmQuestions.length > 0 && (
-                <>
-                  <SectionLabel label="DM questions" count={dmQuestions.length} />
-                  {dmQuestions.map(item => (
-                    <ChatRow key={item.id} id={item.id} isPinned={false} isFlagged={flagged.has(item.id)}
-                      onPin={handlePin} onFlag={handleFlag} onClick={() => handleItemClick(item)}
-                      avatar={item.avatarUrl
-                        ? <img src={item.avatarUrl} alt="" className="w-[54px] h-[54px] rounded-full object-cover" />
-                        : <div className="w-[54px] h-[54px] rounded-full bg-gray-200 flex items-center justify-center"><span className="text-gray-500 font-semibold text-lg">{item.name[0]}</span></div>}
-                      name={item.name} preview={item.preview} time={item.time}
-                      unread={item.unread} showUnread status={item.status} price={item.price}
-                      mediaPreview={item.mediaPreview} source={item.source} />
-                  ))}
-                </>
-              )}
-              {postQuestions.length === 0 && dmQuestions.length === 0 && pinnedItems.length === 0 && (
-                <div className="flex flex-col items-center justify-center pt-24 px-8 text-center">
-                  <p className="text-[15px] font-semibold text-gray-900 mb-1">All caught up</p>
-                  <p className="text-[14px] text-gray-400 leading-snug">Questions waiting for your reply will appear here</p>
-                </div>
-              )}
-            </>
-          ) : (
-            /* Answered tab — simple flat list */
-            <>
-              {regularItems.length > 0 && pinnedItems.length > 0 && <SectionLabel label="All answered" />}
-              {regularItems.map(item => (
+              <SectionLabel label="Needs your reply" count={actionNeeded.length} />
+              {actionNeeded.map(item => (
                 <ChatRow key={item.id} id={item.id} isPinned={false} isFlagged={flagged.has(item.id)}
                   onPin={handlePin} onFlag={handleFlag} onClick={() => handleItemClick(item)}
                   avatar={item.avatarUrl
@@ -1097,11 +1046,31 @@ export default function InboxPage() {
                     : <div className="w-[54px] h-[54px] rounded-full bg-gray-200 flex items-center justify-center"><span className="text-gray-500 font-semibold text-lg">{item.name[0]}</span></div>}
                   name={item.name} preview={item.preview} time={item.time}
                   unread={item.unread} showUnread status={item.status} price={item.price}
-                  mediaPreview={item.mediaPreview} source={item.source} />
+                  mediaPreview={item.mediaPreview} source={item.source} badge="action" />
               ))}
             </>
           )}
-        </>
+
+          {/* Everything else — questions you asked + answered threads */}
+          {otherThreads.length > 0 && (
+            <>
+              {actionNeeded.length > 0 || pinnedItems.length > 0
+                ? <SectionLabel label="All conversations" />
+                : null}
+              {otherThreads.map(item => (
+                <ChatRow key={item.id} id={item.id} isPinned={false} isFlagged={flagged.has(item.id)}
+                  onPin={handlePin} onFlag={handleFlag} onClick={() => handleItemClick(item)}
+                  avatar={item.avatarUrl
+                    ? <img src={item.avatarUrl} alt="" className="w-[54px] h-[54px] rounded-full object-cover" />
+                    : <div className="w-[54px] h-[54px] rounded-full bg-gray-200 flex items-center justify-center"><span className="text-gray-500 font-semibold text-lg">{item.name[0]}</span></div>}
+                  name={item.name} preview={item.preview} time={item.time}
+                  unread={item.unread} showUnread status={item.status} price={item.price}
+                  mediaPreview={item.mediaPreview} source={item.source}
+                  badge={item.isCreator && item.status === 'answered' ? 'answered' : item.status === 'answered' ? 'answered' : 'waiting'} />
+              ))}
+            </>
+          )}
+        </div>
       )}
       <Toast message={toast} />
 
