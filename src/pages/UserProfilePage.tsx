@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, MoreHorizontal, MapPin } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, MapPin, Search, X } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import type { UserRow, PostRow } from '../lib/database.types'
 import { useAuth } from '../contexts/AuthContext'
@@ -33,6 +34,277 @@ function VerifiedBadge() {
       <circle cx="7" cy="7" r="7" fill="#3897F0" />
       <path d="M4 7l2.5 2.5L10 4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
+  )
+}
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+type FollowUser = {
+  id: string
+  username: string | null
+  display_name: string | null
+  avatar_url: string | null
+}
+
+// ─── Followers / Following Sheet ──────────────────────────────────────────────
+
+function FollowersSheet({
+  open,
+  onClose,
+  profileId,
+  profileUsername,
+  initialTab,
+  currentUserId,
+}: {
+  open: boolean
+  onClose: () => void
+  profileId: string
+  profileUsername: string
+  initialTab: 'followers' | 'following'
+  currentUserId: string | null
+}) {
+  const navigate = useNavigate()
+  const [tab, setTab]           = useState<'followers' | 'following'>(initialTab)
+  const [query, setQuery]       = useState('')
+  const [followers, setFollowers] = useState<FollowUser[]>([])
+  const [following, setFollowing] = useState<FollowUser[]>([])
+  const [loading, setLoading]   = useState(false)
+  const [myFollowing, setMyFollowing] = useState<Set<string>>(new Set())
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    setTab(initialTab)
+    setQuery('')
+    setLoading(true)
+
+    Promise.all([
+      supabase
+        .from('user_following')
+        .select('users!user_following_follower_id_fkey(id, username, display_name, avatar_url)')
+        .eq('creator_id', profileId)
+        .limit(200),
+      supabase
+        .from('user_following')
+        .select('users!user_following_creator_id_fkey(id, username, display_name, avatar_url)')
+        .eq('follower_id', profileId)
+        .limit(200),
+      currentUserId
+        ? supabase.from('user_following').select('creator_id').eq('follower_id', currentUserId).limit(500)
+        : Promise.resolve({ data: [] }),
+    ]).then(([frs, fing, mine]) => {
+      setFollowers(((frs.data ?? []) as any[]).map((r: any) => r.users).filter(Boolean) as FollowUser[])
+      setFollowing(((fing.data ?? []) as any[]).map((r: any) => r.users).filter(Boolean) as FollowUser[])
+      setMyFollowing(new Set(((mines: any) => (mines.data ?? []).map((r: any) => r.creator_id))(mine)))
+      setLoading(false)
+    }).catch(() => setLoading(false))
+  }, [open, profileId, initialTab, currentUserId])
+
+  const list = tab === 'followers' ? followers : following
+  const q = query.trim().toLowerCase()
+  const filtered = q
+    ? list.filter(u =>
+        (u.display_name ?? '').toLowerCase().includes(q) ||
+        (u.username ?? '').toLowerCase().includes(q)
+      )
+    : list
+
+  async function toggleFollow(u: FollowUser) {
+    if (!currentUserId) return
+    const isFollowing = myFollowing.has(u.id)
+    setMyFollowing(prev => {
+      const n = new Set(prev)
+      isFollowing ? n.delete(u.id) : n.add(u.id)
+      return n
+    })
+    if (isFollowing) {
+      await supabase.from('user_following').delete()
+        .eq('follower_id', currentUserId).eq('creator_id', u.id)
+    } else {
+      await supabase.from('user_following').insert({ follower_id: currentUserId, creator_id: u.id })
+    }
+  }
+
+  const UserInitials = (u: FollowUser) =>
+    initials(u.display_name ?? u.username)
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          key="followers-sheet"
+          initial={{ y: '100%' }}
+          animate={{ y: 0 }}
+          exit={{ y: '100%' }}
+          transition={{ type: 'spring', damping: 32, stiffness: 380 }}
+          className="fixed inset-0 z-[60] bg-white flex flex-col"
+          style={{ paddingTop: 'env(safe-area-inset-top)' }}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 pt-4 pb-2 flex-shrink-0">
+            <button onClick={onClose} className="text-[15px] text-[#111] font-normal px-1">Cancel</button>
+            <p className="text-[15px] font-bold text-[#111]">@{profileUsername}</p>
+            <div className="w-16" />
+          </div>
+
+          {/* Tabs */}
+          <div className="flex flex-shrink-0" style={{ borderBottom: '0.5px solid #f0f0f0' }}>
+            {(['followers', 'following'] as const).map(t => (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                className="flex-1 py-3 text-[14px] font-semibold relative"
+                style={{ color: tab === t ? '#111' : '#aaa' }}
+              >
+                {t.charAt(0).toUpperCase() + t.slice(1)}
+                {tab === t && (
+                  <motion.div
+                    layoutId="tab-underline"
+                    className="absolute bottom-0 left-0 right-0 h-[2px] rounded-full"
+                    style={{ background: '#111' }}
+                  />
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Search */}
+          <div className="px-4 py-2.5 flex-shrink-0" style={{ borderBottom: '0.5px solid #f5f5f7' }}>
+            <div className="flex items-center gap-2.5 bg-[#F2F2F7] rounded-[12px] px-3.5 py-2.5">
+              <Search className="w-4 h-4 text-gray-400 flex-shrink-0" strokeWidth={2} />
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="Search"
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                className="flex-1 bg-transparent text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none"
+              />
+              {query && (
+                <button onClick={() => setQuery('')}>
+                  <X className="w-4 h-4 text-gray-400" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* List */}
+          <div className="flex-1 overflow-y-auto">
+            {loading ? (
+              <div className="flex flex-col gap-0 mt-2">
+                {[0,1,2,3,4].map(i => (
+                  <div key={i} className="flex items-center gap-3.5 px-4 py-3" style={{ borderBottom: '0.5px solid #f5f5f7' }}>
+                    <div className="w-[46px] h-[46px] rounded-full bg-gray-100 animate-pulse flex-shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 bg-gray-100 rounded animate-pulse w-1/3" />
+                      <div className="h-3 bg-gray-100 rounded animate-pulse w-1/4" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="flex flex-col items-center justify-center pt-20 px-8 text-center">
+                <p className="text-[15px] font-semibold text-[#111] mb-1">
+                  {q ? 'No results' : tab === 'followers' ? 'No followers yet' : 'Not following anyone yet'}
+                </p>
+                <p className="text-[13px] text-[#aaa]">
+                  {q ? 'Try a different name or username' : ''}
+                </p>
+              </div>
+            ) : filtered.map(u => (
+              <div
+                key={u.id}
+                className="flex items-center gap-3.5 px-4 py-3"
+                style={{ borderBottom: '0.5px solid #f5f5f7' }}
+              >
+                <button
+                  onClick={() => { onClose(); navigate(`/u/${u.username ?? u.id}`) }}
+                  className="flex items-center gap-3.5 flex-1 min-w-0 text-left"
+                >
+                  {u.avatar_url ? (
+                    <img src={u.avatar_url} alt="" className="w-[46px] h-[46px] rounded-full object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-[46px] h-[46px] rounded-full bg-[#111] flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-semibold text-[15px]">{UserInitials(u)}</span>
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[15px] font-semibold text-[#111] truncate">{u.display_name ?? u.username}</p>
+                    {u.username && <p className="font-mono text-[12px] text-[#aaa] truncate">@{u.username}</p>}
+                  </div>
+                </button>
+                {currentUserId && u.id !== currentUserId && (
+                  <button
+                    onClick={() => toggleFollow(u)}
+                    className="flex-shrink-0 rounded-[8px] px-4 py-1.5 text-[13px] font-semibold transition-all"
+                    style={myFollowing.has(u.id)
+                      ? { background: '#f2f2f2', color: '#111', border: '0.5px solid #d1d5db' }
+                      : { background: '#111', color: '#fff' }}
+                  >
+                    {myFollowing.has(u.id) ? 'Following' : 'Follow'}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
+
+// ─── Recent Answers Info Sheet ────────────────────────────────────────────────
+
+function RecentAnswersSheet({
+  open,
+  onClose,
+  username,
+  count,
+}: {
+  open: boolean
+  onClose: () => void
+  username: string
+  count: number
+}) {
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div
+            key="ra-bd"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="fixed inset-0 z-[70]"
+            style={{ background: 'rgba(0,0,0,0.4)' }}
+            onClick={onClose}
+          />
+          <motion.div
+            key="ra-sheet"
+            initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 34, stiffness: 380 }}
+            className="fixed bottom-0 left-0 right-0 z-[71] bg-white text-center"
+            style={{ borderRadius: '22px 22px 0 0', paddingBottom: 'max(32px, env(safe-area-inset-bottom))' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-9 h-1 rounded-full bg-gray-200" />
+            </div>
+            <div className="px-6 pt-5 pb-2">
+              {/* Eye-like icon */}
+              <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
+                style={{ background: '#f5f5f7' }}>
+                <span style={{ fontSize: 26 }}>💬</span>
+              </div>
+              <p className="text-[22px] font-bold text-[#111] mb-1">{fmt(count)} recent answers</p>
+              <p className="text-[14px] leading-relaxed" style={{ color: '#888' }}>
+                Recent answers are the number of questions answered by{' '}
+                <span className="font-semibold text-[#111]">@{username}</span> on Oodle in the last 30 days.
+              </p>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   )
 }
 
@@ -114,8 +386,15 @@ export default function UserProfilePage() {
   const [notFound, setNotFound] = useState(false)
   const [following, setFollowing] = useState(false)
 
-  const [amaOpen, setAmaOpen] = useState(false)
-  const [avatarOpen, setAvatarOpen] = useState(false)
+  const [amaOpen, setAmaOpen]               = useState(false)
+  const [avatarOpen, setAvatarOpen]         = useState(false)
+  const [followersOpen, setFollowersOpen]   = useState(false)
+  const [followersTab, setFollowersTab]     = useState<'followers' | 'following'>('followers')
+  const [recentAnswersOpen, setRecentAnswersOpen] = useState(false)
+
+  // Follower avatars + recent answers count
+  const [followerAvatars, setFollowerAvatars] = useState<string[]>([])
+  const [recentAnswerCount, setRecentAnswerCount] = useState(0)
 
   useEffect(() => {
     if (!username) return
@@ -125,7 +404,6 @@ export default function UserProfilePage() {
       setLoading(true)
       setNotFound(false)
 
-      // Fetch user by username
       const { data: user, error } = await supabase
         .from('users')
         .select('*')
@@ -160,6 +438,29 @@ export default function UserProfilePage() {
             .then(({ data }) => { if (!cancelled) setFollowing(!!data) })
         }
 
+        // Fetch a few follower avatars for the social proof row
+        supabase
+          .from('user_following')
+          .select('users!user_following_follower_id_fkey(avatar_url)')
+          .eq('creator_id', user.id)
+          .limit(4)
+          .then(({ data }) => {
+            if (cancelled || !data) return
+            const avatars = (data as any[])
+              .map((r: any) => r.users?.avatar_url)
+              .filter(Boolean) as string[]
+            setFollowerAvatars(avatars.slice(0, 3))
+          })
+
+        // Count recent answers (last 30 days)
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+        supabase
+          .from('threads')
+          .select('id', { count: 'exact', head: true })
+          .eq('creator_id', user.id)
+          .eq('status', 'answered')
+          .gte('updated_at', thirtyDaysAgo)
+          .then(({ count }) => { if (!cancelled) setRecentAnswerCount(count ?? 0) })
       }
     }
 
@@ -218,7 +519,6 @@ export default function UserProfilePage() {
 
   const displayName = profile.display_name || profile.username || 'User'
   const userInitials = initials(displayName)
-  // Treat creators as verified (no dedicated verified field in schema)
   const isVerified = profile.role === 'creator'
 
   return (
@@ -266,16 +566,24 @@ export default function UserProfilePage() {
 
           {/* Stats */}
           <div className="flex flex-1 justify-around text-center">
-            {[
-              { num: posts.length,           label: 'posts'     },
-              { num: profile.followers_count, label: 'followers' },
-              { num: profile.following_count, label: 'following' },
-            ].map(s => (
-              <div key={s.label}>
-                <p className="text-[16px] font-bold text-[#111]">{fmt(s.num)}</p>
-                <p className="text-[12px] text-[#555] mt-[1px]">{s.label}</p>
-              </div>
-            ))}
+            <div>
+              <p className="text-[16px] font-bold text-[#111]">{fmt(posts.length)}</p>
+              <p className="text-[12px] text-[#555] mt-[1px]">posts</p>
+            </div>
+            <button
+              onClick={() => { setFollowersTab('followers'); setFollowersOpen(true) }}
+              className="flex flex-col items-center active:opacity-60 transition-opacity"
+            >
+              <p className="text-[16px] font-bold text-[#111]">{fmt(profile.followers_count ?? 0)}</p>
+              <p className="text-[12px] text-[#555] mt-[1px]">followers</p>
+            </button>
+            <button
+              onClick={() => { setFollowersTab('following'); setFollowersOpen(true) }}
+              className="flex flex-col items-center active:opacity-60 transition-opacity"
+            >
+              <p className="text-[16px] font-bold text-[#111]">{fmt(profile.following_count ?? 0)}</p>
+              <p className="text-[12px] text-[#555] mt-[1px]">following</p>
+            </button>
           </div>
         </div>
 
@@ -285,14 +593,49 @@ export default function UserProfilePage() {
           <p className="text-[13px] text-[#555] leading-[1.45] mb-1">{profile.bio}</p>
         )}
 
-        {/* Follow + Message */}
+        {/* Social proof row: follower avatars · recent answers */}
+        {(followerAvatars.length > 0 || recentAnswerCount > 0) && (
+          <button
+            onClick={() => recentAnswerCount > 0 && setRecentAnswersOpen(true)}
+            className="flex items-center gap-2 mt-2 mb-1 active:opacity-60 transition-opacity"
+            style={{ cursor: recentAnswerCount > 0 ? 'pointer' : 'default' }}
+          >
+            {/* Stacked avatars */}
+            {followerAvatars.length > 0 && (
+              <div className="flex -space-x-2">
+                {followerAvatars.map((url, i) => (
+                  <img
+                    key={i}
+                    src={url}
+                    alt=""
+                    className="w-[20px] h-[20px] rounded-full object-cover ring-2 ring-white"
+                    style={{ zIndex: followerAvatars.length - i }}
+                  />
+                ))}
+              </div>
+            )}
+            <span className="text-[12px]" style={{ color: '#888' }}>
+              {followerAvatars.length > 0 && recentAnswerCount > 0
+                ? `${fmt(profile.followers_count ?? 0)} followers · `
+                : followerAvatars.length > 0
+                  ? `${fmt(profile.followers_count ?? 0)} followers`
+                  : ''}
+              {recentAnswerCount > 0 && (
+                <span>
+                  <span className="font-semibold text-[#111]">{fmt(recentAnswerCount)} recent answers</span>
+                </span>
+              )}
+            </span>
+          </button>
+        )}
+
+        {/* Follow + Inbox */}
         <div className="flex items-center gap-2 mt-3.5">
           <button
             onClick={async () => {
               if (!currentUser || !profile) return
               const next = !following
               setFollowing(next)
-              // Optimistic update — clamp at 0 in both directions
               let newCount = 0
               setProfile(prev => {
                 if (!prev) return prev
@@ -361,6 +704,24 @@ export default function UserProfilePage() {
           creatorId={profile.id}
         />
       )}
+
+      {/* ── Followers / Following Sheet ── */}
+      <FollowersSheet
+        open={followersOpen}
+        onClose={() => setFollowersOpen(false)}
+        profileId={profile.id}
+        profileUsername={profile.username ?? displayName}
+        initialTab={followersTab}
+        currentUserId={currentUser?.id ?? null}
+      />
+
+      {/* ── Recent Answers Sheet ── */}
+      <RecentAnswersSheet
+        open={recentAnswersOpen}
+        onClose={() => setRecentAnswersOpen(false)}
+        username={profile.username ?? displayName}
+        count={recentAnswerCount}
+      />
 
       {/* ── Avatar lightbox ── */}
       {avatarOpen && profile.avatar_url && (
