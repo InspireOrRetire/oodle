@@ -74,12 +74,12 @@ export async function createThread(params: {
 
   // Only increment question_count when this thread is tied to a specific post
   if (postId) {
-    await supabase.rpc('increment_question_count', { post_id: postId }).catch(() => {
-      supabase.from('posts').select('question_count').eq('id', postId).single()
-        .then(({ data }) => {
-          if (data) supabase.from('posts').update({ question_count: (data.question_count ?? 0) + 1 }).eq('id', postId)
-        })
-    })
+    try {
+      await supabase.rpc('increment_question_count', { post_id: postId })
+    } catch {
+      const { data } = await supabase.from('posts').select('question_count').eq('id', postId).single()
+      if (data) await supabase.from('posts').update({ question_count: (data.question_count ?? 0) + 1 }).eq('id', postId)
+    }
   }
 
   return thread.id
@@ -399,12 +399,12 @@ export async function createThreadWithMedia(params: {
   }
 
   if (postId) {
-    await supabase.rpc('increment_question_count', { post_id: postId }).catch(() => {
-      supabase.from('posts').select('question_count').eq('id', postId).single()
-        .then(({ data }) => {
-          if (data) supabase.from('posts').update({ question_count: (data.question_count ?? 0) + 1 }).eq('id', postId)
-        })
-    })
+    try {
+      await supabase.rpc('increment_question_count', { post_id: postId })
+    } catch {
+      const { data } = await supabase.from('posts').select('question_count').eq('id', postId).single()
+      if (data) await supabase.from('posts').update({ question_count: (data.question_count ?? 0) + 1 }).eq('id', postId)
+    }
   }
 
   return threadId
