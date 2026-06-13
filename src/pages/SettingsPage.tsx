@@ -604,13 +604,13 @@ function PayoutSheet({ open, onClose, onSaved }: { open: boolean; onClose: () =>
                                           {status === 'pending' ? 'Continue setup' : 'Set up payouts'}
                                         </span>
                         }
-                      </button
+                      </button>
                         )}
                 
                   {status === 'connected' && (
                       <div className="flex items-center gap-2 rounded-[12px] px-4 py-3" style={{ background: '#f0fdf4', border: '0.5px solid #bbf7d0' }}>
                                   <Check style={{ width: 14, height: 14, color: '#16a34a', flexShrink: 0 }} strokeWidth={2.5} />
-                                  <span className="font-mono text-[12px]" style={{ color: '#16a34a' }}>Payouts enabled</span>span>
+                                  <span className="font-mono text-[12px]" style={{ color: '#16a34a' }}>Payouts enabled</span>
                       </div>
                         )}
                 
