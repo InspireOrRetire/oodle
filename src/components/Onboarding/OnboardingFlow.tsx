@@ -170,7 +170,7 @@ function SlideFirstPost({
       <div className="flex flex-col items-center justify-center px-8 py-24 text-center">
         <div className="text-6xl mb-5">🎉</div>
         <h2 className="text-[28px] font-bold text-[#111] mb-2">First post live!</h2>
-        <p className="text-[16px] text-[#888]">Fans can now discover and ask you questions.</p>
+        <p className="text-[16px] text-[#888]">Peers can now discover and ask you questions.</p>
       </div>
     )
   }
@@ -187,7 +187,7 @@ function SlideFirstPost({
           Make your first post
         </h2>
         <p className="text-[16px] text-[#888] leading-relaxed">
-          Answer the question your followers always ask — fans will pay to unlock it.
+          Answer the question your followers always ask — peers will pay to unlock it.
         </p>
       </div>
 
@@ -205,7 +205,7 @@ function SlideFirstPost({
         ref={textareaRef}
         value={answer}
         onChange={e => setAnswer(e.target.value)}
-        placeholder="Share what you know — tease the value, fans pay to get the full answer…"
+        placeholder="Share what you know — tease the value, peers pay to get the full answer…"
         rows={4}
         className="w-full text-[15px] text-[#111] placeholder-[#c0c0c0] outline-none resize-none leading-relaxed mb-4 rounded-[16px] px-4 py-3"
         style={{ border: '1.5px solid #e0e0e0', background: '#fafafa' }}

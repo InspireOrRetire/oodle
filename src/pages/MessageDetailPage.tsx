@@ -1247,7 +1247,7 @@ export default function MessageDetailPage() {
                       </div>
                       <div className="text-left">
                         <p className="text-[13px] font-semibold" style={{ color: '#555' }}>Add cover thumbnail</p>
-                        <p className="text-[11px]" style={{ color: '#aaa' }}>Shown to fans before they unlock your answer</p>
+                        <p className="text-[11px]" style={{ color: '#aaa' }}>Shown to peers before they unlock your answer</p>
                       </div>
                     </button>
                   )}

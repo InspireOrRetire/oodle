@@ -460,12 +460,38 @@ function FeedCard({
 
               {/* ── Metadata row ── */}
               {item.comments > 0 && (
-                <div className="flex items-center gap-2 pt-1 pb-3">
+                <div className="flex items-center gap-2 pt-1 pb-1">
                   <span className="text-[11px]" style={{ color: '#bbb' }}>
                     {item.comments} question{item.comments !== 1 ? 's' : ''}
                   </span>
                 </div>
               )}
+
+              {/* ── Action row ── */}
+              <div className="flex items-center justify-between py-2.5" style={{ borderTop: item.comments > 0 ? 'none' : undefined }}>
+                <button
+                  onClick={e => { e.stopPropagation(); onAsk?.() }}
+                  className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 active:opacity-70 transition-opacity"
+                  style={{ background: '#f5f5f7' }}
+                >
+                  <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
+                  <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
+                </button>
+                <button
+                  onClick={e => { e.stopPropagation(); onSaveToggle() }}
+                  className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 active:opacity-70 transition-opacity"
+                  style={{ background: saved ? '#111' : '#f5f5f7' }}
+                >
+                  <Bookmark
+                    style={{ width: 13, height: 13, color: saved ? 'white' : '#555' }}
+                    strokeWidth={1.75}
+                    fill={saved ? 'white' : 'none'}
+                  />
+                  <span className="text-[12px] font-medium" style={{ color: saved ? 'white' : '#555' }}>
+                    {saved ? 'Saved' : 'Save'}
+                  </span>
+                </button>
+              </div>
             </>
           )
         })()
