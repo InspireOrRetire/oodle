@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useLayout } from '../contexts/LayoutContext'
 import { Edit, Search, Pin, Flag, X, ChevronRight, Camera, Video, FileText, Bell, MapPin, AlignLeft } from 'lucide-react'
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
@@ -894,6 +895,7 @@ function threadToItem(t: ThreadWithParticipants, userId: string) {
 export default function InboxPage() {
   const navigate = useNavigate()
   const { user, profile, loading: authLoading, isExploreMode } = useAuth()
+  const { scrollContainerRef } = useLayout()
   const [threads, setThreads] = useState<ThreadWithParticipants[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch]   = useState('')
@@ -903,11 +905,32 @@ export default function InboxPage() {
   const [composing, setComposing]       = useState(false)
   const [answerTarget, setAnswerTarget] = useState<AnswerTarget | null>(null)
   const toastRef                        = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const allConvosRef                    = useRef<HTMLDivElement>(null)
+  const [scrollY, setScrollY]           = useState(0)
 
   function showToast(msg: string) {
     if (toastRef.current) clearTimeout(toastRef.current)
     setToast(msg)
     toastRef.current = setTimeout(() => setToast(null), 2400)
+  }
+
+  // Track scroll position on the layout container
+  useEffect(() => {
+    const el = scrollContainerRef.current
+    if (!el) return
+    const onScroll = () => setScrollY(el.scrollTop)
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => el.removeEventListener('scroll', onScroll)
+  }, [scrollContainerRef])
+
+  function scrollToTop() {
+    scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function scrollToAllConvos() {
+    const el = allConvosRef.current
+    if (!el || !scrollContainerRef.current) return
+    scrollContainerRef.current.scrollTo({ top: el.offsetTop - 12, behavior: 'smooth' })
   }
 
   useEffect(() => {
@@ -1055,7 +1078,7 @@ export default function InboxPage() {
           {otherThreads.length > 0 && (
             <>
               {actionNeeded.length > 0 || pinnedItems.length > 0
-                ? <SectionLabel label="All conversations" />
+                ? <div ref={allConvosRef}><SectionLabel label="All conversations" /></div>
                 : null}
               {otherThreads.map(item => (
                 <ChatRow key={item.id} id={item.id} isPinned={false} isFlagged={flagged.has(item.id)}
@@ -1072,6 +1095,41 @@ export default function InboxPage() {
           )}
         </div>
       )}
+      {/* Floating nav pill */}
+      <AnimatePresence>
+        {scrollY > 80 && (
+          <motion.div
+            key="inbox-pill"
+            initial={{ opacity: 0, y: 10, scale: 0.92 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.92 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 380 }}
+            className="fixed z-20 flex"
+            style={{ bottom: 88, right: 16 }}
+          >
+            {/* Skip to all convos — only shown when above that section */}
+            {actionNeeded.length > 0 &&
+              allConvosRef.current &&
+              scrollY < allConvosRef.current.offsetTop - 60 && (
+              <button
+                onClick={scrollToAllConvos}
+                className="flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[12px] font-semibold shadow-lg mr-2"
+                style={{ background: '#111', color: '#fff' }}
+              >
+                All convos ↓
+              </button>
+            )}
+            <button
+              onClick={scrollToTop}
+              className="flex items-center justify-center rounded-full w-9 h-9 shadow-lg"
+              style={{ background: 'rgba(255,255,255,0.92)', border: '0.5px solid #e5e5e5', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+            >
+              <span style={{ fontSize: 14, lineHeight: 1, color: '#111' }}>↑</span>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Toast message={toast} />
 
       <NewMessageCompose

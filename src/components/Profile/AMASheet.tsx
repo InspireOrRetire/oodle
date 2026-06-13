@@ -40,6 +40,7 @@ export default function AMASheet({
   const navigate = useNavigate()
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
+  const [sendError, setSendError] = useState<string | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const canSend = text.trim().length > 0
@@ -47,6 +48,7 @@ export default function AMASheet({
   async function handleSend() {
     if (!canSend || sending) return
     setSending(true)
+    setSendError(null)
     try {
       const threadId = await createThreadWithMedia({
         creatorId,
@@ -57,8 +59,10 @@ export default function AMASheet({
       setText('')
       onClose()
       navigate(`/inbox/${threadId}`)
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('AMASheet send error', err)
+      const msg = err instanceof Error ? err.message : (err as { message?: string })?.message ?? 'Something went wrong'
+      setSendError(msg)
       setSending(false)
     }
   }
@@ -66,6 +70,7 @@ export default function AMASheet({
   function handleClose() {
     if (sending) return
     setText('')
+    setSendError(null)
     onClose()
   }
 
@@ -151,6 +156,13 @@ export default function AMASheet({
                   {text.length}/{MAX_CHARS}
                 </span>
               </div>
+
+              {/* Error */}
+              {sendError && (
+                <p className="mt-3 text-[12px] text-center font-mono" style={{ color: '#e53e3e' }}>
+                  {sendError}
+                </p>
+              )}
 
               {/* Send button */}
               <button
