@@ -12,16 +12,6 @@ import PostMediaCarousel from '../components/Post/PostMediaCarousel'
 import TokenKeypad from '../components/Post/TokenKeypad'
 import { formatDistanceToNow } from '../lib/time'
 import { useLayout } from '../contexts/LayoutContext'
-import QuestionQueue from '../components/Profile/QuestionQueue'
-import ProfileAnswerSheet from '../components/Profile/ProfileAnswerSheet'
-import {
-  fetchQuestions,
-  fetchMyUpvotes,
-  upvoteQuestion,
-  unvoteQuestion,
-  dismissQuestion,
-} from '../services/profileQuestionService'
-import { ProfileQuestion } from '../services/profileQuestionService'
 
 // Placeholder profiles kept only for legacy mock data objects defined below.
 const CREATOR_PROFILE = { display_name: '', username: '', avatar_url: '' }
@@ -3309,59 +3299,6 @@ export default function ProfilePage() {
   const [createPostOpen, setCreatePostOpen] = useState(false)
   const [editProfileOpen, setEditProfileOpen] = useState(false)
 
-  // Profile questions state
-  const [profileQuestions, setProfileQuestions] = useState<ProfileQuestion[]>([])
-  const [pqUpvotedIds,     setPqUpvotedIds]     = useState<Set<string>>(new Set())
-  const [_pqLoading,       setPqLoading]        = useState(false)
-  const [answerTarget,     setAnswerTarget]      = useState<ProfileQuestion | null>(null)
-
-  // Load profile questions for own profile
-  useEffect(() => {
-    if (!realProfile?.id || !isOwnProfile) return
-    let cancelled = false
-    setPqLoading(true)
-
-    fetchQuestions(realProfile.id)
-      .then(async qs => {
-        if (cancelled) return
-        setProfileQuestions(qs)
-        if (user && user.id !== 'explore-guest' && qs.length) {
-          const voted = await fetchMyUpvotes(qs.map(q => q.id), user.id)
-          if (!cancelled) setPqUpvotedIds(voted)
-        }
-      })
-      .catch(console.error)
-      .finally(() => { if (!cancelled) setPqLoading(false) })
-
-    return () => { cancelled = true }
-  }, [realProfile?.id, isOwnProfile, user])
-
-  // Profile question upvote handlers (creator can also vote on their own queue)
-  function handlePqUpvote(id: string) {
-    if (!user) return
-    setPqUpvotedIds(prev => new Set([...prev, id]))
-    setProfileQuestions(prev => prev.map(q => q.id === id ? { ...q, upvote_count: q.upvote_count + 1 } : q))
-    upvoteQuestion(id, user.id).catch(() => {
-      setPqUpvotedIds(prev => { const s = new Set(prev); s.delete(id); return s })
-      setProfileQuestions(prev => prev.map(q => q.id === id ? { ...q, upvote_count: Math.max(0, q.upvote_count - 1) } : q))
-    })
-  }
-
-  function handlePqUnvote(id: string) {
-    if (!user) return
-    setPqUpvotedIds(prev => { const s = new Set(prev); s.delete(id); return s })
-    setProfileQuestions(prev => prev.map(q => q.id === id ? { ...q, upvote_count: Math.max(0, q.upvote_count - 1) } : q))
-    unvoteQuestion(id, user.id).catch(() => {
-      setPqUpvotedIds(prev => new Set([...prev, id]))
-      setProfileQuestions(prev => prev.map(q => q.id === id ? { ...q, upvote_count: q.upvote_count + 1 } : q))
-    })
-  }
-
-  function handlePqDismiss(id: string) {
-    setProfileQuestions(prev => prev.filter(q => q.id !== id))
-    dismissQuestion(id).catch(console.error)
-  }
-
   function handleAskSubmit(threadId: string, text: string, price: number) {
     const q: LocalQuestion = {
       id:      `lq_${Date.now()}`,
@@ -3503,19 +3440,6 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* ── Question queue (creator view) ── */}
-          {isOwnProfile && (
-            <QuestionQueue
-              questions={profileQuestions}
-              currentUserId={user?.id ?? ''}
-              upvotedIds={pqUpvotedIds}
-              isCreator={true}
-              onUpvote={handlePqUpvote}
-              onUnvote={handlePqUnvote}
-              onAnswer={q => setAnswerTarget(q)}
-              onDismiss={handlePqDismiss}
-            />
-          )}
         </div>
       </div>
 
@@ -3808,16 +3732,6 @@ export default function ProfilePage() {
         document.body
       )}
 
-      {/* ── Profile answer sheet ── */}
-      <ProfileAnswerSheet
-        question={answerTarget}
-        onClose={() => setAnswerTarget(null)}
-        userId={user?.id ?? ''}
-        onAnswered={id => {
-          setProfileQuestions(qs => qs.filter(q => q.id !== id))
-          setAnswerTarget(null)
-        }}
-      />
 
     </div>
   )
