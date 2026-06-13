@@ -279,8 +279,7 @@ export async function searchCreators(query: string, limit = 20) {
   const { data, error } = await supabase
     .from('users')
     .select('id, username, display_name, avatar_url, followers_count, role')
-    .eq('role', 'creator')
-    .ilike('username', `%${query}%`)
+    .or(`username.ilike.%${query}%,display_name.ilike.%${query}%`)
     .order('followers_count', { ascending: false })
     .limit(limit)
 

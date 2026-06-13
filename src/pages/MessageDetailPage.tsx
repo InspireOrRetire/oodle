@@ -791,12 +791,15 @@ export default function MessageDetailPage() {
         >
           <ArrowLeft className="w-5 h-5 text-gray-900" strokeWidth={2} />
         </button>
-        <div className="flex-1 flex flex-col items-center">
+        <button
+          className="flex-1 flex flex-col items-center active:opacity-70"
+          onClick={() => navigate(`/u/${otherProfile.username ?? otherName}`)}
+        >
           <Avatar url={otherProfile.avatar_url} name={otherName} size={9} />
           <p className="font-semibold text-[13px] text-gray-900 leading-tight mt-0.5">
             @{otherName}
           </p>
-        </div>
+        </button>
         <div className="w-9 flex-shrink-0" />
       </div>
 
@@ -860,7 +863,7 @@ export default function MessageDetailPage() {
           <p className="text-[17px] text-gray-900 leading-snug">{question}</p>
         </motion.div>
 
-        {!isAnswered && (
+        {!isAnswered && isCreator && (
           <p className="text-[13px] text-gray-400 leading-relaxed">
             @{askerName} will be able to view your answer after purchase.
           </p>

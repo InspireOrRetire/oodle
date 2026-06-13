@@ -277,11 +277,18 @@ export default function UserProfilePage() {
               if (!currentUser || !profile) return
               const next = !following
               setFollowing(next)
+              // Optimistically update displayed count
+              setProfile(prev => prev ? {
+                ...prev,
+                followers_count: (prev.followers_count ?? 0) + (next ? 1 : -1)
+              } : prev)
               if (next) {
                 await supabase.from('user_following').insert({ follower_id: currentUser.id, creator_id: profile.id })
+                await supabase.from('users').update({ followers_count: (profile.followers_count ?? 0) + 1 }).eq('id', profile.id)
               } else {
                 await supabase.from('user_following').delete()
                   .eq('follower_id', currentUser.id).eq('creator_id', profile.id)
+                await supabase.from('users').update({ followers_count: Math.max(0, (profile.followers_count ?? 0) - 1) }).eq('id', profile.id)
               }
             }}
             className="flex-1 rounded-[8px] py-[7px] text-[14px] font-semibold transition-all"

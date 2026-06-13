@@ -73,6 +73,15 @@ export async function createThread(params: {
 
   if (mErr) throw mErr
 
+  // Increment question_count on the post so the card shows total questions asked
+  await supabase.rpc('increment_question_count', { post_id: postId }).catch(() => {
+    // Fallback: direct update if RPC not available
+    supabase.from('posts').select('question_count').eq('id', postId).single()
+      .then(({ data }) => {
+        if (data) supabase.from('posts').update({ question_count: (data.question_count ?? 0) + 1 }).eq('id', postId)
+      })
+  })
+
   return thread.id
 }
 
