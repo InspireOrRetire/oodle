@@ -319,7 +319,7 @@ export default function UserProfilePage() {
             style={{ background: '#f2f2f2', border: '0.5px solid #d1d5db' }}
             onClick={() => navigate('/inbox')}
           >
-            Message
+            Inbox
           </button>
         </div>
 
