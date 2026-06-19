@@ -392,8 +392,9 @@ export default function UserProfilePage() {
   const [followersTab, setFollowersTab]     = useState<'followers' | 'following'>('followers')
   const [recentAnswersOpen, setRecentAnswersOpen] = useState(false)
 
-  // Follower avatars + recent answers count
+  // Follower avatars, total answer count, recent answers count
   const [followerAvatars, setFollowerAvatars] = useState<{ url: string | null; ini: string }[]>([])
+  const [totalAnswerCount, setTotalAnswerCount] = useState(0)
   const [recentAnswerCount, setRecentAnswerCount] = useState(0)
 
   useEffect(() => {
@@ -457,8 +458,14 @@ export default function UserProfilePage() {
             setFollowerAvatars(items.slice(0, 3))
           })
 
-        // Count recent answers (last 30 days)
+        // Total answer count + recent answers (last 30 days)
         const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+        supabase
+          .from('threads')
+          .select('id', { count: 'exact', head: true })
+          .eq('creator_id', user.id)
+          .eq('status', 'answered')
+          .then(({ count }) => { if (!cancelled) setTotalAnswerCount(count ?? 0) })
         supabase
           .from('threads')
           .select('id', { count: 'exact', head: true })
@@ -571,10 +578,6 @@ export default function UserProfilePage() {
 
           {/* Stats */}
           <div className="flex flex-1 justify-around text-center">
-            <div>
-              <p className="text-[16px] font-bold text-[#111]">{fmt(posts.length)}</p>
-              <p className="text-[12px] text-[#555] mt-[1px]">posts</p>
-            </div>
             <button
               onClick={() => { setFollowersTab('followers'); setFollowersOpen(true) }}
               className="flex flex-col items-center active:opacity-60 transition-opacity"
@@ -588,6 +591,14 @@ export default function UserProfilePage() {
             >
               <p className="text-[16px] font-bold text-[#111]">{fmt(profile.following_count ?? 0)}</p>
               <p className="text-[12px] text-[#555] mt-[1px]">following</p>
+            </button>
+            <button
+              onClick={() => totalAnswerCount > 0 && setRecentAnswersOpen(true)}
+              className="flex flex-col items-center active:opacity-60 transition-opacity"
+              style={{ cursor: totalAnswerCount > 0 ? 'pointer' : 'default' }}
+            >
+              <p className="text-[16px] font-bold text-[#111]">{fmt(totalAnswerCount)}</p>
+              <p className="text-[12px] text-[#555] mt-[1px]">answers</p>
             </button>
           </div>
         </div>
