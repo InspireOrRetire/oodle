@@ -733,7 +733,7 @@ export default function MessageDetailPage() {
                   placeholder={thread.price.toString()}
                   className="flex-1 bg-transparent text-[22px] font-bold text-gray-900 focus:outline-none"
                 />
-                <span className="text-[13px] text-gray-400">tokens</span>
+                <span className="text-[13px] text-gray-400">USD</span>
               </div>
             </div>
 
@@ -976,8 +976,7 @@ export default function MessageDetailPage() {
                   <p className="font-semibold text-[13px] text-[#111]">@{creatorName}</p>
                   <div className="ml-auto flex items-center gap-1 rounded-full px-2.5 py-1" style={{ background: '#111' }}>
                     <Zap style={{ width: 10, height: 10, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
-                    <span className="text-[12px] font-bold text-white">{thread.price}</span>
-                    <span className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>tokens</span>
+                    <span className="text-[12px] font-bold text-white">${thread.price.toFixed(2)}</span>
                   </div>
                 </div>
                 <p className="text-[14px] text-gray-700 leading-[1.5] line-clamp-2">{teaser}</p>
@@ -1105,7 +1104,7 @@ export default function MessageDetailPage() {
           >
             <Zap className="w-[15px] h-[15px]" style={{ color: '#111' }} strokeWidth={2.5} fill="#111" />
             <span className="text-[15px] font-bold text-[#111]">
-              I want this · {thread.price} tokens
+              I want this · ${thread.price.toFixed(2)}
             </span>
           </button>
         </div>
@@ -1555,11 +1554,8 @@ export default function MessageDetailPage() {
                         )}
                         {/* Value display */}
                         <span className="text-[12px] font-bold text-white px-0.5 min-w-[28px] text-center">
-                          {answerPrice === 0 ? 'Free' : answerPrice}
+                          {answerPrice === 0 ? 'Free' : `$${answerPrice}`}
                         </span>
-                        {answerPrice > 0 && (
-                          <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.5)' }}>tokens</span>
-                        )}
                         {/* Up arrow — always visible */}
                         <button
                           onMouseDown={e => { e.preventDefault(); setAnswerPrice(p => p + 1); setFreeConfirmed(false); setShowFreeToast(false) }}
@@ -1592,7 +1588,7 @@ export default function MessageDetailPage() {
                             Your answer is free
                           </p>
                           <p className="text-[12px] leading-snug" style={{ color: '#999' }}>
-                            Anyone can read your full answer at no cost. You won't earn tokens from this.
+                            Anyone can read your full answer at no cost. You won't earn anything from this.
                           </p>
                         </div>
                       </div>

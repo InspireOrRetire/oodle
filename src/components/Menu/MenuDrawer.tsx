@@ -87,17 +87,17 @@ export default function MenuDrawer({ isOpen, onClose }: Props) {
               </div>
             </button>
 
-            {/* Tokens row */}
+            {/* Balance row */}
             <button
               onClick={() => setShowTopUp(true)}
               className="w-full flex items-center justify-between py-3 px-3 rounded-lg hover:bg-amber-50 transition-colors"
             >
               <div className="flex items-center gap-3">
                 <TokenIcon size={20} />
-                <span className="text-[15px] text-gray-900">Tokens</span>
+                <span className="text-[15px] text-gray-900">Balance</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-amber-500 font-medium text-[15px]">{tokenBalance.toFixed(0)}</span>
+                <span className="text-amber-500 font-medium text-[15px]">${tokenBalance.toFixed(2)}</span>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </div>
             </button>

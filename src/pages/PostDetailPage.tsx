@@ -365,7 +365,7 @@ export default function PostDetailPage() {
                       >
                         <Zap style={{ width: 9, height: 9, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
                         <span className="font-mono text-[11px] font-semibold" style={{ color: '#b45309' }}>
-                          {reply.price} tokens
+                          ${reply.price.toFixed(2)}
                         </span>
                       </div>
 

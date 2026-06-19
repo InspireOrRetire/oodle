@@ -98,9 +98,9 @@ export default function TopUpSheet({ onClose }: Props) {
                 transition={{ type: 'spring', stiffness: 420, damping: 42 }}
               >
                 <div className="px-5 pt-4 pb-2">
-                  <p style={{ fontSize: 18, fontWeight: 700, color: '#111', marginBottom: 3 }}>Add tokens</p>
+                  <p style={{ fontSize: 18, fontWeight: 700, color: '#111', marginBottom: 3 }}>Add balance</p>
                   <p className="font-mono" style={{ fontSize: 11, color: '#aaa' }}>
-                    Use tokens to unlock answers from any creator
+                    Use your balance to unlock answers from any creator
                   </p>
                 </div>
 
@@ -123,7 +123,7 @@ export default function TopUpSheet({ onClose }: Props) {
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <span style={{ fontSize: 15, fontWeight: 700, color: sel ? 'white' : '#111' }}>
-                              {p.tokens} tokens
+                              ${p.tokens} balance
                             </span>
                             {p.tag && (
                               <span className="font-mono rounded-[4px] px-[5px] py-[2px]"
@@ -138,7 +138,7 @@ export default function TopUpSheet({ onClose }: Props) {
                           </div>
                           <p className="font-mono mt-[1px]"
                             style={{ fontSize: 10, color: sel ? 'rgba(255,255,255,0.5)' : '#bbb' }}>
-                            ${(p.price / p.tokens).toFixed(3)} per token
+                            ${p.tokens} added to your balance
                           </p>
                         </div>
                         <span style={{ fontSize: 16, fontWeight: 700, flexShrink: 0, color: sel ? 'white' : '#111' }}>
@@ -183,13 +183,13 @@ export default function TopUpSheet({ onClose }: Props) {
                   initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                   style={{ fontSize: 20, fontWeight: 700, color: '#111', marginBottom: 4 }}>
-                  Tokens added!
+                  Balance added!
                 </motion.p>
                 <motion.p
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                   transition={{ delay: 0.3 }}
                   className="font-mono" style={{ fontSize: 12, color: '#aaa', marginBottom: 20 }}>
-                  {selected.tokens} tokens added to your balance
+                  ${selected.tokens} added to your balance
                 </motion.p>
 
                 {/* Placement 3 nudge — post-purchase tip */}
