@@ -3568,24 +3568,29 @@ export default function ProfilePage() {
 
           {/* Stats row */}
           <div className="flex" style={{ borderTop: '0.5px solid #f2f2f2', paddingTop: 10 }}>
-            <div className="flex-1 text-center">
+            <button
+              onClick={() => { setFollowersSheetTab('followers'); setFollowersSheetOpen(true) }}
+              className="flex-1 text-center active:opacity-60 transition-opacity"
+            >
               <p className="text-[14px] font-semibold text-[#111]">{activeProfile.followers_count >= 1000 ? `${(activeProfile.followers_count / 1000).toFixed(1)}K` : activeProfile.followers_count}</p>
-              <button
-                onClick={() => { setFollowersSheetTab('followers'); setFollowersSheetOpen(true) }}
-                className="font-mono text-[9px] text-[#bbb] uppercase tracking-[0.05em] mt-[1px] active:opacity-60"
-              >followers</button>
-            </div>
-            <div className="flex-1 text-center" style={{ borderLeft: '0.5px solid #f2f2f2' }}>
+              <p className="font-mono text-[9px] text-[#bbb] uppercase tracking-[0.05em] mt-[1px]">followers</p>
+            </button>
+            <button
+              onClick={() => { setFollowersSheetTab('following'); setFollowersSheetOpen(true) }}
+              className="flex-1 text-center active:opacity-60 transition-opacity"
+              style={{ borderLeft: '0.5px solid #f2f2f2' }}
+            >
               <p className="text-[14px] font-semibold text-[#111]">{activeProfile.following_count}</p>
-              <button
-                onClick={() => { setFollowersSheetTab('following'); setFollowersSheetOpen(true) }}
-                className="font-mono text-[9px] text-[#bbb] uppercase tracking-[0.05em] mt-[1px] active:opacity-60"
-              >following</button>
-            </div>
-            <div className="flex-1 text-center" style={{ borderLeft: '0.5px solid #f2f2f2' }}>
+              <p className="font-mono text-[9px] text-[#bbb] uppercase tracking-[0.05em] mt-[1px]">following</p>
+            </button>
+            <button
+              onClick={() => { setFollowersSheetTab('followers'); setFollowersSheetOpen(true) }}
+              className="flex-1 text-center active:opacity-60 transition-opacity"
+              style={{ borderLeft: '0.5px solid #f2f2f2' }}
+            >
               <p className="text-[14px] font-semibold text-[#111]">{answeredCount}</p>
               <p className="font-mono text-[9px] text-[#bbb] uppercase tracking-[0.05em] mt-[1px]">answers</p>
-            </div>
+            </button>
           </div>
 
           {/* Social proof row */}
