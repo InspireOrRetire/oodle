@@ -911,9 +911,9 @@ function DeleteAccountSheet({ open, onClose, onConfirm }: { open: boolean; onClo
 // ─── Token buy sheet ──────────────────────────────────────────────────────────
 
 const TOKEN_PACKS = [
-  { id: 'p1', tokens: 5,  price: 4.99 },
-  { id: 'p2', tokens: 10, price: 9.99,  tag: 'Most popular' },
-  { id: 'p3', tokens: 25, price: 24.99, tag: 'Best value'   },
+  { id: 'p1', tokens: 4,    price: 4.99 },
+  { id: 'p2', tokens: 8.5,  price: 9.99,  tag: 'Most popular' },
+  { id: 'p3', tokens: 21,   price: 24.99, tag: 'Best value'   },
 ]
 
 function BuyTokensSheet({ open, onClose, onPurchased }: { open: boolean; onClose: () => void; onPurchased: () => void }) {
