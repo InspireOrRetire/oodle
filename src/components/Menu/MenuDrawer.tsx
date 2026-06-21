@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { X, Wallet, Users, Zap, FileText, MessageSquare, History, ShoppingBag, ShoppingCart, Leaf, Scan, HelpCircle, Settings, ChevronRight, LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { supabase } from '../../lib/supabase'
 import TokenIcon from '../TokenIcon'
 import TopUpSheet from './TopUpSheet'
 
@@ -11,10 +12,15 @@ interface Props { isOpen: boolean; onClose: () => void }
 export default function MenuDrawer({ isOpen, onClose }: Props) {
   const navigate = useNavigate()
   const { profile, signOut } = useAuth()
-  const balance = 0      // wallet balance — needs payment integration
-  const tokenBalance = 0 // token balance  — needs payment integration
+  const [tokenBalance, setTokenBalance] = useState(0)
   const isCreator = profile?.role === 'creator'
   const [showTopUp, setShowTopUp] = useState(false)
+
+  useEffect(() => {
+    if (!profile?.id) return
+    supabase.from('users').select('token_balance').eq('id', profile.id).single()
+      .then(({ data }) => { if (data) setTokenBalance(data.token_balance ?? 0) })
+  }, [profile?.id, showTopUp])
 
   function go(path: string) { navigate(path); onClose() }
   function handleSignOut() { onClose(); signOut(); navigate('/auth', { replace: true }) }
@@ -82,7 +88,7 @@ export default function MenuDrawer({ isOpen, onClose }: Props) {
               </div>
               <div className="flex items-center gap-1.5">
                 <TokenIcon size={16} />
-                <span className="text-green-500 font-medium text-[15px]">{balance.toFixed(2)}</span>
+                <span className="text-green-500 font-medium text-[15px]">${tokenBalance.toFixed(2)}</span>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </div>
             </button>
