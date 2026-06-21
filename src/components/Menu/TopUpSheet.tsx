@@ -11,27 +11,22 @@ const PACKS = [
   { id: 'p3', tokens: 21,   price: 24.99, tag: 'Best value'   },
 ]
 
-// ─── Apple Pay button ─────────────────────────────────────────────────────────
+// ─── Checkout button ──────────────────────────────────────────────────────────
 
-function ApplePayBtn({ price, loading, onClick }: { price: number; loading: boolean; onClick: () => void }) {
+function CheckoutBtn({ price, loading, onClick }: { price: number; loading: boolean; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
       disabled={loading}
       className="w-full rounded-[14px] flex items-center justify-center gap-2 active:opacity-80 disabled:opacity-70 transition-opacity"
-      style={{ background: '#000', height: 52 }}
+      style={{ background: '#111', height: 52 }}
     >
       {loading ? (
         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
       ) : (
-        <>
-          <svg width="15" height="18" viewBox="0 0 17 20" fill="white" aria-hidden="true">
-            <path d="M14.376 10.087c-.01-1.98 1.638-2.944 1.713-2.988-.937-1.37-2.386-1.555-2.899-1.574-1.227-.126-2.408.73-3.03.73-.632 0-1.589-.716-2.618-.696-1.333.02-2.572.786-3.257 1.978-1.398 2.424-.356 5.997 1 7.953.665.959 1.451 2.032 2.48 1.993.997-.039 1.372-.643 2.578-.643 1.195 0 1.54.643 2.587.622 1.074-.02 1.748-1.965 2.4-2.935-.753-.343-1.952-1.326-1.954-3.44zm-1.858-6.316c.552-.67.927-1.598.824-2.528-.797.033-1.76.533-2.33 1.202-.512.591-.96 1.534-.839 2.44.89.07 1.793-.454 2.345-1.114z" />
-          </svg>
-          <span style={{ fontSize: 16, fontWeight: 600, color: 'white', letterSpacing: '-0.1px' }}>
-            Pay ${price.toFixed(2)}
-          </span>
-        </>
+        <span style={{ fontSize: 16, fontWeight: 600, color: 'white', letterSpacing: '-0.1px' }}>
+          Add ${price.toFixed(2)} balance
+        </span>
       )}
     </button>
   )
@@ -199,7 +194,7 @@ export default function TopUpSheet({ onClose }: Props) {
                 </div>
 
                 <div className="px-5 pb-10">
-                  <ApplePayBtn price={selected.price} loading={loading} onClick={handleBuy} />
+                  <CheckoutBtn price={selected.price} loading={loading} onClick={handleBuy} />
                 </div>
               </motion.div>
             )}
