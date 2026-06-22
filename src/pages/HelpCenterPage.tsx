@@ -77,7 +77,7 @@ const SECTIONS: Section[] = [
         title: 'Creating a Listing (how answered questions appear)',
         body: [
           'On OODLE, your "listings" are your answered questions. When you post a photo or video and a peer asks a question, you can reply via DM with a paid answer.',
-          'Switch to Answer Mode inside the DM thread, compose your answer (text, photo, or video), and set your price in tokens before sending.',
+          'Switch to Answer Mode inside the DM thread, compose your answer (text, photo, or video), and set your price before sending.',
           'Once you send the answer it is locked. The peer who asked is notified and can purchase it. Other peers who see the question under your post can also purchase the same answer.',
           'Think of each answered question as evergreen content — the more people who purchase it, the more you earn from a single answer.',
           'Set a default answer price in Settings → Creator → Default answer price so every new question starts with your preferred rate pre-filled.',
@@ -122,8 +122,8 @@ const SECTIONS: Section[] = [
         body: [
           'When a peer purchases an answered question, it appears in your Earnings page as a completed order with the token amount, the buyer, and a timestamp.',
           'You do not need to do anything after a sale — the answer is automatically delivered to the buyer and unlocked on the post timeline.',
-          'If the same question is purchased by multiple peers, each purchase is recorded as a separate order. You earn the full token price for every buyer.',
-          'Purchases enter a short holding period (typically 24 hours) before the tokens are added to your available balance, allowing time for the buyer to raise any concerns.',
+          'If the same question is purchased by multiple peers, each purchase is recorded as a separate order. You earn the full price for every buyer.',
+          'Purchases enter a short holding period (typically 24 hours) before the amount is added to your available balance, allowing time for the buyer to raise any concerns.',
         ],
       },
       {

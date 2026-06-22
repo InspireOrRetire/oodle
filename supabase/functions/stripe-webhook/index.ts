@@ -181,8 +181,53 @@ async function handleCapabilityStatusUpdated(
 }
 
 // ── V1 handler: checkout session completed ────────────────────────────────────
-// Marks the purchase complete so the buyer can access the unlocked answer.
+// Routes to topup or unlock handler based on session metadata.type.
 async function handleCheckoutCompleted(
+  session: Stripe.Checkout.Session,
+  db: ReturnType<typeof getServiceClient>
+) {
+  if (session.metadata?.type === 'topup') {
+    return handleTopupCompleted(session, db)
+  }
+  return handleUnlockCompleted(session, db)
+}
+
+// ── Topup: increment the buyer's token_balance ────────────────────────────────
+async function handleTopupCompleted(
+  session: Stripe.Checkout.Session,
+  db: ReturnType<typeof getServiceClient>
+) {
+  const { buyer_id, balance_amount } = session.metadata ?? {}
+
+  if (!buyer_id || !balance_amount) {
+    console.error('[stripe-webhook] topup missing metadata', session.id)
+    return
+  }
+
+  const amount = Number(balance_amount)
+
+  try {
+    const { data: userData } = await db
+      .from('users')
+      .select('token_balance')
+      .eq('id', buyer_id)
+      .single()
+
+    const newBalance = (userData?.token_balance ?? 0) + amount
+
+    await db
+      .from('users')
+      .update({ token_balance: newBalance })
+      .eq('id', buyer_id)
+
+    console.log(`[stripe-webhook] Topped up $${amount} for user ${buyer_id} → new balance $${newBalance}`)
+  } catch (err) {
+    console.error('[stripe-webhook] handleTopupCompleted error:', err)
+  }
+}
+
+// ── Unlock: marks a post_purchase complete so buyer can access the answer ─────
+async function handleUnlockCompleted(
   session: Stripe.Checkout.Session,
   db: ReturnType<typeof getServiceClient>
 ) {
@@ -194,14 +239,12 @@ async function handleCheckoutCompleted(
   }
 
   try {
-    // Update the pending purchase record written by stripe-checkout
     const { count } = await db
       .from('post_purchases')
       .update({ status: 'completed' })
       .eq('stripe_session_id', session.id)
       .select('id', { count: 'exact', head: true })
 
-    // Safety net: if the client-side insert race-lost to the webhook, insert now
     if (count === 0) {
       await db.from('post_purchases').insert({
         post_id,
@@ -214,6 +257,6 @@ async function handleCheckoutCompleted(
 
     console.log(`[stripe-webhook] Unlocked post ${post_id} for buyer ${buyer_id}`)
   } catch (err) {
-    console.error('[stripe-webhook] handleCheckoutCompleted error:', err)
+    console.error('[stripe-webhook] handleUnlockCompleted error:', err)
   }
 }

@@ -911,9 +911,9 @@ function DeleteAccountSheet({ open, onClose, onConfirm }: { open: boolean; onClo
 // ─── Token buy sheet ──────────────────────────────────────────────────────────
 
 const TOKEN_PACKS = [
-  { id: 'p1', tokens: 50,  price: 4.99 },
-  { id: 'p2', tokens: 120, price: 9.99,  tag: 'Most popular' },
-  { id: 'p3', tokens: 300, price: 24.99, tag: 'Best value'   },
+  { id: 'p1', tokens: 4,    price: 4.99 },
+  { id: 'p2', tokens: 8.5,  price: 9.99,  tag: 'Most popular' },
+  { id: 'p3', tokens: 21,   price: 24.99, tag: 'Best value'   },
 ]
 
 function BuyTokensSheet({ open, onClose, onPurchased }: { open: boolean; onClose: () => void; onPurchased: () => void }) {
@@ -948,9 +948,9 @@ function BuyTokensSheet({ open, onClose, onPurchased }: { open: boolean; onClose
                   <div className="w-16 h-16 rounded-full bg-[#111] flex items-center justify-center mb-4">
                     <Zap style={{ width: 28, height: 28, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
                   </div>
-                  <p className="text-[20px] font-bold text-[#111] mb-1">Tokens added!</p>
+                  <p className="text-[20px] font-bold text-[#111] mb-1">Balance added!</p>
                   <p className="font-mono text-[12px] mb-5" style={{ color: '#aaa' }}>
-                    {selected.tokens} tokens added to your balance
+                    ${selected.tokens} added to your balance
                   </p>
                   {/* Placement 3 — post-purchase nudge */}
                   <div className="w-full rounded-[12px] px-4 py-3 text-center" style={{ background: '#f9f9f9', border: '0.5px solid #ebebeb' }}>
@@ -962,9 +962,9 @@ function BuyTokensSheet({ open, onClose, onPurchased }: { open: boolean; onClose
               ) : (
                 <motion.div key="form" initial={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <div className="px-5 pt-4 pb-2">
-                    <p className="text-[18px] font-bold text-[#111] mb-1">Buy tokens</p>
+                    <p className="text-[18px] font-bold text-[#111] mb-1">Add balance</p>
                     <p className="font-mono text-[11px]" style={{ color: '#aaa' }}>
-                      Use tokens to unlock answers from any creator
+                      Use your balance to unlock answers from any creator
                     </p>
                   </div>
                   <div className="px-5 py-3 flex flex-col gap-2.5">
@@ -981,7 +981,7 @@ function BuyTokensSheet({ open, onClose, onPurchased }: { open: boolean; onClose
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
                               <span className="text-[15px] font-bold" style={{ color: sel ? 'white' : '#111' }}>
-                                {p.tokens} tokens
+                                ${p.tokens} balance
                               </span>
                               {p.tag && (
                                 <span className="font-mono text-[9px] px-[5px] py-[2px] rounded-[4px]"
@@ -992,7 +992,7 @@ function BuyTokensSheet({ open, onClose, onPurchased }: { open: boolean; onClose
                             </div>
                             <p className="font-mono text-[10px] mt-[1px]"
                               style={{ color: sel ? 'rgba(255,255,255,0.5)' : '#bbb' }}>
-                              ${(p.price / p.tokens).toFixed(3)} per token
+                              ${p.tokens} added to your balance
                             </p>
                           </div>
                           <span className="text-[16px] font-bold flex-shrink-0"
@@ -1115,7 +1115,7 @@ function AnswerDetailSheet({ entry, onClose }: { entry: PurchaseEntry | null; on
               <div className="flex items-center justify-between pt-4" style={{ borderTop: '0.5px solid #f2f2f2' }}>
                 <div className="flex items-center gap-1.5">
                   <Zap style={{ width: 11, height: 11, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
-                  <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>{entry.price} tokens</span>
+                  <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>${entry.price.toFixed(2)}</span>
                 </div>
                 <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>
                   {purchasedAgo(entry.purchased_at)}
@@ -1179,7 +1179,7 @@ function MyAnswersSheet({ open, onClose }: { open: boolean; onClose: () => void 
                 <div className="flex items-center gap-1">
                   <Zap style={{ width: 9, height: 9, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
                   <span className="font-mono text-[10px]" style={{ color: '#bbb' }}>
-                    {t.price} tokens
+                    ${t.price.toFixed(2)}
                   </span>
                 </div>
                 <span className="font-mono text-[10px]" style={{ color: '#bbb' }}>
@@ -1295,11 +1295,10 @@ export default function SettingsPage() {
               <div className="w-8 h-8 rounded-[9px] flex items-center justify-center" style={{ background: '#fff8ed' }}>
                 <Zap style={{ width: 15, height: 15, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
               </div>
-              <p className="text-[14px] font-medium text-[#111]">Token balance</p>
+              <p className="text-[14px] font-medium text-[#111]">Balance</p>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="text-[22px] font-bold text-[#111]">{balance}</span>
-              <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>tokens</span>
+              <span className="text-[22px] font-bold text-[#111]">${balance.toFixed(2)}</span>
             </div>
           </div>
           {/* Placement 1 — below balance */}
@@ -1312,7 +1311,7 @@ export default function SettingsPage() {
             style={{ background: '#111' }}
           >
             <Zap style={{ width: 13, height: 13, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
-            <span style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>Add tokens</span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>Add balance</span>
           </button>
         </div>
 

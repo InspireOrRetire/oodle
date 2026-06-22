@@ -42,17 +42,17 @@ function SlideTokens() {
         <Zap className="w-12 h-12" style={{ color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
       </div>
       <h2 className="text-[30px] font-bold text-[#111] mb-4 leading-tight">
-        Tokens are your currency
+        Your balance is your currency
       </h2>
       <p className="text-[16px] text-[#666] leading-[1.7] mb-8">
-        On oodle, you use <span className="font-semibold text-[#111]">tokens</span> to unlock
+        On oodle, you use your <span className="font-semibold text-[#111]">balance</span> to unlock
         answers from creators. Each creator sets their own price.
       </p>
       <div className="w-full rounded-2xl px-6 py-5 text-left space-y-4"
         style={{ background: '#f9f9f9', border: '0.5px solid #ededed' }}>
         {[
           { icon: '⚡', label: 'Ask a question',    sub: 'Send any question to a creator you follow' },
-          { icon: '🔒', label: 'Answers are gated', sub: 'Pay tokens to unlock the creator\'s response' },
+          { icon: '🔒', label: 'Answers are gated', sub: 'Use your balance to unlock the creator\'s response' },
           { icon: '📲', label: 'Anyone can benefit', sub: 'Others can pay to see the same Q&A — creators earn passively' },
         ].map(row => (
           <div key={row.label} className="flex items-start gap-4">
@@ -89,7 +89,7 @@ function SlideCreatorModel() {
         {[
           { step: '1', bg: '#111',     text: 'white', label: 'You ask',           detail: 'Post your question on a creator\'s content' },
           { step: '2', bg: '#f5a623',  text: 'white', label: 'Creator answers',   detail: 'They write, record, or share exactly what you need' },
-          { step: '3', bg: '#10b981',  text: 'white', label: 'You unlock it',     detail: 'Pay tokens — others can too, earning the creator passively' },
+          { step: '3', bg: '#10b981',  text: 'white', label: 'You unlock it',     detail: 'Use your balance — others can too, earning the creator passively' },
         ].map((row, i) => (
           <div key={row.step} className="flex items-start gap-4 text-left">
             <div className="flex flex-col items-center flex-shrink-0">
@@ -112,7 +112,7 @@ function SlideCreatorModel() {
       <div className="mt-8 rounded-2xl px-5 py-4 w-full text-left"
         style={{ background: '#fffbeb', border: '1px solid #f0e0a0' }}>
         <p className="text-[13px] text-[#b45309] leading-snug">
-          <span className="font-semibold">Creators earn tokens</span> every time someone unlocks
+          <span className="font-semibold">Creators earn</span> every time someone unlocks
           their answer — even answers written months ago keep earning.
         </p>
       </div>
@@ -229,7 +229,7 @@ function SlideFirstPost({
             className="w-8 h-8 rounded-full flex items-center justify-center text-[#111] font-bold active:opacity-60 text-lg"
             style={{ background: '#f0f0f0' }}
           >+</button>
-          <span className="text-[13px] text-[#888] ml-1">tokens</span>
+          <span className="text-[13px] text-[#888] ml-1">USD</span>
         </div>
       </div>
 

@@ -1610,7 +1610,7 @@ function NewPostSheet({
                                   {price || '0'}
                                 </span>
                                 <span className="text-[13px] font-semibold mt-1" style={{ color: '#b88c00' }}>
-                                  {Number(price) > 0 ? 'tokens' : 'free'}
+                                  {Number(price) > 0 ? 'USD' : 'free'}
                                 </span>
                               </button>
                               <button

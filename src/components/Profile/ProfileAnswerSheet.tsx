@@ -227,7 +227,7 @@ export default function ProfileAnswerSheet({
                       className="w-16 rounded-[8px] px-2 py-[5px] text-[13px] text-[#111] outline-none text-center"
                       style={{ background: '#f5f5f7', border: '0.5px solid #e5e5e5' }}
                     />
-                    <span className="text-[12px] text-[#aaa]">tokens</span>
+                    <span className="text-[12px] text-[#aaa]">USD</span>
                   </div>
                 )}
               </div>

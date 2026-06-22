@@ -668,13 +668,6 @@ export default function UserProfilePage() {
           >
             {following ? 'Following' : 'Follow'}
           </button>
-          <button
-            className="flex-1 rounded-[8px] py-[7px] text-[14px] font-semibold text-[#111]"
-            style={{ background: '#f2f2f2', border: '0.5px solid #d1d5db' }}
-            onClick={() => navigate('/inbox')}
-          >
-            Inbox
-          </button>
         </div>
 
         {/* Ask me anything CTA */}

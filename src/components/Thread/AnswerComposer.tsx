@@ -511,7 +511,7 @@ export default function AnswerComposer({ question, price, postImageUrl, postCapt
             hasContent && !undoActive ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-400'
           }`}
         >
-          {isEditing ? `Save edit` : `Submit · ${price.toFixed(2)} tokens`}
+          {isEditing ? `Save edit` : `Submit · $${price.toFixed(2)}`}
         </button>
       </div>
     </div>

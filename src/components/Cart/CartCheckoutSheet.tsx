@@ -125,10 +125,10 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                         <div style={{ borderTop: '0.5px solid #eee', paddingTop: 8, marginTop: 4 }}>
                           <div className="flex items-center justify-between">
                             <span className="text-[13px] font-semibold" style={{ color: '#111' }}>
-                              {hasBalance ? 'Balance after' : 'Tokens needed'}
+                              {hasBalance ? 'Balance after' : 'Balance needed'}
                             </span>
                             <span className="font-mono text-[14px] font-bold" style={{ color: hasBalance ? '#111' : '#ef4444' }}>
-                              {hasBalance ? `⚡${remaining}` : `⚡${total - balance} more`}
+                              {hasBalance ? `$${remaining.toFixed(2)}` : `$${(total - balance).toFixed(2)} more`}
                             </span>
                           </div>
                         </div>
@@ -143,15 +143,15 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                         >
                           <Zap style={{ width: 15, height: 15, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
                           <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
-                            Unlock {count} answer{count !== 1 ? 's' : ''} · ⚡{total}
+                            Unlock {count} answer{count !== 1 ? 's' : ''} · ${total.toFixed(2)}
                           </span>
                         </button>
                       ) : (
                         <div className="flex flex-col gap-2.5">
                           <div className="rounded-[14px] px-5 py-3 text-center" style={{ background: '#f9f9f9', border: '0.5px solid #ebebeb' }}>
-                            <p className="text-[13px] font-semibold text-[#333] mb-0.5">Not enough tokens</p>
+                            <p className="text-[13px] font-semibold text-[#333] mb-0.5">Not enough balance</p>
                             <p className="font-mono text-[11px]" style={{ color: '#bbb' }}>
-                              Add tokens to your wallet to unlock {count === 1 ? 'this answer' : 'these answers'}
+                              Add balance to unlock {count === 1 ? 'this answer' : 'these answers'}
                             </p>
                           </div>
                           <button
@@ -160,7 +160,7 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                             style={{ background: '#111' }}
                           >
                             <Zap style={{ width: 14, height: 14, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
-                            <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>Add tokens</span>
+                            <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>Add balance</span>
                           </button>
                         </div>
                       )}

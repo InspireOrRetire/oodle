@@ -20,9 +20,9 @@ export interface UnlockTarget {
 interface TokenPack { id: string; tokens: number; price: number; tag?: string }
 
 const TOKEN_PACKS: TokenPack[] = [
-  { id: 'p1', tokens: 50,  price: 4.99 },
-  { id: 'p2', tokens: 120, price: 9.99,  tag: 'Most popular' },
-  { id: 'p3', tokens: 300, price: 24.99, tag: 'Best value'   },
+  { id: 'p1', tokens: 4,    price: 4.99 },
+  { id: 'p2', tokens: 8.5,  price: 9.99,  tag: 'Most popular' },
+  { id: 'p3', tokens: 21,   price: 24.99, tag: 'Best value'   },
 ]
 
 type UView = 'main' | 'buy-tokens' | 'card' | 'success'
@@ -215,15 +215,14 @@ async function openUnlockCheckout() {
                           style={{ width: 44, height: 44, background: '#f5a623' }}>
                           <Zap style={{ width: 20, height: 20, color: 'white' }} strokeWidth={2} fill="white" />
                         </div>
-                        <span style={{ fontSize: 44, fontWeight: 700, color: '#111', lineHeight: 1 }}>{price}</span>
-                        <span style={{ fontSize: 18, color: '#999', alignSelf: 'flex-end', paddingBottom: 5 }}>tokens</span>
+                        <span style={{ fontSize: 44, fontWeight: 700, color: '#111', lineHeight: 1 }}>${price.toFixed(2)}</span>
                       </div>
                       <p className="text-center font-mono text-[12px] mb-0.5" style={{ color: '#aaa' }}>
-                        Your balance: {balance} tokens
+                        Your balance: ${balance.toFixed(2)}
                       </p>
                       {!hasBalance && (
                         <p className="text-center font-mono text-[11px]" style={{ color: '#f5a623' }}>
-                          You need {price - balance} more tokens
+                          You need ${(price - balance).toFixed(2)} more
                         </p>
                       )}
 
@@ -236,7 +235,7 @@ async function openUnlockCheckout() {
                         >
                           <Zap style={{ width: 15, height: 15, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
                           <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
-                            {hasBalance ? `Unlock for ${price} tokens` : 'Buy tokens to unlock'}
+                            {hasBalance ? `Unlock for $${price.toFixed(2)}` : 'Add balance to unlock'}
                           </span>
                         </button>
                         <button
@@ -262,11 +261,11 @@ async function openUnlockCheckout() {
                           className="w-full py-2 flex items-center justify-center gap-1.5 active:opacity-60"
                         >
                           <Zap style={{ width: 12, height: 12, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
-                          <span className="font-mono text-[11px]" style={{ color: '#aaa' }}>Buy more tokens</span>
+                          <span className="font-mono text-[11px]" style={{ color: '#aaa' }}>Add balance</span>
                         </button>
                       </div>
                       <p className="text-center font-mono text-[10px] mt-2" style={{ color: '#d0d0d0' }}>
-                        Tokens are non-refundable
+                        Balance is non-refundable
                       </p>
                     </div>
                   </motion.div>
@@ -281,10 +280,10 @@ async function openUnlockCheckout() {
                         <button onClick={() => nav('main')} className="p-1 -ml-1">
                           <ArrowLeft style={{ width: 20, height: 20, color: '#111' }} strokeWidth={2} />
                         </button>
-                        <span className="text-[17px] font-bold text-[#111]">Buy tokens</span>
+                        <span className="text-[17px] font-bold text-[#111]">Add balance</span>
                       </div>
                       <p className="font-mono text-[11px] mb-4" style={{ color: '#aaa' }}>
-                        Current balance: {balance} tokens
+                        Current balance: ${balance.toFixed(2)}
                       </p>
                       <div className="flex flex-col gap-3 mb-5">
                         {TOKEN_PACKS.map(p => {
@@ -300,7 +299,7 @@ async function openUnlockCheckout() {
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-0.5">
                                   <span className="text-[16px] font-bold" style={{ color: sel ? 'white' : '#111' }}>
-                                    {p.tokens} tokens
+                                    ${p.tokens} balance
                                   </span>
                                   {p.tag && (
                                     <span className="font-mono text-[9px] px-[6px] py-[2px] rounded-[4px]"

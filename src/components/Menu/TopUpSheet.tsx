@@ -1,43 +1,38 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Zap, Check } from 'lucide-react'
+import { supabase } from '../../lib/supabase'
 
 // ─── Token packs ───────────────────────────────────────────────────────────────
 
 const PACKS = [
-  { id: 'p1', tokens: 50,  price: 4.99  },
-  { id: 'p2', tokens: 120, price: 9.99,  tag: 'Most popular' },
-  { id: 'p3', tokens: 300, price: 24.99, tag: 'Best value'   },
+  { id: 'p1', tokens: 4,    price: 4.99  },
+  { id: 'p2', tokens: 8.5,  price: 9.99,  tag: 'Most popular' },
+  { id: 'p3', tokens: 21,   price: 24.99, tag: 'Best value'   },
 ]
 
-// ─── Apple Pay button ─────────────────────────────────────────────────────────
+// ─── Checkout button ──────────────────────────────────────────────────────────
 
-function ApplePayBtn({ price, loading, onClick }: { price: number; loading: boolean; onClick: () => void }) {
+function CheckoutBtn({ price, loading, onClick }: { price: number; loading: boolean; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
       disabled={loading}
       className="w-full rounded-[14px] flex items-center justify-center gap-2 active:opacity-80 disabled:opacity-70 transition-opacity"
-      style={{ background: '#000', height: 52 }}
+      style={{ background: '#111', height: 52 }}
     >
       {loading ? (
         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
       ) : (
-        <>
-          {/* Apple logo */}
-          <svg width="15" height="18" viewBox="0 0 17 20" fill="white" aria-hidden="true">
-            <path d="M14.376 10.087c-.01-1.98 1.638-2.944 1.713-2.988-.937-1.37-2.386-1.555-2.899-1.574-1.227-.126-2.408.73-3.03.73-.632 0-1.589-.716-2.618-.696-1.333.02-2.572.786-3.257 1.978-1.398 2.424-.356 5.997 1 7.953.665.959 1.451 2.032 2.48 1.993.997-.039 1.372-.643 2.578-.643 1.195 0 1.54.643 2.587.622 1.074-.02 1.748-1.965 2.4-2.935-.753-.343-1.952-1.326-1.954-3.44zm-1.858-6.316c.552-.67.927-1.598.824-2.528-.797.033-1.76.533-2.33 1.202-.512.591-.96 1.534-.839 2.44.89.07 1.793-.454 2.345-1.114z" />
-          </svg>
-          <span style={{ fontSize: 16, fontWeight: 600, color: 'white', letterSpacing: '-0.1px' }}>
-            Pay ${price.toFixed(2)}
-          </span>
-        </>
+        <span style={{ fontSize: 16, fontWeight: 600, color: 'white', letterSpacing: '-0.1px' }}>
+          Add ${price.toFixed(2)} balance
+        </span>
       )}
     </button>
   )
 }
 
-// ─── Nudge texts (placement 2 & 3) ───────────────────────────────────────────
+// ─── Nudge texts ──────────────────────────────────────────────────────────────
 
 const NUDGE_SELECTION = "Heads up — your credits go further when you fund at oodle.com"
 const NUDGE_SUCCESS   = "Next time, fund at oodle.com for bonus credits on every top-up"
@@ -50,18 +45,55 @@ export default function TopUpSheet({ onClose }: Props) {
   const [selected,  setSelected]  = useState(PACKS[1])
   const [loading,   setLoading]   = useState(false)
   const [step,      setStep]      = useState<'packs' | 'success'>('packs')
+  const [error,     setError]     = useState<string | null>(null)
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (channelRef.current) supabase.removeChannel(channelRef.current)
+    }
+  }, [])
 
   async function handleBuy() {
     setLoading(true)
-    await new Promise(r => setTimeout(r, 1700))
-    setLoading(false)
-    setStep('success')
+    setError(null)
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Not signed in')
+
+      // Subscribe to the user's row — fires when the webhook increments token_balance
+      const channel = supabase
+        .channel(`topup:${session.user.id}`)
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'users', filter: `id=eq.${session.user.id}` },
+          () => { setStep('success'); supabase.removeChannel(channel) }
+        )
+        .subscribe()
+      channelRef.current = channel
+
+      const { data, error: fnError } = await supabase.functions.invoke('stripe-topup', {
+        body: { packId: selected.id },
+      })
+
+      if (fnError || !data?.url) throw new Error(fnError?.message ?? 'No checkout URL returned')
+
+      window.open(data.url, '_blank')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Something went wrong')
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current)
+        channelRef.current = null
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   function handleClose() {
     onClose()
-    // Reset after exit animation
-    setTimeout(() => { setStep('packs'); setLoading(false) }, 420)
+    setTimeout(() => { setStep('packs'); setLoading(false); setError(null) }, 420)
   }
 
   return (
@@ -98,9 +130,9 @@ export default function TopUpSheet({ onClose }: Props) {
                 transition={{ type: 'spring', stiffness: 420, damping: 42 }}
               >
                 <div className="px-5 pt-4 pb-2">
-                  <p style={{ fontSize: 18, fontWeight: 700, color: '#111', marginBottom: 3 }}>Add tokens</p>
+                  <p style={{ fontSize: 18, fontWeight: 700, color: '#111', marginBottom: 3 }}>Add balance</p>
                   <p className="font-mono" style={{ fontSize: 11, color: '#aaa' }}>
-                    Use tokens to unlock answers from any creator
+                    Use your balance to unlock answers from any creator
                   </p>
                 </div>
 
@@ -123,7 +155,7 @@ export default function TopUpSheet({ onClose }: Props) {
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <span style={{ fontSize: 15, fontWeight: 700, color: sel ? 'white' : '#111' }}>
-                              {p.tokens} tokens
+                              ${p.tokens} balance
                             </span>
                             {p.tag && (
                               <span className="font-mono rounded-[4px] px-[5px] py-[2px]"
@@ -138,7 +170,7 @@ export default function TopUpSheet({ onClose }: Props) {
                           </div>
                           <p className="font-mono mt-[1px]"
                             style={{ fontSize: 10, color: sel ? 'rgba(255,255,255,0.5)' : '#bbb' }}>
-                            ${(p.price / p.tokens).toFixed(3)} per token
+                            ${p.tokens} added to your balance
                           </p>
                         </div>
                         <span style={{ fontSize: 16, fontWeight: 700, flexShrink: 0, color: sel ? 'white' : '#111' }}>
@@ -149,16 +181,20 @@ export default function TopUpSheet({ onClose }: Props) {
                   })}
                 </div>
 
-                {/* Placement 2 nudge — above pay button */}
+                {error && (
+                  <div className="px-5 pb-2">
+                    <p className="text-center font-mono" style={{ fontSize: 11, color: '#e53e3e' }}>{error}</p>
+                  </div>
+                )}
+
                 <div className="px-5 pb-2">
                   <p className="text-center font-mono" style={{ fontSize: 11, color: '#bbb', lineHeight: 1.5 }}>
                     {NUDGE_SELECTION}
                   </p>
                 </div>
 
-                {/* Apple Pay button */}
                 <div className="px-5 pb-10">
-                  <ApplePayBtn price={selected.price} loading={loading} onClick={handleBuy} />
+                  <CheckoutBtn price={selected.price} loading={loading} onClick={handleBuy} />
                 </div>
               </motion.div>
             )}
@@ -183,16 +219,15 @@ export default function TopUpSheet({ onClose }: Props) {
                   initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                   style={{ fontSize: 20, fontWeight: 700, color: '#111', marginBottom: 4 }}>
-                  Tokens added!
+                  Balance added!
                 </motion.p>
                 <motion.p
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                   transition={{ delay: 0.3 }}
                   className="font-mono" style={{ fontSize: 12, color: '#aaa', marginBottom: 20 }}>
-                  {selected.tokens} tokens added to your balance
+                  ${selected.tokens} added to your balance
                 </motion.p>
 
-                {/* Placement 3 nudge — post-purchase tip */}
                 <motion.div
                   initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.42 }}

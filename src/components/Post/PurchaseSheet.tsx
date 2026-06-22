@@ -102,11 +102,10 @@ export default function PurchaseSheet({ question, post, balance, onClose, onPurc
               {/* Price */}
               <div className="flex items-center justify-center gap-3 mb-2">
                 <TokenIcon size={32} />
-                <span className="text-4xl font-bold text-gray-900">{question.price.toFixed(2)}</span>
-                <span className="text-[15px] text-gray-400 font-medium">tokens</span>
+                <span className="text-4xl font-bold text-gray-900">${question.price.toFixed(2)}</span>
               </div>
               <p className="text-center text-[12px] text-gray-400 mb-6">
-                Your balance: {balance.toFixed(2)} tokens
+                Your balance: ${balance.toFixed(2)}
               </p>
 
               {/* CTA */}
@@ -116,11 +115,11 @@ export default function PurchaseSheet({ question, post, balance, onClose, onPurc
                     onClick={() => advance('confirm')}
                     className="w-full bg-gray-900 py-4 rounded-2xl font-semibold text-[15px] text-white"
                   >
-                    Unlock for {question.price.toFixed(2)} tokens
+                    Unlock for ${question.price.toFixed(2)}
                   </button>
                 ) : (
                   <div className="rounded-[14px] px-5 py-4 text-center" style={{ background: '#f9f9f9', border: '0.5px solid #ebebeb' }}>
-                    <p className="text-[13px] font-semibold text-[#333] mb-1">Not enough tokens</p>
+                    <p className="text-[13px] font-semibold text-[#333] mb-1">Not enough balance</p>
                     <p className="text-[12px] leading-[1.6]" style={{ color: '#999' }}>
                       Manage your wallet at{' '}
                       <span className="font-semibold text-[#111]">oodle.com</span>
@@ -284,7 +283,7 @@ export default function PurchaseSheet({ question, post, balance, onClose, onPurc
               >
                 <p className="text-[14px] text-gray-600">
                   New balance:{' '}
-                  <span className="font-semibold text-gray-900">{balanceAfter.toFixed(2)} tokens</span>
+                  <span className="font-semibold text-gray-900">${balanceAfter.toFixed(2)}</span>
                 </p>
               </motion.div>
 
