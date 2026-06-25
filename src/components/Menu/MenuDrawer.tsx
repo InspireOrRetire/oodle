@@ -4,6 +4,7 @@ import { X, Wallet, Users, Zap, FileText, MessageSquare, History, ShoppingBag, S
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { supabase } from '../../lib/supabase'
+import { oo } from '../../lib/oo'
 import TokenIcon from '../TokenIcon'
 import TopUpSheet from './TopUpSheet'
 
@@ -88,7 +89,7 @@ export default function MenuDrawer({ isOpen, onClose }: Props) {
               </div>
               <div className="flex items-center gap-1.5">
                 <TokenIcon size={16} />
-                <span className="text-green-500 font-medium text-[15px]">${tokenBalance.toFixed(2)}</span>
+                <span className="text-green-500 font-medium text-[15px]">{oo(tokenBalance)}</span>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </div>
             </button>
@@ -103,7 +104,7 @@ export default function MenuDrawer({ isOpen, onClose }: Props) {
                 <span className="text-[15px] text-gray-900">Balance</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-amber-500 font-medium text-[15px]">${tokenBalance.toFixed(2)}</span>
+                <span className="text-amber-500 font-medium text-[15px]">{oo(tokenBalance)}</span>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </div>
             </button>

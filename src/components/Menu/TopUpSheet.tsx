@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Zap, Check } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { oo } from '../../lib/oo'
 
 // ─── Token packs ───────────────────────────────────────────────────────────────
 
@@ -13,7 +14,7 @@ const PACKS = [
 
 // ─── Checkout button ──────────────────────────────────────────────────────────
 
-function CheckoutBtn({ price, loading, onClick }: { price: number; loading: boolean; onClick: () => void }) {
+function CheckoutBtn({ tokens, loading, onClick }: { tokens: number; loading: boolean; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
@@ -25,7 +26,7 @@ function CheckoutBtn({ price, loading, onClick }: { price: number; loading: bool
         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
       ) : (
         <span style={{ fontSize: 16, fontWeight: 600, color: 'white', letterSpacing: '-0.1px' }}>
-          Add ${price.toFixed(2)} balance
+          Add {oo(tokens)} balance
         </span>
       )}
     </button>
@@ -34,8 +35,8 @@ function CheckoutBtn({ price, loading, onClick }: { price: number; loading: bool
 
 // ─── Nudge texts ──────────────────────────────────────────────────────────────
 
-const NUDGE_SELECTION = "Heads up — your credits go further when you fund at oodle.com"
-const NUDGE_SUCCESS   = "Next time, fund at oodle.com for bonus credits on every top-up"
+const NUDGE_SELECTION = "Load balance once, unlock answers from any creator"
+const NUDGE_SUCCESS   = "Your balance is ready — start unlocking answers"
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -155,7 +156,7 @@ export default function TopUpSheet({ onClose }: Props) {
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <span style={{ fontSize: 15, fontWeight: 700, color: sel ? 'white' : '#111' }}>
-                              ${p.tokens} balance
+                              {oo(p.tokens)} balance
                             </span>
                             {p.tag && (
                               <span className="font-mono rounded-[4px] px-[5px] py-[2px]"
@@ -170,7 +171,7 @@ export default function TopUpSheet({ onClose }: Props) {
                           </div>
                           <p className="font-mono mt-[1px]"
                             style={{ fontSize: 10, color: sel ? 'rgba(255,255,255,0.5)' : '#bbb' }}>
-                            ${p.tokens} added to your balance
+                            {oo(p.tokens)} added to your balance
                           </p>
                         </div>
                         <span style={{ fontSize: 16, fontWeight: 700, flexShrink: 0, color: sel ? 'white' : '#111' }}>
@@ -194,7 +195,7 @@ export default function TopUpSheet({ onClose }: Props) {
                 </div>
 
                 <div className="px-5 pb-10">
-                  <CheckoutBtn price={selected.price} loading={loading} onClick={handleBuy} />
+                  <CheckoutBtn tokens={selected.tokens} loading={loading} onClick={handleBuy} />
                 </div>
               </motion.div>
             )}
@@ -225,7 +226,7 @@ export default function TopUpSheet({ onClose }: Props) {
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                   transition={{ delay: 0.3 }}
                   className="font-mono" style={{ fontSize: 12, color: '#aaa', marginBottom: 20 }}>
-                  ${selected.tokens} added to your balance
+                  {oo(selected.tokens)} added to your balance
                 </motion.p>
 
                 <motion.div

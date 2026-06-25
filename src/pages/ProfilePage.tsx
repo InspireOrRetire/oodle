@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Share2, Menu, Eye, Plus, Minus, MoreHorizontal, Link, Zap, Bookmark, Check, ArrowLeft, Mail, Heart, MessageCircle, ChevronUp, ChevronDown, Copy, AtSign, Camera, ChevronRight as ChevronRightIcon, Image, Video, MapPin, List, Type, FileText, X, Search } from 'lucide-react'
+import { oo } from '../lib/oo'
 import { QRCodeSVG } from 'qrcode.react'
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
@@ -984,14 +985,14 @@ function PurchaseSheet({
                           style={{ width: 44, height: 44, background: '#f5a623' }}>
                           <Zap style={{ width: 20, height: 20, color: 'white' }} strokeWidth={2} fill="white" />
                         </div>
-                        <span style={{ fontSize: 44, fontWeight: 700, color: '#111', lineHeight: 1 }}>${price.toFixed(2)}</span>
+                        <span style={{ fontSize: 44, fontWeight: 700, color: '#111', lineHeight: 1 }}>{oo(price)}</span>
                       </div>
                       <p className="text-center font-mono text-[12px] mb-0.5" style={{ color: '#aaa' }}>
-                        Your balance: ${balance.toFixed(2)}
+                        Your balance: {oo(balance)}
                       </p>
                       {!hasBalance && (
                         <p className="text-center font-mono text-[11px]" style={{ color: '#f5a623' }}>
-                          You need ${(price - balance).toFixed(2)} more
+                          You need {oo(price - balance)} more
                         </p>
                       )}
 
@@ -1012,7 +1013,7 @@ function PurchaseSheet({
                             : <>
                                 <Zap style={{ width: 15, height: 15, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
                                 <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
-                                  {hasBalance ? `Unlock for $${price.toFixed(2)}` : 'Add balance to unlock'}
+                                  {hasBalance ? `Unlock for ${oo(price)}` : 'Add balance to unlock'}
                                 </span>
                               </>
                           }
@@ -1044,7 +1045,7 @@ function PurchaseSheet({
                       </div>
 
                       <p className="font-mono text-[11px] mb-4" style={{ color: '#aaa' }}>
-                        Current balance: ${balance.toFixed(2)}
+                        Current balance: {oo(balance)}
                       </p>
 
                       {/* Packs */}
@@ -1066,7 +1067,7 @@ function PurchaseSheet({
                                 <div className="flex items-center gap-2 mb-0.5">
                                   <span className="text-[16px] font-bold"
                                     style={{ color: selected ? 'white' : '#111' }}>
-                                    ${p.tokens} balance
+                                    {oo(p.tokens)} balance
                                   </span>
                                   {p.tag && (
                                     <span className="font-mono text-[9px] px-[6px] py-[2px] rounded-[4px]"
@@ -1101,7 +1102,7 @@ function PurchaseSheet({
                         {topping
                           ? <div className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin" />
                           : <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
-                              Add ${pack.price.toFixed(2)} balance
+                              Add {oo(pack.tokens)} balance
                             </span>
                         }
                       </button>
