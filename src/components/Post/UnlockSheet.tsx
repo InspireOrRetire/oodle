@@ -218,7 +218,7 @@ export default function UnlockSheet({
                           {unlocking
                             ? <div className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin" />
                             : <>
-                                <Zap style={{ width: 15, height: 15, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
+                                <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 15, lineHeight: 1 }}>$?</span>
                                 <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
                                   {hasBalance ? `Unlock for ${oo(price)}` : 'Add balance to unlock'}
                                 </span>
@@ -230,7 +230,7 @@ export default function UnlockSheet({
                             onClick={() => nav('buy-tokens')}
                             className="w-full py-2 flex items-center justify-center gap-1.5 active:opacity-60"
                           >
-                            <Zap style={{ width: 12, height: 12, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
+                            <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
                             <span className="font-mono text-[11px]" style={{ color: '#aaa' }}>Add balance</span>
                           </button>
                         )}

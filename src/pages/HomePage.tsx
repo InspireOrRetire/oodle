@@ -370,7 +370,7 @@ function FeedCard({
                           className="flex items-center gap-1.5 flex-shrink-0 rounded-[20px] px-3 py-1.5 active:opacity-75 transition-opacity"
                           style={{ background: '#111', marginTop: 1 }}
                         >
-                          <Zap style={{ width: 10, height: 10, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
+                          <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
                           <span className="font-mono text-[11px] font-semibold text-white">{reply.price}</span>
                         </button>
                       </div>
@@ -448,7 +448,7 @@ function FeedCard({
                             className="flex items-center gap-1.5 flex-shrink-0 rounded-[20px] px-3 py-1.5 active:opacity-75 transition-opacity"
                             style={{ background: '#111', marginTop: 1 }}
                           >
-                            <Zap style={{ width: 10, height: 10, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
+                            <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
                             <span className="font-mono text-[11px] font-semibold text-white">{reply.price}</span>
                           </button>
                         </div>

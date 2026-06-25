@@ -646,7 +646,7 @@ function ThreadItem({
                               className="flex items-center gap-1.5 flex-shrink-0 rounded-[20px] px-3 py-1.5 active:opacity-70 transition-opacity"
                               style={{ background: '#f0f0f2', marginTop: 1 }}
                             >
-                              <Zap style={{ width: 10, height: 10, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
+                              <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
                               <span className="font-mono text-[11px] font-semibold text-[#555]">{thread.price}</span>
                             </button>
                           ) : (
@@ -655,7 +655,7 @@ function ThreadItem({
                               className="flex items-center gap-1.5 flex-shrink-0 rounded-[20px] px-3 py-1.5 active:opacity-75 transition-opacity"
                               style={{ background: '#111', marginTop: 1 }}
                             >
-                              <Zap style={{ width: 10, height: 10, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
+                              <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
                               <span className="font-mono text-[11px] font-semibold text-white">{thread.price}</span>
                             </button>
                           )
@@ -742,7 +742,7 @@ function ThreadItem({
                                 className="flex items-center gap-1.5 flex-shrink-0 rounded-[20px] px-3 py-1.5 active:opacity-70 transition-opacity"
                                 style={{ background: '#f0f0f2', marginTop: 1 }}
                               >
-                                <Zap style={{ width: 10, height: 10, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
+                                <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
                                 <span className="font-mono text-[11px] font-semibold text-[#555]">{thread.price}</span>
                               </button>
                             ) : (
@@ -751,7 +751,7 @@ function ThreadItem({
                                 className="flex items-center gap-1.5 flex-shrink-0 rounded-[20px] px-3 py-1.5 active:opacity-75 transition-opacity"
                                 style={{ background: '#111', marginTop: 1 }}
                               >
-                                <Zap style={{ width: 10, height: 10, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
+                                <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
                                 <span className="font-mono text-[11px] font-semibold text-white">{thread.price}</span>
                               </button>
                             )
@@ -779,7 +779,7 @@ function ThreadItem({
                           className="flex items-center gap-1.5 flex-shrink-0 rounded-[20px] px-2.5 py-1"
                           style={{ background: q.status === 'answered' ? '#111' : '#f0f0f2', marginTop: 1 }}
                         >
-                          <Zap style={{ width: 9, height: 9, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
+                          <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
                           <span className="font-mono text-[10px] font-semibold"
                             style={{ color: q.status === 'answered' ? 'white' : '#555' }}>{q.price}</span>
                           <span className="font-mono text-[9px]"
@@ -1619,7 +1619,7 @@ function AskSheet({
                                 className="flex items-center gap-1.5 flex-shrink-0 rounded-[20px] px-2.5 py-1 mt-[1px]"
                                 style={{ background: q.status === 'answered' ? '#111' : '#f0f0f2' }}
                               >
-                                <Zap style={{ width: 9, height: 9, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
+                                <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
                                 <span
                                   className="font-mono text-[10px] font-semibold"
                                   style={{ color: q.status === 'answered' ? 'white' : '#555' }}
@@ -2053,7 +2053,7 @@ function EditPriceSheet({
                 <p className="text-[18px] font-bold text-[#111]">Post price</p>
                 <div className="flex items-center gap-1 rounded-[20px] px-2.5 py-1 mt-[2px]"
                   style={{ background: '#f0f0f2' }}>
-                  <Zap style={{ width: 9, height: 9, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
+                  <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
                   <span className="font-mono text-[11px] font-semibold text-[#555]">
                     {currentPrice === 0 ? 'free' : currentPrice}
                   </span>
@@ -3737,7 +3737,7 @@ export default function ProfilePage() {
                 {/* New price pill */}
                 <div className="flex items-center gap-1 rounded-[20px] px-3 py-1 mt-0.5"
                   style={{ background: '#f0f0f2' }}>
-                  <Zap style={{ width: 10, height: 10, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
+                  <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
                   <span className="font-mono text-[12px] font-semibold" style={{ color: '#111' }}>
                     {priceSavedToast === 0 ? 'free' : `$${priceSavedToast}`}
                   </span>

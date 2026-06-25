@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, Zap, ShoppingBag } from 'lucide-react'
+import { Check, ShoppingBag } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { sendInsufficientBalanceEmail } from '../../services/emailService'
@@ -86,7 +86,7 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                       <div className="flex items-center justify-between mb-5">
                         <p className="text-[18px] font-bold text-[#111]">Order summary</p>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: '#f5f5f7' }}>
-                          <Zap style={{ width: 11, height: 11, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
+                          <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
                           <span className="font-mono text-[12px] font-semibold text-[#111]">{count} answer{count !== 1 ? 's' : ''}</span>
                         </div>
                       </div>
@@ -102,7 +102,7 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                             </div>
                             <span className="flex items-center gap-1 rounded-full px-2.5 py-1.5 flex-shrink-0 font-mono text-[11px] font-semibold"
                               style={{ background: '#fffbeb', color: '#b45309' }}>
-                              <Zap style={{ width: 9, height: 9, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
+                              <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
                               {it.price}
                             </span>
                           </div>
@@ -114,13 +114,13 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-[13px]" style={{ color: '#888' }}>Total</span>
                           <span className="flex items-center gap-1 font-mono text-[15px] font-bold text-[#111]">
-                            <Zap style={{ width: 12, height: 12, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
+                            <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
                             {total}
                           </span>
                         </div>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-[13px]" style={{ color: '#888' }}>Your balance</span>
-                          <span className="font-mono text-[13px]" style={{ color: hasBalance ? '#111' : '#ef4444' }}>⚡{balance}</span>
+                          <span className="font-mono text-[13px]" style={{ color: hasBalance ? '#111' : '#ef4444' }}>$?{balance}</span>
                         </div>
                         <div style={{ borderTop: '0.5px solid #eee', paddingTop: 8, marginTop: 4 }}>
                           <div className="flex items-center justify-between">
@@ -141,7 +141,7 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                           className="w-full rounded-[14px] py-[15px] flex items-center justify-center gap-2 active:opacity-80 transition-opacity"
                           style={{ background: '#111' }}
                         >
-                          <Zap style={{ width: 15, height: 15, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
+                          <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 15, lineHeight: 1 }}>$?</span>
                           <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
                             Unlock {count} answer{count !== 1 ? 's' : ''} · ${total.toFixed(2)}
                           </span>
@@ -159,7 +159,7 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                             className="w-full rounded-[14px] py-[15px] flex items-center justify-center gap-2 active:opacity-80"
                             style={{ background: '#111' }}
                           >
-                            <Zap style={{ width: 14, height: 14, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
+                            <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 15, lineHeight: 1 }}>$?</span>
                             <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>Add balance</span>
                           </button>
                         </div>

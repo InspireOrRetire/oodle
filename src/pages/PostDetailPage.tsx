@@ -271,16 +271,11 @@ export default function PostDetailPage() {
                 className="w-full flex items-center justify-center gap-2 py-3.5 rounded-[16px] active:opacity-80 transition-opacity mb-3"
                 style={{ background: '#111' }}
               >
-                <div style={{
-                  width: 18, height: 18, borderRadius: '50%', background: '#f5a623',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                }}>
-                  <Zap style={{ width: 10, height: 10, color: 'white' }} strokeWidth={2.5} fill="white" />
-                </div>
+                <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 15, lineHeight: 1 }}>$?</span>
                 <span className="text-[14px] font-semibold text-white">
                   I want this
                   {price != null && (
-                    <span className="ml-1.5 font-mono opacity-75">· ⚡{price}</span>
+                    <span className="ml-1.5 font-mono opacity-75">· $?{price}</span>
                   )}
                 </span>
               </button>
@@ -364,7 +359,7 @@ export default function PostDetailPage() {
                         className="flex items-center gap-1 rounded-full px-2.5 py-1"
                         style={{ background: '#fffbeb', border: '0.5px solid #fde68a' }}
                       >
-                        <Zap style={{ width: 9, height: 9, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
+                        <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
                         <span className="font-mono text-[11px] font-semibold" style={{ color: '#b45309' }}>
                           ${reply.price.toFixed(2)}
                         </span>
@@ -424,8 +419,8 @@ export default function PostDetailPage() {
                           className="flex items-center gap-1.5 flex-shrink-0 rounded-[20px] px-3.5 py-2 active:scale-95 transition-transform"
                           style={{ background: '#111' }}
                         >
-                          <Zap style={{ width: 10, height: 10, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
-                          <span className="font-mono text-[12px] font-semibold text-white">⚡{reply.price}</span>
+                          <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
+                          <span className="font-mono text-[12px] font-semibold text-white">$?{reply.price}</span>
                         </button>
                       </div>
                     </div>
@@ -471,7 +466,7 @@ export default function PostDetailPage() {
                           className="flex items-center gap-1.5 flex-shrink-0 rounded-[20px] px-2.5 py-1.5 active:scale-95 transition-transform"
                           style={{ background: '#111', marginTop: 1 }}
                         >
-                          <Zap style={{ width: 10, height: 10, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
+                          <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
                           <span className="font-mono text-[11px] font-semibold text-white">{reply.price}</span>
                         </button>
                       </div>

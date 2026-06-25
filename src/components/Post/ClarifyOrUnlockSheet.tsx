@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Zap, MessageCircle, Check, ShoppingCart } from 'lucide-react'
+import { X, MessageCircle, Check, ShoppingCart } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { createThreadWithMedia } from '../../services/threadService'
 import { cartService } from '../../services/cartService'
@@ -145,9 +145,7 @@ export default function ClarifyOrUnlockSheet({ target, onClose, onUnlock }: Prop
                 className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl mb-3 active:opacity-80 transition-opacity"
                 style={{ background: '#111' }}
               >
-                <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#f5a623', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Zap style={{ width: 11, height: 11, color: 'white' }} strokeWidth={2.5} fill="white" />
-                </div>
+                <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 15, lineHeight: 1 }}>$?</span>
                 <span className="text-[15px] font-semibold text-white">
                   Unlock answer
                   <span className="ml-1.5 font-mono opacity-70">· {target.price}</span>

@@ -1114,7 +1114,7 @@ function AnswerDetailSheet({ entry, onClose }: { entry: PurchaseEntry | null; on
               {/* Meta row */}
               <div className="flex items-center justify-between pt-4" style={{ borderTop: '0.5px solid #f2f2f2' }}>
                 <div className="flex items-center gap-1.5">
-                  <Zap style={{ width: 11, height: 11, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
+                  <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
                   <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>${entry.price.toFixed(2)}</span>
                 </div>
                 <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>
@@ -1177,7 +1177,7 @@ function MyAnswersSheet({ open, onClose }: { open: boolean; onClose: () => void 
               {/* Tokens paid + timestamp */}
               <div className="flex items-center justify-between mt-2 pl-[42px]">
                 <div className="flex items-center gap-1">
-                  <Zap style={{ width: 9, height: 9, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
+                  <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
                   <span className="font-mono text-[10px]" style={{ color: '#bbb' }}>
                     ${t.price.toFixed(2)}
                   </span>
@@ -1293,7 +1293,7 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-[9px] flex items-center justify-center" style={{ background: '#fff8ed' }}>
-                <Zap style={{ width: 15, height: 15, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
+                <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 15, lineHeight: 1 }}>$?</span>
               </div>
               <p className="text-[14px] font-medium text-[#111]">Balance</p>
             </div>
@@ -1310,7 +1310,7 @@ export default function SettingsPage() {
             className="w-full rounded-[12px] py-3 flex items-center justify-center gap-2 active:opacity-70 transition-opacity"
             style={{ background: '#111' }}
           >
-            <Zap style={{ width: 13, height: 13, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
+            <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 15, lineHeight: 1 }}>$?</span>
             <span style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>Add balance</span>
           </button>
         </div>

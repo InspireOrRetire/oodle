@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Zap, X, Check, ShoppingCart, Trash2 } from 'lucide-react'
+import { ArrowLeft, X, Check, ShoppingCart, Trash2 } from 'lucide-react'
 import { cartService, type CartItem } from '../services/cartService'
 import CartCheckoutSheet from '../components/Cart/CartCheckoutSheet'
 
@@ -146,10 +146,7 @@ export default function CartPage() {
                           color:      checked ? '#b45309' : '#bbb',
                         }}
                       >
-                        <Zap
-                          style={{ width: 10, height: 10, color: checked ? '#f5a623' : '#ccc' }}
-                          strokeWidth={2.5} fill={checked ? '#f5a623' : '#ccc'}
-                        />
+                        <span style={{ fontWeight: 700, color: checked ? '#f5a623' : '#ccc', fontSize: 11, lineHeight: 1 }}>$?</span>
                         {it.price}
                       </span>
                       <button
@@ -181,10 +178,10 @@ export default function CartPage() {
                 className="w-full py-4 rounded-2xl text-[15px] font-semibold text-white flex items-center justify-center gap-2 transition-opacity"
                 style={{ background: '#111', opacity: selectedCount === 0 ? 0.3 : 1 }}
               >
-                <Zap style={{ width: 14, height: 14, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
+                <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 15, lineHeight: 1 }}>$?</span>
                 {selectedCount === 0
                   ? 'Select answers to unlock'
-                  : `Unlock ${selectedCount === items.length ? 'all' : 'selected'} · ⚡${selectedTotal}`
+                  : `Unlock ${selectedCount === items.length ? 'all' : 'selected'} · $?${selectedTotal}`
                 }
               </button>
             </div>
