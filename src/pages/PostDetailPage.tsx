@@ -13,6 +13,7 @@ import { cartCountText } from '../services/cartService'
 import { createThreadWithMedia } from '../services/threadService'
 import { myQuestionsStore } from '../services/myQuestionsStore'
 import { useAuth } from '../contexts/AuthContext'
+import { oo } from '../lib/oo'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -268,14 +269,13 @@ export default function PostDetailPage() {
                   price:    price ?? 0,
                   postId:   item.id,
                 })}
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-[16px] active:opacity-80 transition-opacity mb-3"
-                style={{ background: '#111' }}
+                className="w-full flex items-center justify-center py-3.5 rounded-full active:opacity-80 transition-opacity mb-3"
+                style={{ background: '#000' }}
               >
-                <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 15, lineHeight: 1 }}>$?</span>
                 <span className="text-[14px] font-semibold text-white">
                   I want this
                   {price != null && (
-                    <span className="ml-1.5 font-mono opacity-75">· $?{price}</span>
+                    <span className="ml-1.5 font-mono opacity-60">· {oo(price)}</span>
                   )}
                 </span>
               </button>
@@ -356,12 +356,11 @@ export default function PostDetailPage() {
                     <div className="flex items-center gap-2 flex-wrap">
                       {/* Price to unlock */}
                       <div
-                        className="flex items-center gap-1 rounded-full px-2.5 py-1"
-                        style={{ background: '#fffbeb', border: '0.5px solid #fde68a' }}
+                        className="rounded-full px-2.5 py-1"
+                        style={{ background: '#f0f0f2' }}
                       >
-                        <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
-                        <span className="font-mono text-[11px] font-semibold" style={{ color: '#b45309' }}>
-                          ${reply.price.toFixed(2)}
+                        <span className="font-mono text-[11px] font-semibold text-[#555]">
+                          {oo(reply.price)}
                         </span>
                       </div>
 
@@ -416,11 +415,10 @@ export default function PostDetailPage() {
                         </div>
                         <button
                           onClick={() => setClarifyTarget({ postId: item.id, creatorId: item.creator.id ?? '', creator: item.creator, question: reply.question, price: reply.price })}
-                          className="flex items-center gap-1.5 flex-shrink-0 rounded-[20px] px-3.5 py-2 active:scale-95 transition-transform"
-                          style={{ background: '#111' }}
+                          className="flex-shrink-0 rounded-full px-3.5 py-2 active:scale-95 transition-transform"
+                          style={{ background: '#000' }}
                         >
-                          <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
-                          <span className="font-mono text-[12px] font-semibold text-white">$?{reply.price}</span>
+                          <span className="font-mono text-[12px] font-semibold text-white">{oo(reply.price)}</span>
                         </button>
                       </div>
                     </div>
@@ -463,11 +461,10 @@ export default function PostDetailPage() {
                         <p className="flex-1 text-[14px] text-[#222] leading-[1.55]">{reply.question}</p>
                         <button
                           onClick={() => setClarifyTarget({ postId: item.id, creatorId: item.creator.id ?? '', creator: item.creator, question: reply.question, price: reply.price })}
-                          className="flex items-center gap-1.5 flex-shrink-0 rounded-[20px] px-2.5 py-1.5 active:scale-95 transition-transform"
-                          style={{ background: '#111', marginTop: 1 }}
+                          className="flex-shrink-0 rounded-full px-2.5 py-1.5 active:scale-95 transition-transform"
+                          style={{ background: '#000', marginTop: 1 }}
                         >
-                          <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
-                          <span className="font-mono text-[11px] font-semibold text-white">{reply.price}</span>
+                          <span className="font-mono text-[11px] font-semibold text-white">{oo(reply.price)}</span>
                         </button>
                       </div>
                       {cartCountText(reply.cart_count) && (

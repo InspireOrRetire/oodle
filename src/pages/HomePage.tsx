@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import UnlockSheet, { type UnlockTarget } from '../components/Post/UnlockSheet'
 import ClarifyOrUnlockSheet, { type ClarifyTarget } from '../components/Post/ClarifyOrUnlockSheet'
 import { cartCountText, cartService } from '../services/cartService'
+import { oo } from '../lib/oo'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -367,11 +368,10 @@ function FeedCard({
                         <p className="flex-1 text-[13px] text-[#222] leading-[1.55]">{reply.question}</p>
                         <button
                           onClick={e => { e.stopPropagation(); setClarifyTarget({ postId: item.id, creatorId: item.creator.id ?? '', creator: item.creator, question: reply.question, price: reply.price }) }}
-                          className="flex items-center gap-1.5 flex-shrink-0 rounded-[20px] px-3 py-1.5 active:opacity-75 transition-opacity"
-                          style={{ background: '#111', marginTop: 1 }}
+                          className="flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-75 transition-opacity"
+                          style={{ background: '#000', marginTop: 1 }}
                         >
-                          <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
-                          <span className="font-mono text-[11px] font-semibold text-white">{reply.price}</span>
+                          <span className="font-mono text-[11px] font-semibold text-white">{oo(reply.price)}</span>
                         </button>
                       </div>
                       {/* Per-reply cart count */}
@@ -445,11 +445,10 @@ function FeedCard({
                           <p className="flex-1 text-[13px] text-[#222] leading-[1.55]">{reply.question}</p>
                           <button
                             onClick={() => onUnlock(item)}
-                            className="flex items-center gap-1.5 flex-shrink-0 rounded-[20px] px-3 py-1.5 active:opacity-75 transition-opacity"
-                            style={{ background: '#111', marginTop: 1 }}
+                            className="flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-75 transition-opacity"
+                            style={{ background: '#000', marginTop: 1 }}
                           >
-                            <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
-                            <span className="font-mono text-[11px] font-semibold text-white">{reply.price}</span>
+                            <span className="font-mono text-[11px] font-semibold text-white">{oo(reply.price)}</span>
                           </button>
                         </div>
                       </div>
@@ -2393,7 +2392,7 @@ export default function HomePage() {
                             <div className="flex-1 min-w-0">
                               <p className="text-[13px] font-semibold text-[#111] truncate">{item.creator}</p>
                               <p className="text-[11px] truncate" style={{ color: '#aaa' }}>
-                                {item.unlocks} unlocks · <span style={{ color: '#f5a623' }}>⚡{item.price}</span>
+                                {item.unlocks} unlocks · {oo(item.price)}
                               </p>
                             </div>
                           </button>
@@ -2761,7 +2760,7 @@ export default function HomePage() {
                                     {notif.reference_type === 'payment' && (
                                       <>
                                         <span style={{ color: '#e0e0e0' }}>·</span>
-                                        <span className="text-[11px] font-semibold" style={{ color: '#f5a623' }}>
+                                        <span className="text-[11px] font-semibold" style={{ color: '#555' }}>
                                           Payment
                                         </span>
                                       </>

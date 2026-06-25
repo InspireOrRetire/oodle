@@ -101,8 +101,7 @@ export default function PurchaseSheet({ question, post, balance, onClose, onPurc
               </div>
 
               {/* Price */}
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <TokenIcon size={32} />
+              <div className="flex items-center justify-center mb-2">
                 <span className="text-4xl font-bold text-gray-900">{oo(question.price)}</span>
               </div>
               <p className="text-center text-[12px] text-gray-400 mb-6">
@@ -114,7 +113,7 @@ export default function PurchaseSheet({ question, post, balance, onClose, onPurc
                 {canAfford ? (
                   <button
                     onClick={() => advance('confirm')}
-                    className="w-full bg-gray-900 py-4 rounded-2xl font-semibold text-[15px] text-white"
+                    className="w-full bg-black py-4 rounded-full font-semibold text-[15px] text-white"
                   >
                     Unlock for {oo(question.price)}
                   </button>
@@ -181,7 +180,7 @@ export default function PurchaseSheet({ question, post, balance, onClose, onPurc
               <div className="px-6 flex flex-col gap-2">
                 <button
                   onClick={() => advance('processing')}
-                  className="w-full bg-gray-900 py-4 rounded-2xl font-semibold text-[15px] text-white"
+                  className="w-full bg-black py-4 rounded-full font-semibold text-[15px] text-white"
                 >
                   Confirm &amp; Pay
                 </button>
@@ -294,7 +293,7 @@ export default function PurchaseSheet({ question, post, balance, onClose, onPurc
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.55 }}
-                className="w-full bg-gray-900 py-4 rounded-2xl font-semibold text-[15px] text-white"
+                className="w-full bg-black py-4 rounded-full font-semibold text-[15px] text-white"
               >
                 Done
               </motion.button>

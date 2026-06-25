@@ -197,7 +197,7 @@ export default function UnlockSheet({
                         Your balance: {oo(balance)}
                       </p>
                       {!hasBalance && (
-                        <p className="text-center font-mono text-[11px]" style={{ color: '#f5a623' }}>
+                        <p className="text-center font-mono text-[11px]" style={{ color: '#888' }}>
                           You need {oo(price - balance)} more
                         </p>
                       )}
@@ -212,25 +212,21 @@ export default function UnlockSheet({
                         <button
                           onClick={() => hasBalance ? handleBalanceUnlock() : nav('buy-tokens')}
                           disabled={unlocking}
-                          className="w-full rounded-[14px] py-[15px] flex items-center justify-center gap-2 active:opacity-80 disabled:opacity-70"
-                          style={{ background: '#111' }}
+                          className="w-full rounded-full py-[15px] flex items-center justify-center active:opacity-80 disabled:opacity-70"
+                          style={{ background: '#000' }}
                         >
                           {unlocking
                             ? <div className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            : <>
-                                <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 15, lineHeight: 1 }}>$?</span>
-                                <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
-                                  {hasBalance ? `Unlock for ${oo(price)}` : 'Add balance to unlock'}
-                                </span>
-                              </>
+                            : <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
+                                {hasBalance ? `Unlock for ${oo(price)}` : 'Add balance to unlock'}
+                              </span>
                           }
                         </button>
                         {!hasBalance && (
                           <button
                             onClick={() => nav('buy-tokens')}
-                            className="w-full py-2 flex items-center justify-center gap-1.5 active:opacity-60"
+                            className="w-full py-2 flex items-center justify-center active:opacity-60"
                           >
-                            <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
                             <span className="font-mono text-[11px]" style={{ color: '#aaa' }}>Add balance</span>
                           </button>
                         )}
@@ -294,8 +290,8 @@ export default function UnlockSheet({
                         <p className="text-center font-mono text-[11px] mb-2" style={{ color: '#e53e3e' }}>{error}</p>
                       )}
                       <button onClick={handleTopUp} disabled={topping}
-                        className="w-full rounded-[14px] py-[14px] flex items-center justify-center gap-2 active:opacity-80 disabled:opacity-70"
-                        style={{ background: '#111' }}>
+                        className="w-full rounded-full py-[14px] flex items-center justify-center gap-2 active:opacity-80 disabled:opacity-70"
+                        style={{ background: '#000' }}>
                         {topping
                           ? <div className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin" />
                           : <span style={{ fontSize: 16, fontWeight: 600, color: 'white', letterSpacing: '-0.1px' }}>
@@ -329,7 +325,7 @@ export default function UnlockSheet({
                     <motion.button
                       initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}
                       onClick={handleClose}
-                      className="w-full rounded-[14px] py-[14px] active:opacity-70 transition-opacity"
+                      className="w-full rounded-full py-[14px] active:opacity-70 transition-opacity"
                       style={{ background: '#f5f5f7' }}>
                       <span style={{ fontSize: 15, fontWeight: 600, color: '#111' }}>Done</span>
                     </motion.button>

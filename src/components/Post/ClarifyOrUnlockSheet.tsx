@@ -142,20 +142,19 @@ export default function ClarifyOrUnlockSheet({ target, onClose, onUnlock }: Prop
               {/* Unlock */}
               <button
                 onClick={() => { onUnlock(); onClose() }}
-                className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl mb-3 active:opacity-80 transition-opacity"
-                style={{ background: '#111' }}
+                className="w-full flex items-center justify-center py-4 rounded-full mb-3 active:opacity-80 transition-opacity"
+                style={{ background: '#000' }}
               >
-                <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 15, lineHeight: 1 }}>$?</span>
                 <span className="text-[15px] font-semibold text-white">
                   Unlock answer
-                  <span className="ml-1.5 font-mono opacity-70">· {target.price}</span>
+                  <span className="ml-1.5 font-mono opacity-60">· {target.price}</span>
                 </span>
               </button>
 
               {/* Clarify */}
               <button
                 onClick={() => setStep('compose')}
-                className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl mb-3 active:opacity-70 transition-opacity"
+                className="w-full flex items-center justify-center gap-2 py-4 rounded-full mb-3 active:opacity-70 transition-opacity"
                 style={{ border: '1.5px solid #e5e5e5', background: 'white' }}
               >
                 <MessageCircle style={{ width: 15, height: 15, color: '#555' }} strokeWidth={1.75} />

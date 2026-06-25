@@ -19,8 +19,8 @@ function CheckoutBtn({ tokens, loading, onClick }: { tokens: number; loading: bo
     <button
       onClick={onClick}
       disabled={loading}
-      className="w-full rounded-[14px] flex items-center justify-center gap-2 active:opacity-80 disabled:opacity-70 transition-opacity"
-      style={{ background: '#111', height: 52 }}
+      className="w-full rounded-full flex items-center justify-center gap-2 active:opacity-80 disabled:opacity-70 transition-opacity"
+      style={{ background: '#000', height: 52 }}
     >
       {loading ? (
         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -243,7 +243,7 @@ export default function TopUpSheet({ onClose }: Props) {
                   initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
                   onClick={handleClose}
-                  className="w-full rounded-[14px] py-[14px] flex items-center justify-center active:opacity-70 transition-opacity"
+                  className="w-full rounded-full py-[14px] flex items-center justify-center active:opacity-70 transition-opacity"
                   style={{ background: '#f5f5f7' }}>
                   <span style={{ fontSize: 15, fontWeight: 600, color: '#111' }}>Done</span>
                 </motion.button>
