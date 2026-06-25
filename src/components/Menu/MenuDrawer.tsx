@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { supabase } from '../../lib/supabase'
 import { oo } from '../../lib/oo'
-import TokenIcon from '../TokenIcon'
 import TopUpSheet from './TopUpSheet'
 
 interface Props { isOpen: boolean; onClose: () => void }
@@ -88,7 +87,6 @@ export default function MenuDrawer({ isOpen, onClose }: Props) {
                 <span className="text-[15px] text-gray-900">Wallet</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <TokenIcon size={16} />
                 <span className="text-green-500 font-medium text-[15px]">{oo(tokenBalance)}</span>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </div>
@@ -100,7 +98,7 @@ export default function MenuDrawer({ isOpen, onClose }: Props) {
               className="w-full flex items-center justify-between py-3 px-3 rounded-lg hover:bg-amber-50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <TokenIcon size={20} />
+                <span className="font-bold text-[15px]" style={{ color: '#f5a623' }}>$?</span>
                 <span className="text-[15px] text-gray-900">Balance</span>
               </div>
               <div className="flex items-center gap-1.5">

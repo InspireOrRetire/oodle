@@ -190,12 +190,8 @@ export default function UnlockSheet({
                       )}
 
                       {/* Price display */}
-                      <div className="flex items-center justify-center gap-3 mb-1">
-                        <div className="flex items-center justify-center rounded-full flex-shrink-0"
-                          style={{ width: 44, height: 44, background: '#f5a623' }}>
-                          <Zap style={{ width: 20, height: 20, color: 'white' }} strokeWidth={2} fill="white" />
-                        </div>
-                        <span style={{ fontSize: 44, fontWeight: 700, color: '#111', lineHeight: 1 }}>{oo(price)}</span>
+                      <div className="flex items-center justify-center mb-1">
+                        <span style={{ fontSize: 48, fontWeight: 700, color: '#111', lineHeight: 1 }}>{oo(price)}</span>
                       </div>
                       <p className="text-center font-mono text-[12px] mb-0.5" style={{ color: '#aaa' }}>
                         Your balance: {oo(balance)}

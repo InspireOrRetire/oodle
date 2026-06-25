@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Question, Post } from '../../lib/supabase'
 import TokenIcon from '../TokenIcon'
+import { oo } from '../../lib/oo'
 
 type Step = 'review' | 'confirm' | 'processing' | 'success'
 
@@ -102,10 +103,10 @@ export default function PurchaseSheet({ question, post, balance, onClose, onPurc
               {/* Price */}
               <div className="flex items-center justify-center gap-3 mb-2">
                 <TokenIcon size={32} />
-                <span className="text-4xl font-bold text-gray-900">${question.price.toFixed(2)}</span>
+                <span className="text-4xl font-bold text-gray-900">{oo(question.price)}</span>
               </div>
               <p className="text-center text-[12px] text-gray-400 mb-6">
-                Your balance: ${balance.toFixed(2)}
+                Your balance: {oo(balance)}
               </p>
 
               {/* CTA */}
@@ -115,7 +116,7 @@ export default function PurchaseSheet({ question, post, balance, onClose, onPurc
                     onClick={() => advance('confirm')}
                     className="w-full bg-gray-900 py-4 rounded-2xl font-semibold text-[15px] text-white"
                   >
-                    Unlock for ${question.price.toFixed(2)}
+                    Unlock for {oo(question.price)}
                   </button>
                 ) : (
                   <div className="rounded-[14px] px-5 py-4 text-center" style={{ background: '#f9f9f9', border: '0.5px solid #ebebeb' }}>
@@ -164,7 +165,7 @@ export default function PurchaseSheet({ question, post, balance, onClose, onPurc
                 <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
                   <span className="text-[13px] text-gray-500">You pay</span>
                   <span className="font-semibold text-[14px] text-gray-900">
-                    {question.price.toFixed(2)}
+                    {oo(question.price)}
                   </span>
                 </div>
 
@@ -172,7 +173,7 @@ export default function PurchaseSheet({ question, post, balance, onClose, onPurc
                 <div className="flex items-center justify-between px-4 py-3">
                   <span className="text-[13px] text-gray-500">Remaining balance</span>
                   <span className={`font-semibold text-[14px] ${balanceAfter < 0 ? 'text-red-500' : 'text-gray-900'}`}>
-                    {balanceAfter.toFixed(2)}
+                    {oo(balanceAfter)}
                   </span>
                 </div>
               </div>
@@ -283,7 +284,7 @@ export default function PurchaseSheet({ question, post, balance, onClose, onPurc
               >
                 <p className="text-[14px] text-gray-600">
                   New balance:{' '}
-                  <span className="font-semibold text-gray-900">${balanceAfter.toFixed(2)}</span>
+                  <span className="font-semibold text-gray-900">{oo(balanceAfter)}</span>
                 </p>
               </motion.div>
 
