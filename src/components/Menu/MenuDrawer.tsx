@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { X, Wallet, Users, Zap, FileText, MessageSquare, History, ShoppingBag, ShoppingCart, Leaf, Scan, HelpCircle, Settings, ChevronRight, LogOut } from 'lucide-react'
+import { X, Wallet, Users, Zap, ShoppingBag, ShoppingCart, Leaf, HelpCircle, Settings, ChevronRight, LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { supabase } from '../../lib/supabase'
@@ -43,11 +43,8 @@ export default function MenuDrawer({ isOpen, onClose }: Props) {
           {/* Top nav items */}
           <div className="space-y-1 mb-1">
             {[
-              { icon: Users,        label: 'Discover Friends', path: '/'          },
+              { icon: Users, label: 'Discover Friends', path: '/' },
               ...(isCreator ? [{ icon: Zap, label: 'Creator Center', path: '/settings' }] : []),
-              { icon: FileText,     label: 'Drafts',           path: null         },
-              { icon: MessageSquare,label: 'My Comments',      path: null         },
-              { icon: History,      label: 'History',          path: null         },
             ].map(item => (
               <button
                 key={item.label}
@@ -126,9 +123,8 @@ export default function MenuDrawer({ isOpen, onClose }: Props) {
         <div className="border-t border-gray-100 py-4">
           <div className="flex justify-around">
             {[
-              { icon: Scan,       label: 'Scan',        action: undefined              },
-              { icon: HelpCircle, label: 'Help Center',  action: () => go('/help')     },
-              { icon: Settings,   label: 'Settings',     action: () => go('/settings') },
+              { icon: HelpCircle, label: 'Help Center', action: () => go('/help')     },
+              { icon: Settings,   label: 'Settings',    action: () => go('/settings') },
             ].map(item => (
               <button key={item.label} onClick={item.action} className="flex flex-col items-center gap-1">
                 <div className="p-2 bg-gray-100 rounded-full">
