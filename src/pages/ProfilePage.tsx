@@ -643,18 +643,18 @@ function ThreadItem({
                           isOwner ? (
                             <button
                               onClick={e => { e.stopPropagation(); onEditPrice?.() }}
-                              className="flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-70 transition-opacity"
+                              className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-70 transition-opacity"
                               style={{ background: '#f0f0f2', marginTop: 1 }}
                             >
-                              <span className="font-mono text-[11px] font-semibold text-[#555]">{oo(thread.price)}</span>
+                              <span className="text-[11px] font-semibold text-[#555] tracking-tight">{oo(thread.price)}</span>
                             </button>
                           ) : (
                             <button
                               onClick={e => { e.stopPropagation(); onUnlock(thread) }}
-                              className="flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-75 transition-opacity"
+                              className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-75 transition-opacity"
                               style={{ background: '#000', marginTop: 1 }}
                             >
-                              <span className="font-mono text-[11px] font-semibold text-white">{oo(thread.price)}</span>
+                              <span className="text-[11px] font-semibold text-white tracking-tight">{oo(thread.price)}</span>
                             </button>
                           )
                         )}
@@ -737,18 +737,18 @@ function ThreadItem({
                             isOwner ? (
                               <button
                                 onClick={e => { e.stopPropagation(); onEditPrice?.() }}
-                                className="flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-70 transition-opacity"
+                                className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-70 transition-opacity"
                                 style={{ background: '#f0f0f2', marginTop: 1 }}
                               >
-                                <span className="font-mono text-[11px] font-semibold text-[#555]">{oo(thread.price)}</span>
+                                <span className="text-[11px] font-semibold text-[#555] tracking-tight">{oo(thread.price)}</span>
                               </button>
                             ) : (
                               <button
                                 onClick={e => { e.stopPropagation(); onUnlock(thread) }}
-                                className="flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-75 transition-opacity"
+                                className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-75 transition-opacity"
                                 style={{ background: '#000', marginTop: 1 }}
                               >
-                                <span className="font-mono text-[11px] font-semibold text-white">{oo(thread.price)}</span>
+                                <span className="text-[11px] font-semibold text-white tracking-tight">{oo(thread.price)}</span>
                               </button>
                             )
                           )}
@@ -772,12 +772,12 @@ function ThreadItem({
                           {q.text}
                         </p>
                         <div
-                          className="flex items-center gap-1 flex-shrink-0 rounded-full px-2.5 py-1"
+                          className="inline-flex items-center justify-center gap-1 flex-shrink-0 rounded-full px-2.5 py-1"
                           style={{ background: q.status === 'answered' ? '#000' : '#f0f0f2', marginTop: 1 }}
                         >
-                          <span className="font-mono text-[10px] font-semibold"
+                          <span className="text-[10px] font-semibold tracking-tight"
                             style={{ color: q.status === 'answered' ? 'white' : '#555' }}>{oo(q.price)}</span>
-                          <span className="font-mono text-[9px]"
+                          <span className="text-[9px]"
                             style={{ color: q.status === 'answered' ? 'rgba(255,255,255,0.5)' : '#bbb' }}>
                             {q.status === 'answered' ? '· answered' : '· pending'}
                           </span>
@@ -1608,11 +1608,11 @@ function AskSheet({
                                 {q.text}
                               </p>
                               <div
-                                className="flex-shrink-0 rounded-full px-2.5 py-1 mt-[1px]"
+                                className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-2.5 py-1 mt-[1px]"
                                 style={{ background: q.status === 'answered' ? '#000' : '#f0f0f2' }}
                               >
                                 <span
-                                  className="font-mono text-[10px] font-semibold"
+                                  className="text-[10px] font-semibold tracking-tight"
                                   style={{ color: q.status === 'answered' ? 'white' : '#555' }}
                                 >
                                   {oo(q.price)}
@@ -2042,12 +2042,12 @@ function EditPriceSheet({
               {/* Title + current price */}
               <div className="flex items-start justify-between mb-1">
                 <p className="text-[18px] font-bold text-[#111]">Post price</p>
-                <div className="flex items-center gap-1 rounded-full px-2.5 py-1 mt-[2px]"
+                <div className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 mt-[2px]"
                   style={{ background: '#f0f0f2' }}>
-                  <span className="font-mono text-[11px] font-semibold text-[#555]">
+                  <span className="text-[11px] font-semibold text-[#555] tracking-tight">
                     {currentPrice === 0 ? 'free' : oo(currentPrice)}
                   </span>
-                  <span className="font-mono text-[10px] text-[#bbb]">current</span>
+                  <span className="text-[10px] text-[#bbb]">current</span>
                 </div>
               </div>
               <p className="font-mono text-[11px] mb-5" style={{ color: '#aaa' }}>
@@ -3722,9 +3722,9 @@ export default function ProfilePage() {
                   Price updated
                 </span>
                 {/* New price pill */}
-                <div className="flex items-center gap-1 rounded-full px-3 py-1 mt-0.5"
+                <div className="inline-flex items-center justify-center rounded-full px-3 py-1 mt-0.5"
                   style={{ background: '#f0f0f2' }}>
-                  <span className="font-mono text-[12px] font-semibold" style={{ color: '#111' }}>
+                  <span className="text-[12px] font-semibold tracking-tight" style={{ color: '#111' }}>
                     {priceSavedToast === 0 ? 'free' : oo(priceSavedToast)}
                   </span>
                 </div>

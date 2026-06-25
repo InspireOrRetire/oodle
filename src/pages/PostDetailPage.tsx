@@ -415,10 +415,10 @@ export default function PostDetailPage() {
                         </div>
                         <button
                           onClick={() => setClarifyTarget({ postId: item.id, creatorId: item.creator.id ?? '', creator: item.creator, question: reply.question, price: reply.price })}
-                          className="flex-shrink-0 rounded-full px-3.5 py-2 active:scale-95 transition-transform"
+                          className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3.5 py-2 active:scale-95 transition-transform"
                           style={{ background: '#000' }}
                         >
-                          <span className="font-mono text-[12px] font-semibold text-white">{oo(reply.price)}</span>
+                          <span className="text-[12px] font-semibold text-white tracking-tight">{oo(reply.price)}</span>
                         </button>
                       </div>
                     </div>
@@ -461,10 +461,10 @@ export default function PostDetailPage() {
                         <p className="flex-1 text-[14px] text-[#222] leading-[1.55]">{reply.question}</p>
                         <button
                           onClick={() => setClarifyTarget({ postId: item.id, creatorId: item.creator.id ?? '', creator: item.creator, question: reply.question, price: reply.price })}
-                          className="flex-shrink-0 rounded-full px-2.5 py-1.5 active:scale-95 transition-transform"
+                          className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-2.5 py-1.5 active:scale-95 transition-transform"
                           style={{ background: '#000', marginTop: 1 }}
                         >
-                          <span className="font-mono text-[11px] font-semibold text-white">{oo(reply.price)}</span>
+                          <span className="text-[11px] font-semibold text-white tracking-tight">{oo(reply.price)}</span>
                         </button>
                       </div>
                       {cartCountText(reply.cart_count) && (
