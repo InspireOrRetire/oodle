@@ -23,9 +23,9 @@ export interface UnlockTarget {
 interface TokenPack { id: string; tokens: number; price: number; tag?: string }
 
 const TOKEN_PACKS: TokenPack[] = [
-  { id: 'p1', tokens: 4,    price: 4.99 },
-  { id: 'p2', tokens: 8.5,  price: 9.99,  tag: 'Most popular' },
-  { id: 'p3', tokens: 21,   price: 24.99, tag: 'Best value'   },
+  { id: 'p1', tokens: 5,   price: 5   },
+  { id: 'p2', tokens: 10,  price: 10,  tag: 'Most popular' },
+  { id: 'p3', tokens: 25,  price: 25,  tag: 'Best value'   },
 ]
 
 type UView = 'main' | 'buy-tokens' | 'success'
@@ -196,9 +196,14 @@ export default function UnlockSheet({
                       <p className="text-center font-mono text-[12px] mb-0.5" style={{ color: '#aaa' }}>
                         Your balance: {oo(balance)}
                       </p>
-                      {!hasBalance && (
-                        <p className="text-center font-mono text-[11px]" style={{ color: '#888' }}>
-                          You need {oo(price - balance)} more
+                      {!hasBalance && balance === 0 && (
+                        <p className="text-center text-[12px]" style={{ color: '#888' }}>
+                          Your wallet is empty. Load funds to start unlocking answers.
+                        </p>
+                      )}
+                      {!hasBalance && balance > 0 && (
+                        <p className="text-center text-[12px]" style={{ color: '#888' }}>
+                          You need {oo(price - balance)} more to unlock this answer.
                         </p>
                       )}
 
@@ -218,7 +223,7 @@ export default function UnlockSheet({
                           {unlocking
                             ? <div className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin" />
                             : <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
-                                {hasBalance ? `Unlock for ${oo(price)}` : 'Add balance to unlock'}
+                                {hasBalance ? `Unlock ${price.toFixed(2)}` : 'Add funds to unlock'}
                               </span>
                           }
                         </button>
@@ -295,7 +300,7 @@ export default function UnlockSheet({
                         {topping
                           ? <div className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin" />
                           : <span style={{ fontSize: 16, fontWeight: 600, color: 'white', letterSpacing: '-0.1px' }}>
-                              Add {oo(pack.tokens)} balance
+                              Add {oo(pack.tokens)}
                             </span>
                         }
                       </button>

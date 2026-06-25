@@ -92,17 +92,29 @@ export default function MenuDrawer({ isOpen, onClose }: Props) {
             {/* Balance row */}
             <button
               onClick={() => setShowTopUp(true)}
-              className="w-full flex items-center justify-between py-3 px-3 rounded-lg hover:bg-amber-50 transition-colors"
+              className="w-full flex items-center justify-between py-3 px-3 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <span className="font-bold text-[15px]" style={{ color: '#f5a623' }}>$?</span>
+                <span className="font-bold text-[15px] text-gray-900">$?</span>
                 <span className="text-[15px] text-gray-900">Balance</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-amber-500 font-medium text-[15px]">{oo(tokenBalance)}</span>
+                <span className="font-medium text-[15px] text-gray-900">{oo(tokenBalance)}</span>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </div>
             </button>
+
+            {/* Low balance / empty wallet nudge */}
+            {tokenBalance === 0 && (
+              <p className="text-[12px] px-3 pb-1" style={{ color: '#999' }}>
+                Your wallet is empty. Load funds to start unlocking answers.
+              </p>
+            )}
+            {tokenBalance > 0 && tokenBalance < 5 && (
+              <p className="text-[12px] px-3 pb-1" style={{ color: '#999' }}>
+                Your balance is running low. Add funds to keep asking.
+              </p>
+            )}
           </div>
 
           <div className="h-px bg-gray-100 my-3" />

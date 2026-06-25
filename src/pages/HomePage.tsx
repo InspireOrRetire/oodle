@@ -371,7 +371,7 @@ function FeedCard({
                           className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-75 transition-opacity"
                           style={{ background: '#000', marginTop: 1 }}
                         >
-                          <span className="text-[12px] font-semibold text-white tracking-tight">{oo(reply.price)}</span>
+                          <span className="text-[12px] font-semibold text-white tracking-tight">Unlock {reply.price.toFixed(2)}</span>
                         </button>
                       </div>
                       {/* Per-reply cart count */}

@@ -273,10 +273,7 @@ export default function PostDetailPage() {
                 style={{ background: '#000' }}
               >
                 <span className="text-[14px] font-semibold text-white">
-                  I want this
-                  {price != null && (
-                    <span className="ml-1.5 font-mono opacity-60">· {oo(price)}</span>
-                  )}
+                  {price != null ? `Unlock ${price.toFixed(2)}` : 'I want this'}
                 </span>
               </button>
             )}
@@ -359,8 +356,8 @@ export default function PostDetailPage() {
                         className="rounded-full px-2.5 py-1"
                         style={{ background: '#f0f0f2' }}
                       >
-                        <span className="font-mono text-[11px] font-semibold text-[#555]">
-                          {oo(reply.price)}
+                        <span className="text-[11px] font-semibold text-[#555] tracking-tight">
+                          Unlock {reply.price.toFixed(2)}
                         </span>
                       </div>
 
@@ -418,7 +415,7 @@ export default function PostDetailPage() {
                           className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3.5 py-2 active:scale-95 transition-transform"
                           style={{ background: '#000' }}
                         >
-                          <span className="text-[12px] font-semibold text-white tracking-tight">{oo(reply.price)}</span>
+                          <span className="text-[12px] font-semibold text-white tracking-tight">Unlock {reply.price.toFixed(2)}</span>
                         </button>
                       </div>
                     </div>
@@ -464,7 +461,7 @@ export default function PostDetailPage() {
                           className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-2.5 py-1.5 active:scale-95 transition-transform"
                           style={{ background: '#000', marginTop: 1 }}
                         >
-                          <span className="text-[11px] font-semibold text-white tracking-tight">{oo(reply.price)}</span>
+                          <span className="text-[11px] font-semibold text-white tracking-tight">Unlock {reply.price.toFixed(2)}</span>
                         </button>
                       </div>
                       {cartCountText(reply.cart_count) && (

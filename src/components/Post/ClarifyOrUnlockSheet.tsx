@@ -146,8 +146,7 @@ export default function ClarifyOrUnlockSheet({ target, onClose, onUnlock }: Prop
                 style={{ background: '#000' }}
               >
                 <span className="text-[15px] font-semibold text-white">
-                  Unlock answer
-                  <span className="ml-1.5 font-mono opacity-60">· {target.price}</span>
+                  Unlock {target.price.toFixed(2)}
                 </span>
               </button>
 

@@ -115,7 +115,7 @@ export default function PurchaseSheet({ question, post, balance, onClose, onPurc
                     onClick={() => advance('confirm')}
                     className="w-full bg-black py-4 rounded-full font-semibold text-[15px] text-white"
                   >
-                    Unlock for {oo(question.price)}
+                    Unlock {question.price.toFixed(2)}
                   </button>
                 ) : (
                   <div className="rounded-[14px] px-5 py-4 text-center" style={{ background: '#f9f9f9', border: '0.5px solid #ebebeb' }}>
