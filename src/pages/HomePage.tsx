@@ -3068,7 +3068,7 @@ export default function HomePage() {
                 onLike={() => toggleLike(item.id)}
                 onSaveToggle={() => setSaveTarget(item.id)}
                 onFollow={handleFollow}
-                onUnlock={feedItem => setUnlockTarget({ creator: feedItem.creator, question: feedItem.question, price: feedItem.price ?? 0 })}
+                onUnlock={feedItem => setUnlockTarget({ creator: feedItem.creator, question: feedItem.question, price: feedItem.price ?? 0, postId: feedItem.id })}
                 onProfile={username => navigate(`/u/${username}`)}
                 onAsk={() => { iosKbRef.current?.focus(); setAskItem(item) }}
                 onTap={() => handleCardTap(item)}

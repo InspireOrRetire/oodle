@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Share2, Menu, Eye, Plus, Minus, MoreHorizontal, Link, Zap, Bookmark, Check, ArrowLeft, CreditCard, Shield, Mail, Heart, MessageCircle, ChevronUp, ChevronDown, Copy, AtSign, Camera, ChevronRight as ChevronRightIcon, Image, Video, MapPin, List, Type, FileText, X, Search } from 'lucide-react'
+import { Share2, Menu, Eye, Plus, Minus, MoreHorizontal, Link, Zap, Bookmark, Check, ArrowLeft, Mail, Heart, MessageCircle, ChevronUp, ChevronDown, Copy, AtSign, Camera, ChevronRight as ChevronRightIcon, Image, Video, MapPin, List, Type, FileText, X, Search } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
@@ -828,21 +828,10 @@ const TOKEN_PACKS: TokenPack[] = [
   { id: 'p3', tokens: 21,   price: 24.99, tag: 'Best value'   },
 ]
 
-// Re-usable Apple Pay button content
-function ApplePayLogo() {
-  return (
-    <span className="flex items-center gap-[5px]">
-      <svg viewBox="0 0 17 20" width="15" height="18" fill="white">
-        <path d="M14.14 10.53c-.02-2.04 1.67-3.03 1.74-3.07-.95-1.39-2.43-1.58-2.95-1.6-1.26-.13-2.46.74-3.1.74-.64 0-1.63-.72-2.68-.7-1.38.02-2.66.8-3.37 2.03C2.1 10.6 3.12 14.7 4.77 16.94c.82 1.12 1.79 2.38 3.07 2.33 1.24-.05 1.7-.79 3.2-.79 1.49 0 1.91.79 3.21.77 1.33-.02 2.17-1.15 2.98-2.27.94-1.29 1.33-2.55 1.35-2.61-.03-.01-2.59-1-2.61-3.96h.02zm-2.44-7.27c.68-.82 1.14-1.96 1.01-3.1--.98.04-2.16.65-2.86 1.47-.63.72-1.18 1.87-1.03 2.97 1.09.08 2.2-.55 2.88-1.34z"/>
-      </svg>
-      <span style={{ fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', fontSize: 19, fontWeight: 500, color: 'white', letterSpacing: '-0.3px', lineHeight: 1 }}>Pay</span>
-    </span>
-  )
-}
 
 // ─── Purchase bottom sheet ─────────────────────────────────────────────────────
 
-type PView = 'main' | 'buy-tokens' | 'card' | 'success'
+type PView = 'main' | 'buy-tokens' | 'success'
 
 function PurchaseSheet({
   thread,
@@ -862,76 +851,66 @@ function PurchaseSheet({
   const initials = creatorDisplay.initials
 
   const [view, setView]         = useState<PView>('main')
-  const [balance]               = useState(120)
+  const [balance, setBalance]   = useState(0)
   const [pack, setPack]         = useState<TokenPack>(TOKEN_PACKS[1])
-  const [cardCtx, setCardCtx]   = useState<'unlock' | 'tokens'>('unlock')
-
-  // Card form
-  const [cardNum, setCardNum]   = useState('')
-  const [expiry, setExpiry]     = useState('')
-  const [cvc, setCvc]           = useState('')
-  const [cardName, setCardName] = useState('')
-
-  // Async states
-  const [paying, setPaying]     = useState(false)
-  const [appling, setAppling]   = useState(false)
+  const [unlocking, setUnlocking] = useState(false)
+  const [topping,   setTopping]   = useState(false)
+  const [unlockErr, setUnlockErr] = useState<string | null>(null)
 
   const price      = thread?.price ?? 0
   const hasBalance = balance >= price
 
   function nav(to: PView) { setView(to) }
 
-  function handleTokenUnlock() {
-    if (hasBalance) { if (thread) onPurchased?.(thread.id); nav('success') }
-    else nav('buy-tokens')
+  useEffect(() => {
+    let cancelled = false
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.user?.id) return
+      supabase.from('users').select('token_balance').eq('id', session.user.id).single()
+        .then(({ data }) => { if (!cancelled && data) setBalance(data.token_balance ?? 0) })
+    })
+    return () => { cancelled = true }
+  }, [])
+
+  async function handleBalanceUnlock() {
+    if (!thread) return
+    setUnlocking(true); setUnlockErr(null)
+    try {
+      const { data, error: fnErr } = await supabase.functions.invoke('unlock-with-balance', {
+        body: { threadId: thread.id, price },
+      })
+      if (fnErr || !data?.success) throw new Error(fnErr?.message ?? data?.error ?? 'Unlock failed')
+      setBalance(data.newBalance ?? 0)
+      onPurchased?.(thread.id)
+      nav('success')
+    } catch (err: unknown) {
+      setUnlockErr(err instanceof Error ? err.message : 'Something went wrong')
+    } finally {
+      setUnlocking(false)
+    }
   }
 
-  async function handleApplePay() {
-    setAppling(true)
-    await new Promise(r => setTimeout(r, 1700))
-    setAppling(false)
-    if (thread) onPurchased?.(thread.id)
-    nav('success')
-  }
-
-  async function handleCardPay() {
-    setPaying(true)
-    await new Promise(r => setTimeout(r, 1900))
-    setPaying(false)
-    if (thread) onPurchased?.(thread.id)
-    nav('success')
+  async function handleTopUp() {
+    setTopping(true); setUnlockErr(null)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Not signed in')
+      const { data, error: fnErr } = await supabase.functions.invoke('stripe-topup', {
+        body: { packId: pack.id },
+      })
+      if (fnErr || !data?.url) throw new Error(fnErr?.message ?? 'No checkout URL')
+      window.open(data.url, '_blank')
+    } catch (err: unknown) {
+      setUnlockErr(err instanceof Error ? err.message : 'Something went wrong')
+    } finally {
+      setTopping(false)
+    }
   }
 
   function handleClose() {
     onClose()
-    setTimeout(() => {
-      setView('main')
-      setCardNum(''); setExpiry(''); setCvc(''); setCardName('')
-      setPaying(false); setAppling(false)
-    }, 380)
+    setTimeout(() => { setView('main'); setUnlocking(false); setTopping(false); setUnlockErr(null) }, 380)
   }
-
-  // ── Auto-formatters ──────────────────────────────────────────────────────────
-  function fmtCard(v: string) {
-    return v.replace(/\D/g, '').slice(0, 16).replace(/(.{4})(?=.)/g, '$1 ')
-  }
-  function fmtExpiry(v: string) {
-    const d = v.replace(/\D/g, '').slice(0, 4)
-    return d.length >= 3 ? d.slice(0, 2) + ' / ' + d.slice(2) : d
-  }
-  function cardBrand(n: string) {
-    const d = n.replace(/\s/g, '')[0]
-    if (d === '4') return 'VISA'
-    if (d === '5') return 'MC'
-    if (d === '3') return 'AMEX'
-    if (d === '6') return 'DISC'
-    return null
-  }
-  const brand        = cardBrand(cardNum)
-  const cardComplete = cardNum.replace(/\s/g, '').length === 16
-                    && expiry.replace(/\s/g, '').length >= 4
-                    && cvc.length >= 3
-                    && cardName.trim().length > 0
 
   // ── Slide variants ───────────────────────────────────────────────────────────
   const V = {
@@ -1019,39 +998,24 @@ function PurchaseSheet({
                       {/* CTAs */}
                       <div className="flex flex-col gap-2.5 mt-5">
 
-                        {/* Token unlock */}
-                        <button onClick={handleTokenUnlock}
-                          className="w-full rounded-[14px] py-[15px] flex items-center justify-center gap-2 active:opacity-80 transition-opacity"
+                        {unlockErr && (
+                          <p className="text-center font-mono text-[11px] text-red-500">{unlockErr}</p>
+                        )}
+
+                        <button
+                          onClick={hasBalance ? handleBalanceUnlock : () => nav('buy-tokens')}
+                          disabled={unlocking}
+                          className="w-full rounded-[14px] py-[15px] flex items-center justify-center gap-2 active:opacity-80 transition-opacity disabled:opacity-50"
                           style={{ background: '#111' }}>
-                          <Zap style={{ width: 15, height: 15, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
-                          <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
-                            {hasBalance ? `Unlock for $${price.toFixed(2)}` : 'Add balance to unlock'}
-                          </span>
-                        </button>
-
-                        {/* Apple Pay */}
-                        <button onClick={handleApplePay} disabled={appling}
-                          className="w-full rounded-[14px] py-[14px] flex items-center justify-center gap-2 active:opacity-80 transition-opacity disabled:opacity-70"
-                          style={{ background: '#000' }}>
-                          {appling
+                          {unlocking
                             ? <div className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            : <ApplePayLogo />
+                            : <>
+                                <Zap style={{ width: 15, height: 15, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
+                                <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
+                                  {hasBalance ? `Unlock for $${price.toFixed(2)}` : 'Add balance to unlock'}
+                                </span>
+                              </>
                           }
-                        </button>
-
-                        {/* Card */}
-                        <button onClick={() => { setCardCtx('unlock'); nav('card') }}
-                          className="w-full rounded-[14px] py-[14px] flex items-center justify-center gap-2 active:opacity-80 transition-opacity"
-                          style={{ background: '#f5f5f7', border: '0.5px solid #e8e8e8' }}>
-                          <CreditCard style={{ width: 16, height: 16, color: '#555' }} strokeWidth={1.75} />
-                          <span style={{ fontSize: 15, fontWeight: 500, color: '#333' }}>Pay with card</span>
-                        </button>
-
-                        {/* Buy tokens shortcut */}
-                        <button onClick={() => nav('buy-tokens')}
-                          className="w-full py-2 flex items-center justify-center gap-1.5 active:opacity-60 transition-opacity">
-                          <Zap style={{ width: 12, height: 12, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
-                          <span className="font-mono text-[11px]" style={{ color: '#aaa' }}>Add balance</span>
                         </button>
                       </div>
 
@@ -1128,149 +1092,23 @@ function PurchaseSheet({
                         })}
                       </div>
 
-                      {/* Pay buttons */}
-                      <div className="flex flex-col gap-2.5">
-                        <button onClick={handleApplePay} disabled={appling}
-                          className="w-full rounded-[14px] py-[14px] flex items-center justify-center gap-2 active:opacity-80 disabled:opacity-70"
-                          style={{ background: '#000' }}>
-                          {appling
-                            ? <div className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            : <ApplePayLogo />
-                          }
-                        </button>
-                        <button onClick={() => { setCardCtx('tokens'); nav('card') }}
-                          className="w-full rounded-[14px] py-[14px] flex items-center justify-center gap-2 active:opacity-80"
-                          style={{ background: '#f5f5f7', border: '0.5px solid #e8e8e8' }}>
-                          <CreditCard style={{ width: 16, height: 16, color: '#555' }} strokeWidth={1.75} />
-                          <span style={{ fontSize: 15, fontWeight: 500, color: '#333' }}>Pay with card</span>
-                        </button>
-                      </div>
-
-                      <p className="text-center font-mono text-[10px] mt-4" style={{ color: '#d0d0d0' }}>
-                        Tokens are non-refundable
-                      </p>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* ────────────────── CARD ────────────────── */}
-                {view === 'card' && (
-                  <motion.div key="card" variants={V}
-                    initial="enter" animate="center" exit="exit" transition={Tx}
-                    className="absolute inset-0 overflow-y-auto"
-                  >
-                    <div className="px-5 pt-4 pb-10">
-
-                      {/* Header */}
-                      <div className="flex items-center gap-2 pb-4 mb-4"
-                        style={{ borderBottom: '0.5px solid #f2f2f2' }}>
-                        <button onClick={() => nav(cardCtx === 'tokens' ? 'buy-tokens' : 'main')}
-                          className="p-1 -ml-1">
-                          <ArrowLeft style={{ width: 20, height: 20, color: '#111' }} strokeWidth={2} />
-                        </button>
-                        <span className="text-[17px] font-bold text-[#111]">Pay with card</span>
-                        {/* Brand badges */}
-                        <div className="ml-auto flex items-center gap-1">
-                          {(['VISA', 'MC', 'AMEX', 'DISC'] as const).map(b => (
-                            <div key={b} className="font-mono text-[8px] font-bold px-[5px] py-[2px] rounded-[3px] transition-all"
-                              style={{
-                                background: brand === b ? '#111' : '#f0f0f0',
-                                color:      brand === b ? 'white' : '#bbb',
-                              }}>
-                              {b}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-4">
-
-                        {/* Card number */}
-                        <div>
-                          <label className="font-mono text-[10px] uppercase tracking-[0.06em] mb-2 block"
-                            style={{ color: '#aaa' }}>Card number</label>
-                          <div className="rounded-[12px] px-4 py-[13px] flex items-center gap-2.5"
-                            style={{ background: '#f5f5f7' }}>
-                            <CreditCard style={{ width: 16, height: 16, color: '#bbb', flexShrink: 0 }} strokeWidth={1.75} />
-                            <input
-                              type="text" inputMode="numeric"
-                              placeholder="1234  5678  9012  3456"
-                              value={cardNum}
-                              onChange={e => setCardNum(fmtCard(e.target.value))}
-                              className="flex-1 bg-transparent text-[15px] text-[#111] placeholder-[#ccc] outline-none font-mono tracking-wider"
-                            />
-                          </div>
-                        </div>
-
-                        {/* Expiry + CVC row */}
-                        <div className="flex gap-3">
-                          <div className="flex-1">
-                            <label className="font-mono text-[10px] uppercase tracking-[0.06em] mb-2 block"
-                              style={{ color: '#aaa' }}>Expiry</label>
-                            <input
-                              type="text" inputMode="numeric" placeholder="MM / YY"
-                              value={expiry}
-                              onChange={e => setExpiry(fmtExpiry(e.target.value))}
-                              className="w-full rounded-[12px] px-4 py-[13px] text-[15px] text-[#111] placeholder-[#ccc] outline-none font-mono"
-                              style={{ background: '#f5f5f7' }}
-                            />
-                          </div>
-                          <div className="flex-1">
-                            <label className="font-mono text-[10px] uppercase tracking-[0.06em] mb-2 block"
-                              style={{ color: '#aaa' }}>CVC</label>
-                            <input
-                              type="text" inputMode="numeric" placeholder="•••" maxLength={4}
-                              value={cvc}
-                              onChange={e => setCvc(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                              className="w-full rounded-[12px] px-4 py-[13px] text-[15px] text-[#111] placeholder-[#ccc] outline-none font-mono"
-                              style={{ background: '#f5f5f7' }}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Name */}
-                        <div>
-                          <label className="font-mono text-[10px] uppercase tracking-[0.06em] mb-2 block"
-                            style={{ color: '#aaa' }}>Name on card</label>
-                          <input
-                            type="text" placeholder="Full name"
-                            value={cardName}
-                            onChange={e => setCardName(e.target.value)}
-                            className="w-full rounded-[12px] px-4 py-[13px] text-[15px] text-[#111] placeholder-[#ccc] outline-none"
-                            style={{ background: '#f5f5f7' }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Amount summary */}
-                      <div className="flex items-center justify-between mt-5 px-1">
-                        <span className="font-mono text-[12px]" style={{ color: '#aaa' }}>Total</span>
-                        <span className="text-[17px] font-bold text-[#111]">
-                          ${cardCtx === 'tokens' ? pack.price.toFixed(2) : price.toFixed(2)}
-                        </span>
-                      </div>
-
                       {/* Pay button */}
                       <button
-                        onClick={handleCardPay}
-                        disabled={!cardComplete || paying}
-                        className="w-full rounded-[14px] py-[15px] mt-3 flex items-center justify-center gap-2 active:opacity-80 transition-opacity disabled:opacity-30"
+                        onClick={handleTopUp}
+                        disabled={topping}
+                        className="w-full rounded-[14px] py-[15px] flex items-center justify-center gap-2 active:opacity-80 transition-opacity disabled:opacity-50"
                         style={{ background: '#111' }}>
-                        {paying
+                        {topping
                           ? <div className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin" />
                           : <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
-                              Pay ${cardCtx === 'tokens' ? pack.price.toFixed(2) : price.toFixed(2)}
+                              Add ${pack.price.toFixed(2)} balance
                             </span>
                         }
                       </button>
 
-                      {/* Security note */}
-                      <div className="flex items-center justify-center gap-1.5 mt-3">
-                        <Shield style={{ width: 11, height: 11, color: '#ccc' }} strokeWidth={1.75} />
-                        <span className="font-mono text-[10px]" style={{ color: '#ccc' }}>
-                          Secured by Stripe · 256-bit SSL
-                        </span>
-                      </div>
+                      <p className="text-center font-mono text-[10px] mt-4" style={{ color: '#d0d0d0' }}>
+                        Balance is non-refundable
+                      </p>
                     </div>
                   </motion.div>
                 )}

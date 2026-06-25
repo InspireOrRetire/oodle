@@ -266,6 +266,7 @@ export default function PostDetailPage() {
                   creator:  item.creator,
                   question: item.question,
                   price:    price ?? 0,
+                  postId:   item.id,
                 })}
                 className="w-full flex items-center justify-center gap-2 py-3.5 rounded-[16px] active:opacity-80 transition-opacity mb-3"
                 style={{ background: '#111' }}
@@ -532,7 +533,7 @@ export default function PostDetailPage() {
             target={clarifyTarget}
             onClose={() => setClarifyTarget(null)}
             onUnlock={() => {
-              setUnlockTarget({ creator: { ...clarifyTarget.creator, avatar_url: clarifyTarget.creator.avatar_url ?? undefined }, question: clarifyTarget.question, price: clarifyTarget.price })
+              setUnlockTarget({ creator: { ...clarifyTarget.creator, avatar_url: clarifyTarget.creator.avatar_url ?? undefined }, question: clarifyTarget.question, price: clarifyTarget.price, postId: clarifyTarget.postId })
               setClarifyTarget(null)
             }}
           />
