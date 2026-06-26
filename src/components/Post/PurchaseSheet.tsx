@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Lock } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Question, Post } from '../../lib/supabase'
 import TokenIcon from '../TokenIcon'
@@ -115,7 +116,10 @@ export default function PurchaseSheet({ question, post, balance, onClose, onPurc
                     onClick={() => advance('confirm')}
                     className="w-full bg-black py-4 rounded-full font-semibold text-[15px] text-white"
                   >
-                    Unlock {question.price.toFixed(2)}
+                    <span className="inline-flex items-center gap-1.5">
+                      <Lock style={{ width: 13, height: 13 }} strokeWidth={2.5} />
+                      {question.price.toFixed(2)}
+                    </span>
                   </button>
                 ) : (
                   <div className="rounded-[14px] px-5 py-4 text-center" style={{ background: '#f9f9f9', border: '0.5px solid #ebebeb' }}>

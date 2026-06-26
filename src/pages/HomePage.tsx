@@ -10,7 +10,7 @@ import {
   Check, Plus, Minus, Bookmark, Eye, ArrowLeft, CreditCard, Shield,
   Image as ImageIcon, AlignLeft, Quote, Camera, MapPin, BarChart2,
   ChevronDown, FileText, SlidersHorizontal, Mail, Type, Bell, Video, Flag,
-  ShoppingCart,
+  ShoppingCart, Lock,
 } from 'lucide-react'
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion'
 import PostMediaCarousel from '../components/Post/PostMediaCarousel'
@@ -371,7 +371,7 @@ function FeedCard({
                           className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-75 transition-opacity"
                           style={{ background: '#000', marginTop: 1 }}
                         >
-                          <span className="text-[12px] font-semibold text-white tracking-tight">Unlock {reply.price.toFixed(2)}</span>
+                          <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-white tracking-tight"><Lock style={{ width: 10, height: 10 }} strokeWidth={2.5} />{reply.price.toFixed(2)}</span>
                         </button>
                       </div>
                       {/* Per-reply cart count */}

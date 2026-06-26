@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, MessageCircle, Check, ShoppingCart } from 'lucide-react'
+import { X, MessageCircle, Check, ShoppingCart, Lock } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { createThreadWithMedia } from '../../services/threadService'
 import { cartService } from '../../services/cartService'
@@ -145,8 +145,9 @@ export default function ClarifyOrUnlockSheet({ target, onClose, onUnlock }: Prop
                 className="w-full flex items-center justify-center py-4 rounded-full mb-3 active:opacity-80 transition-opacity"
                 style={{ background: '#000' }}
               >
-                <span className="text-[15px] font-semibold text-white">
-                  Unlock {target.price.toFixed(2)}
+                <span className="inline-flex items-center gap-1.5 text-[15px] font-semibold text-white">
+                  <Lock style={{ width: 13, height: 13 }} strokeWidth={2.5} />
+                  {target.price.toFixed(2)}
                 </span>
               </button>
 

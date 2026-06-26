@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { ArrowLeft, MoreHorizontal, MapPin, Eye, Zap, Check, MessageCircle, X as XIcon } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, MapPin, Eye, Zap, Check, MessageCircle, X as XIcon, Lock } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { FeedItem } from '../services/feedService'
 import { fetchPostById, composedPostToFeedItem } from '../services/feedService'
@@ -273,7 +273,9 @@ export default function PostDetailPage() {
                 style={{ background: '#000' }}
               >
                 <span className="text-[14px] font-semibold text-white">
-                  {price != null ? `Unlock ${price.toFixed(2)}` : 'I want this'}
+                  {price != null
+                    ? <span className="inline-flex items-center gap-1.5"><Lock style={{ width: 13, height: 13 }} strokeWidth={2.5} />{price.toFixed(2)}</span>
+                    : 'I want this'}
                 </span>
               </button>
             )}
@@ -356,8 +358,9 @@ export default function PostDetailPage() {
                         className="rounded-full px-2.5 py-1"
                         style={{ background: '#f0f0f2' }}
                       >
-                        <span className="text-[11px] font-semibold text-[#555] tracking-tight">
-                          Unlock {reply.price.toFixed(2)}
+                        <span className="inline-flex items-center gap-[3px] text-[11px] font-semibold text-[#555] tracking-tight">
+                          <Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />
+                          {reply.price.toFixed(2)}
                         </span>
                       </div>
 
@@ -415,7 +418,7 @@ export default function PostDetailPage() {
                           className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3.5 py-2 active:scale-95 transition-transform"
                           style={{ background: '#000' }}
                         >
-                          <span className="text-[12px] font-semibold text-white tracking-tight">Unlock {reply.price.toFixed(2)}</span>
+                          <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-white tracking-tight"><Lock style={{ width: 10, height: 10 }} strokeWidth={2.5} />{reply.price.toFixed(2)}</span>
                         </button>
                       </div>
                     </div>
@@ -461,7 +464,7 @@ export default function PostDetailPage() {
                           className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-2.5 py-1.5 active:scale-95 transition-transform"
                           style={{ background: '#000', marginTop: 1 }}
                         >
-                          <span className="text-[11px] font-semibold text-white tracking-tight">Unlock {reply.price.toFixed(2)}</span>
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight"><Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{reply.price.toFixed(2)}</span>
                         </button>
                       </div>
                       {cartCountText(reply.cart_count) && (

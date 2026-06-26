@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, ShoppingBag } from 'lucide-react'
+import { Check, ShoppingBag, Lock } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { sendInsufficientBalanceEmail } from '../../services/emailService'
@@ -141,9 +141,9 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                           className="w-full rounded-[14px] py-[15px] flex items-center justify-center gap-2 active:opacity-80 transition-opacity"
                           style={{ background: '#111' }}
                         >
-                          <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 15, lineHeight: 1 }}>$?</span>
-                          <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
-                            Unlock {count} answer{count !== 1 ? 's' : ''} · ${total.toFixed(2)}
+                          <span className="inline-flex items-center gap-1.5" style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
+                            <Lock style={{ width: 13, height: 13 }} strokeWidth={2.5} />
+                            {count} answer{count !== 1 ? 's' : ''} · ${total.toFixed(2)}
                           </span>
                         </button>
                       ) : (

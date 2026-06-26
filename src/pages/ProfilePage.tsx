@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Share2, Menu, Eye, Plus, Minus, MoreHorizontal, Link, Zap, Bookmark, Check, ArrowLeft, Mail, Heart, MessageCircle, ChevronUp, ChevronDown, Copy, AtSign, Camera, ChevronRight as ChevronRightIcon, Image, Video, MapPin, List, Type, FileText, X, Search } from 'lucide-react'
+import { Share2, Menu, Eye, Plus, Minus, MoreHorizontal, Link, Zap, Bookmark, Check, ArrowLeft, Mail, Heart, MessageCircle, ChevronUp, ChevronDown, Copy, AtSign, Camera, ChevronRight as ChevronRightIcon, Image, Video, MapPin, List, Type, FileText, X, Search, Lock } from 'lucide-react'
 import { oo } from '../lib/oo'
 import { QRCodeSVG } from 'qrcode.react'
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion'
@@ -654,7 +654,7 @@ function ThreadItem({
                               className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-75 transition-opacity"
                               style={{ background: '#000', marginTop: 1 }}
                             >
-                              <span className="text-[11px] font-semibold text-white tracking-tight">Unlock {thread.price.toFixed(2)}</span>
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight"><Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{thread.price.toFixed(2)}</span>
                             </button>
                           )
                         )}
@@ -1006,8 +1006,10 @@ function PurchaseSheet({
                           style={{ background: '#000' }}>
                           {unlocking
                             ? <div className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            : <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
-                                {hasBalance ? `Unlock ${price.toFixed(2)}` : 'Add funds to unlock'}
+                            : <span className="inline-flex items-center gap-1.5" style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
+                                {hasBalance
+                                  ? <><Lock style={{ width: 13, height: 13 }} strokeWidth={2.5} />{price.toFixed(2)}</>
+                                  : 'Add funds to unlock'}
                               </span>
                           }
                         </button>

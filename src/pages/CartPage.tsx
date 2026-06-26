@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, X, Check, ShoppingCart, Trash2 } from 'lucide-react'
+import { ArrowLeft, X, Check, ShoppingCart, Trash2, Lock } from 'lucide-react'
 import { cartService, type CartItem } from '../services/cartService'
 import CartCheckoutSheet from '../components/Cart/CartCheckoutSheet'
 
@@ -178,10 +178,12 @@ export default function CartPage() {
                 className="w-full py-4 rounded-2xl text-[15px] font-semibold text-white flex items-center justify-center gap-2 transition-opacity"
                 style={{ background: '#111', opacity: selectedCount === 0 ? 0.3 : 1 }}
               >
-                <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 15, lineHeight: 1 }}>$?</span>
                 {selectedCount === 0
                   ? 'Select answers to unlock'
-                  : `Unlock ${selectedCount === items.length ? 'all' : 'selected'} · $?${selectedTotal}`
+                  : <span className="inline-flex items-center gap-1.5">
+                      <Lock style={{ width: 13, height: 13 }} strokeWidth={2.5} />
+                      {selectedCount === items.length ? 'all' : 'selected'} · $?{selectedTotal}
+                    </span>
                 }
               </button>
             </div>

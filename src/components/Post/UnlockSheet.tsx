@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Check, Zap } from 'lucide-react'
+import { ArrowLeft, Check, Zap, Lock } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { oo } from '../../lib/oo'
 
@@ -222,8 +222,10 @@ export default function UnlockSheet({
                         >
                           {unlocking
                             ? <div className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            : <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
-                                {hasBalance ? `Unlock ${price.toFixed(2)}` : 'Add funds to unlock'}
+                            : <span className="inline-flex items-center gap-1.5" style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
+                                {hasBalance
+                                  ? <><Lock style={{ width: 13, height: 13 }} strokeWidth={2.5} />{price.toFixed(2)}</>
+                                  : 'Add funds to unlock'}
                               </span>
                           }
                         </button>
