@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Check, ShoppingBag, Lock } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { supabase } from '../../lib/supabase'
 import { sendInsufficientBalanceEmail } from '../../services/emailService'
 import type { CartItem } from '../../services/cartService'
 import TopUpSheet from '../Menu/TopUpSheet'
@@ -21,25 +22,41 @@ const Tx = { type: 'spring', stiffness: 420, damping: 42 } as const
 
 export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: Props) {
   const navigate         = useNavigate()
-  const { user }         = useAuth()
+  const { user, profile } = useAuth()
   const [step, setStep]  = useState<Step>('summary')
   const [emailFired, setEmailFired] = useState(false)
   const [topUpOpen, setTopUpOpen]   = useState(false)
+  const [unlockError, setUnlockError] = useState<string | null>(null)
 
-  const [balance] = useState(120) // TODO: wire to real profile balance
+  const balance    = profile?.token_balance ?? 0
   const total      = items.reduce((s, i) => s + i.price, 0)
   const count      = items.length
   const hasBalance = balance >= total
   const remaining  = balance - total
 
-  useEffect(() => { if (!open) setTimeout(() => { setStep('summary'); setEmailFired(false); setTopUpOpen(false) }, 380) }, [open])
+  useEffect(() => {
+    if (!open) setTimeout(() => { setStep('summary'); setEmailFired(false); setTopUpOpen(false); setUnlockError(null) }, 380)
+  }, [open])
 
   function handleClose() { onClose() }
 
   async function handleUnlock() {
     if (!hasBalance) return
     setStep('processing')
-    await new Promise(r => setTimeout(r, 1800))
+    setUnlockError(null)
+    const results = await Promise.all(
+      items.map(item =>
+        supabase.functions.invoke('unlock-with-balance', {
+          body: { threadId: item.itemId, price: item.price },
+        })
+      )
+    )
+    const failed = results.find(r => r.error)
+    if (failed) {
+      setUnlockError(failed.error?.message ?? 'Purchase failed. Please try again.')
+      setStep('summary')
+      return
+    }
     setStep('success')
   }
 
@@ -135,6 +152,9 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                       </div>
 
                       {/* CTA or passive wallet text */}
+                      {unlockError && (
+                        <p className="text-center text-[12px] mb-2" style={{ color: '#ef4444' }}>{unlockError}</p>
+                      )}
                       {hasBalance ? (
                         <button
                           onClick={handleUnlock}

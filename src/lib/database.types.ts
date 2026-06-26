@@ -400,6 +400,27 @@ export type Database = {
           },
         ]
       }
+      blocked_users: {
+        Row: {
+          blocker_id: string
+          blocked_id: string
+          created_at: string
+        }
+        Insert: {
+          blocker_id: string
+          blocked_id: string
+          created_at?: string
+        }
+        Update: {
+          blocker_id?: string
+          blocked_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "blocked_users_blocker_id_fkey"; columns: ["blocker_id"]; referencedRelation: "users"; referencedColumns: ["id"] },
+          { foreignKeyName: "blocked_users_blocked_id_fkey"; columns: ["blocked_id"]; referencedRelation: "users"; referencedColumns: ["id"] },
+        ]
+      }
       users: {
         Row: {
           avatar_url: string | null
@@ -409,14 +430,19 @@ export type Database = {
           default_answer_price: number | null
           display_name: string | null
           email: string
+          email_notifications: boolean
           followers_count: number
           following_count: number
           id: string
           onboarding_completed: boolean
+          public_profile: boolean
+          push_notifications: boolean
           response_rate: number | null
           role: string
+          show_answer_price: boolean
           stripe_account_id: string | null
           stripe_onboarded: boolean | null
+          token_balance: number
           updated_at: string
           username: string | null
         }
@@ -428,14 +454,19 @@ export type Database = {
           default_answer_price?: number | null
           display_name?: string | null
           email: string
+          email_notifications?: boolean
           followers_count?: number
           following_count?: number
           id: string
           onboarding_completed?: boolean
+          public_profile?: boolean
+          push_notifications?: boolean
           response_rate?: number | null
           role: string
+          show_answer_price?: boolean
           stripe_account_id?: string | null
           stripe_onboarded?: boolean | null
+          token_balance?: number
           updated_at?: string
           username?: string | null
         }
@@ -447,14 +478,19 @@ export type Database = {
           default_answer_price?: number | null
           display_name?: string | null
           email?: string
+          email_notifications?: boolean
           followers_count?: number
           following_count?: number
           id?: string
           onboarding_completed?: boolean
+          public_profile?: boolean
+          push_notifications?: boolean
           response_rate?: number | null
           role?: string
+          show_answer_price?: boolean
           stripe_account_id?: string | null
           stripe_onboarded?: boolean | null
+          token_balance?: number
           updated_at?: string
           username?: string | null
         }

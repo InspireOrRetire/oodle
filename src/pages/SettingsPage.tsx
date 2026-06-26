@@ -187,8 +187,19 @@ function ChangePasswordSheet({ open, onClose, onSaved }: { open: boolean; onClos
   async function handleSave() {
     if (!canSave) return
     setLoading(true)
-    await new Promise(r => setTimeout(r, 1400))
+    setError('')
+    const { error: signInErr } = await supabase.auth.signInWithPassword({
+      email: (await supabase.auth.getUser()).data.user?.email ?? '',
+      password: current,
+    })
+    if (signInErr) {
+      setError('Current password is incorrect')
+      setLoading(false)
+      return
+    }
+    const { error: updateErr } = await supabase.auth.updateUser({ password: next })
     setLoading(false)
+    if (updateErr) { setError(updateErr.message); return }
     setCurrent(''); setNext(''); setConfirm(''); setError('')
     onClose(); onSaved()
   }
@@ -1205,7 +1216,7 @@ export default function SettingsPage() {
 
   const { profile: realProfile } = useAuth()
   const profile = { display_name: realProfile?.display_name ?? realProfile?.username ?? 'Your name', username: realProfile?.username ?? '', avatar_url: realProfile?.avatar_url ?? null }
-  const balance = 0  // token balance not in schema yet
+  const balance = realProfile?.token_balance ?? 0
   const isFan = realProfile?.role !== 'creator'
 
   // ── toggle state (lifted so toasts work) ────────────────────────────────────
@@ -1217,7 +1228,34 @@ export default function SettingsPage() {
 
   // ── local mutable profile fields ────────────────────────────────────────────
   const [username, setUsername] = useState(profile.username)
-  const [blockedCount, setBlockedCount] = useState(1)
+  const [blockedCount, setBlockedCount] = useState(0)
+
+  // ── load settings from DB on mount ──────────────────────────────────────────
+  useEffect(() => {
+    if (!realProfile?.id) return
+    supabase
+      .from('users')
+      .select('public_profile, push_notifications, email_notifications, show_answer_price')
+      .eq('id', realProfile.id)
+      .single()
+      .then(({ data }) => {
+        if (!data) return
+        setPublicOn(data.public_profile)
+        setPushOn(data.push_notifications)
+        setEmailOn(data.email_notifications)
+        setPriceOn(data.show_answer_price)
+      })
+    supabase
+      .from('blocked_users')
+      .select('*', { count: 'exact', head: true })
+      .eq('blocker_id', realProfile.id)
+      .then(({ count }) => { if (count !== null) setBlockedCount(count) })
+  }, [realProfile?.id])
+
+  async function saveToggle(field: string, value: boolean) {
+    if (!realProfile?.id) return
+    await supabase.from('users').update({ [field]: value }).eq('id', realProfile.id)
+  }
 
   // ── sheet visibility ─────────────────────────────────────────────────────────
   const [buyOpen,      setBuyOpen]      = useState(false)
@@ -1242,9 +1280,28 @@ export default function SettingsPage() {
   }
 
   // Earnings (creator only)
-  const weekEarnings  = 184.50
-  const monthEarnings = 712.00
-  const allTimeTokens = 2_840
+  const [weekEarnings,  setWeekEarnings]  = useState(0)
+  const [monthEarnings, setMonthEarnings] = useState(0)
+  const [allTimeEarnings, setAllTimeEarnings] = useState(0)
+
+  useEffect(() => {
+    if (!realProfile?.id || isFan) return
+    const now = new Date()
+    const weekAgo  = new Date(now.getTime() - 7  * 24 * 60 * 60 * 1000).toISOString()
+    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
+    supabase
+      .from('post_purchases')
+      .select('amount, created_at')
+      .eq('creator_id', realProfile.id)
+      .then(({ data }) => {
+        if (!data) return
+        const rows = data as { amount: number; created_at: string }[]
+        const sum = (rs: typeof rows) => rs.reduce((s, r) => s + (r.amount ?? 0), 0)
+        setAllTimeEarnings(sum(rows))
+        setMonthEarnings(sum(rows.filter(r => r.created_at >= monthAgo)))
+        setWeekEarnings(sum(rows.filter(r => r.created_at >= weekAgo)))
+      })
+  }, [realProfile?.id, isFan])
 
   return (
     <div className="min-h-screen pb-24" style={{ background: '#f5f5f7' }}>
@@ -1335,7 +1392,7 @@ export default function SettingsPage() {
                 {[
                   { label: 'this week',  value: `$${weekEarnings.toFixed(2)}`       },
                   { label: 'this month', value: `$${monthEarnings.toFixed(2)}`      },
-                  { label: 'all-time',   value: `${allTimeTokens.toLocaleString()} tkn` },
+                  { label: 'all-time',   value: `$${allTimeEarnings.toFixed(2)}`    },
                 ].map((s, i) => (
                   <div key={i} className="flex-1 rounded-[12px] px-3 py-2.5 text-center" style={{ background: '#f5f5f7' }}>
                     <p className="text-[14px] font-bold text-[#111]">{showEarnings ? s.value : '••••'}</p>
@@ -1406,14 +1463,14 @@ export default function SettingsPage() {
           icon={<Eye style={{ width: 14, height: 14 }} strokeWidth={2} />}
           iconBg="#f4f4f6" iconColor="#555"
           label="Public profile" sublabel="Anyone can find and view your profile"
-          isOn={publicOn} onToggle={v => { setPublicOn(v); showToast(v ? 'Profile set to public' : 'Profile set to private') }}
+          isOn={publicOn} onToggle={v => { setPublicOn(v); saveToggle('public_profile', v); showToast(v ? 'Profile set to public' : 'Profile set to private') }}
         />
         {!isFan && (
           <Row
             icon={<Star style={{ width: 14, height: 14 }} strokeWidth={2} />}
             iconBg="#f4f4f6" iconColor="#555"
             label="Show answer price" sublabel="Display your price on your profile"
-            isOn={priceOn} onToggle={v => { setPriceOn(v); showToast(v ? 'Price shown on profile' : 'Price hidden from profile') }}
+            isOn={priceOn} onToggle={v => { setPriceOn(v); saveToggle('show_answer_price', v); showToast(v ? 'Price shown on profile' : 'Price hidden from profile') }}
           />
         )}
         <Row
@@ -1435,8 +1492,8 @@ export default function SettingsPage() {
               const perm = await Notification.requestPermission()
               if (perm === 'granted') {
                 setPushOn(true)
+                saveToggle('push_notifications', true)
                 showToast('Push notifications on')
-                // Onboarding push sequence — wallet funding reminder after short delay
                 setTimeout(() => {
                   new Notification('Your oodle wallet is ready', {
                     body: 'Add funds at oodle.com to start unlocking answers.',
@@ -1445,10 +1502,12 @@ export default function SettingsPage() {
                 }, 3000)
               } else {
                 setPushOn(false)
+                saveToggle('push_notifications', false)
                 showToast('Permission denied — enable in device settings')
               }
             } else {
               setPushOn(v)
+              saveToggle('push_notifications', v)
               showToast(v ? 'Push notifications on' : 'Push notifications off')
             }
           }}
@@ -1457,7 +1516,7 @@ export default function SettingsPage() {
           icon={<Bell style={{ width: 14, height: 14 }} strokeWidth={2} />}
           iconBg="#f4f4f6" iconColor="#555"
           label="Email notifications" sublabel="Weekly digest and updates"
-          isOn={emailOn} onToggle={v => { setEmailOn(v); showToast(v ? 'Email notifications on' : 'Email notifications off') }}
+          isOn={emailOn} onToggle={v => { setEmailOn(v); saveToggle('email_notifications', v); showToast(v ? 'Email notifications on' : 'Email notifications off') }}
           last
         />
       </Section>
