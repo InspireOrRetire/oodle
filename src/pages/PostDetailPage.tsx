@@ -351,33 +351,10 @@ export default function PostDetailPage() {
                     {/* Question */}
                     <p className="text-[14px] text-[#222] leading-[1.55] mb-3">{reply.question}</p>
 
-                    {/* Data points row */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {/* Price to unlock */}
-                      <div
-                        className="rounded-full px-2.5 py-1"
-                        style={{ background: '#f0f0f2' }}
-                      >
-                        <span className="inline-flex items-center gap-[3px] text-[11px] font-semibold text-[#555] tracking-tight">
-                          <Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />
-                          {reply.price.toFixed(2)}
-                        </span>
-                      </div>
-
-                      {/* Answered badge */}
-                      <div
-                        className="flex items-center gap-1 rounded-full px-2.5 py-1"
-                        style={{ background: '#f0fdf4', border: '0.5px solid #bbf7d0' }}
-                      >
-                        <Check style={{ width: 9, height: 9, color: '#10b981' }} strokeWidth={2.5} />
-                        <span className="text-[11px] font-semibold" style={{ color: '#059669' }}>Answered</span>
-                      </div>
-
-                      {/* Social proof */}
-                      <span className="text-[11px]" style={{ color: '#ccc' }}>
-                        {unlockCount} unlocked
-                      </span>
-                    </div>
+                    {/* Social proof */}
+                    <span className="text-[11px]" style={{ color: '#ccc' }}>
+                      {unlockCount} unlocked
+                    </span>
                   </div>
                 </div>
 
