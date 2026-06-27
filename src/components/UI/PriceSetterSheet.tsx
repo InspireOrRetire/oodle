@@ -171,7 +171,7 @@ export default function PriceSetterSheet({ open, currentPrice = 0, onConfirm, on
             {/* ── Amount display ── */}
             <div className="flex-1 flex items-center justify-center">
               <div className="flex items-end">
-                {/* $ */}
+                {/* $? currency prefix */}
                 <span style={{
                   fontSize:      30,
                   fontWeight:    800,
@@ -181,7 +181,7 @@ export default function PriceSetterSheet({ open, currentPrice = 0, onConfirm, on
                   marginRight:   3,
                   transition:    'color 0.12s',
                 }}>
-                  $
+                  $?
                 </span>
 
                 {/* Integer — animates on change */}
@@ -338,7 +338,7 @@ export default function PriceSetterSheet({ open, currentPrice = 0, onConfirm, on
                   color:         hasAmount ? 'white' : '#b8b8b8',
                   transition:    'color 0.2s',
                 }}>
-                  {hasAmount ? `Set price  ·  $${amount.toFixed(2)}` : 'Set price'}
+                  {hasAmount ? `Set price  ·  $?${amount.toFixed(2)}` : 'Set price'}
                 </span>
               </motion.button>
             </div>

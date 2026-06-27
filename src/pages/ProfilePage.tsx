@@ -518,7 +518,7 @@ function ThreadItem({
                 <Zap style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2.5} fill="#111" />
               </div>
               <span style={{ fontSize: 14, fontWeight: 600, color: 'white', fontFamily: 'DM Mono, monospace' }}>
-                {thread.price}
+                {oo(thread.price)}
               </span>
             </button>
           )}
@@ -548,7 +548,28 @@ function ThreadItem({
                   {creator.display_name}
                 </span>
                 <span className="font-mono text-[11px] text-[#bbb] flex-shrink-0">{thread.time_ago}</span>
-                <div className="ml-auto flex items-center gap-1 flex-shrink-0">
+                <div className="ml-auto flex items-center gap-2 flex-shrink-0">
+                  {thread.price > 0 && (
+                    isOwner ? (
+                      <button
+                        onClick={e => { e.stopPropagation(); onEditPrice?.() }}
+                        className="inline-flex items-center justify-center rounded-full px-3 py-1 active:opacity-70 transition-opacity"
+                        style={{ background: '#f0f0f2' }}
+                      >
+                        <span className="text-[11px] font-semibold text-[#555] tracking-tight">{oo(thread.price)}</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={e => { e.stopPropagation(); onUnlock(thread) }}
+                        className="inline-flex items-center justify-center rounded-full px-3 py-1 active:opacity-75 transition-opacity"
+                        style={{ background: '#111' }}
+                      >
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight">
+                          <Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{oo(thread.price)}
+                        </span>
+                      </button>
+                    )
+                  )}
                   <Eye className="w-3 h-3 text-[#ccc]" />
                   <span className="font-mono text-[11px] text-[#ccc]">
                     {thread.views >= 1000 ? `${(thread.views / 1000).toFixed(1)}K` : thread.views}
@@ -654,7 +675,7 @@ function ThreadItem({
                               className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-75 transition-opacity"
                               style={{ background: '#000', marginTop: 1 }}
                             >
-                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight"><Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{thread.price.toFixed(2)}</span>
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight"><Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{oo(thread.price)}</span>
                             </button>
                           )
                         )}

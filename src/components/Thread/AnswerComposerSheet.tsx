@@ -448,7 +448,7 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
                     <p className="font-mono text-[12px] font-semibold" style={{ color: '#111' }}>
                       you keep{' '}
                       <span style={{ color: price > 0 ? '#059669' : '#aaa' }}>
-                        {price > 0 ? `$${(price * 0.8).toFixed(2)}` : '$0.00'}
+                        {price > 0 ? `$?${(price * 0.8).toFixed(2)}` : '$?0.00'}
                       </span>
                     </p>
                     {price > 0 && (
