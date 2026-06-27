@@ -1279,6 +1279,7 @@ function NewPostSheet({
   const [mode,    setMode]    = useState<PostMode>('questions')
   const [caption, setCaption] = useState('')
   const [posted,  setPosted]  = useState(false)
+  const [postError, setPostError] = useState<string | null>(null)
   const [showPostOptions, setShowPostOptions] = useState(false)
 
   // answer-mode attachments
@@ -1334,6 +1335,7 @@ function NewPostSheet({
   async function handlePost() {
     if (!canPost || !userId) return
     setPosted(true)
+    setPostError(null)
     try {
       const postId  = crypto.randomUUID()
       const imgList = isAnswerMode ? images : qImages
@@ -1376,11 +1378,13 @@ function NewPostSheet({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error: insErr } = await (supabase as any).from('posts').insert(insertPayload)
       if (insErr) throw insErr
+      setTimeout(onClose, 1200)
     } catch (e: unknown) {
       console.error('[HomeAskSheet] post insert failed:', e)
-      // Still close after delay — user will see nothing saved
+      const msg = e instanceof Error ? e.message : 'Something went wrong. Please try again.'
+      setPostError(msg)
+      setPosted(false)
     }
-    setTimeout(onClose, 1200)
   }
 
   function addListLine()  { setListItems(p => [...p, { type: 'line',  text: '' }]) }
@@ -1473,6 +1477,12 @@ function NewPostSheet({
               </button>
             </div>
             <div style={{ height: '0.5px', background: '#ebebeb' }} />
+
+            {postError && (
+              <div className="px-4 py-2 text-center text-[13px]" style={{ color: '#ef4444', background: '#fff5f5' }}>
+                {postError}
+              </div>
+            )}
 
             <AnimatePresence mode="wait">
               {posted ? (
