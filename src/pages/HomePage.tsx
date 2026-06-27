@@ -1266,12 +1266,14 @@ function NewPostSheet({
   username,
   userId,
   onClose,
+  onPosted,
 }: {
   open: boolean
   avatarUrl?: string
   username: string
   userId: string
   onClose: () => void
+  onPosted?: () => void
 }) {
   type PostMode = 'questions' | 'answer'
   type ListRow  = { type: 'title' | 'line'; text: string }
@@ -1413,6 +1415,7 @@ function NewPostSheet({
         15000, 'Post'
       )
       if (insErr) throw new Error(insErr.message ?? 'Failed to create post')
+      onPosted?.()
       setTimeout(onClose, 1200)
     } catch (e: unknown) {
       console.error('[HomeAskSheet] post failed:', e)
@@ -2022,6 +2025,9 @@ export default function HomePage() {
   const [feedLoading, setFeedLoading] = useState(true)
   const [feedError,   setFeedError]   = useState<string | null>(null)
 
+  const [feedVersion, setFeedVersion] = useState(0)
+  const refreshFeed = useCallback(() => setFeedVersion(v => v + 1), [])
+
   useEffect(() => {
     // Auth still resolving — wait for it
     if (authLoading) return
@@ -2039,7 +2045,7 @@ export default function HomePage() {
         if (!cancelled) {
           clearTimeout(timeout)
           const items = composed.map(composedPostToFeedItem)
-          setFeed(items)   // real users see real data (or empty state — no mock fallback)
+          setFeed(items)
         }
       })
       .catch(err => {
@@ -2047,7 +2053,7 @@ export default function HomePage() {
       })
       .finally(() => { if (!cancelled) setFeedLoading(false) })
     return () => { cancelled = true; clearTimeout(timeout) }
-  }, [user?.id, authLoading, isExploreMode])
+  }, [user?.id, authLoading, isExploreMode, feedVersion])
 
   // ── Restore scroll position when returning from post detail ────────────
   useEffect(() => {
@@ -3168,6 +3174,7 @@ export default function HomePage() {
         username={activeProfile.username}
         userId={user?.id ?? ''}
         onClose={() => setNewPostOpen(false)}
+        onPosted={refreshFeed}
       />
 
       {/* ── Floating compose FAB (visible when scrolled past compose bar) ── */}
