@@ -2565,7 +2565,7 @@ export default function HomePage() {
                                     <p className="text-[11px] truncate leading-tight" style={{ color: '#aaa' }}>@{q.creatorUsername}</p>
                                   </div>
                                   <span className="flex-shrink-0 text-[10px] font-semibold px-2 py-1 rounded-full"
-                                    style={{ background: '#fffbeb', color: '#b45309' }}>Pending</span>
+                                    style={{ background: '#f0f0f0', color: '#555' }}>Pending</span>
                                 </div>
                                 <div className="p-3.5 pb-3">
                                   <p className="text-[13px] text-[#111] leading-snug line-clamp-2">{q.question}</p>
@@ -2600,7 +2600,7 @@ export default function HomePage() {
                               const status       = (t.status ?? 'clarification') as string
                               const isAnswered   = status === 'answered'
                               const statusLabel  = isAnswered ? 'Answered' : status === 'declined' ? 'Declined' : 'Pending'
-                              const statusColor  = isAnswered ? { bg: '#f0fdf4', text: '#16a34a' } : status === 'declined' ? { bg: '#fef2f2', text: '#dc2626' } : { bg: '#fffbeb', text: '#b45309' }
+                              const statusColor  = isAnswered ? { bg: '#f0fdf4', text: '#16a34a' } : status === 'declined' ? { bg: '#fef2f2', text: '#dc2626' } : { bg: '#f0f0f0', text: '#555' }
                               const fanName      = fan?.display_name || fan?.username || 'You'
                               const fanHandle    = fan?.username ? `@${fan.username}` : ''
                               const destination  = isAnswered && t.post_id ? `/post/${t.post_id}` : `/inbox/${t.id}`

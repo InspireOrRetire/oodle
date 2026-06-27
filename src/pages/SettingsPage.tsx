@@ -249,7 +249,7 @@ function ChangePasswordSheet({ open, onClose, onSaved }: { open: boolean; onClos
               onChange={e => setNext(e.target.value)}
               placeholder="••••••••"
               className="w-full rounded-[12px] px-4 py-[13px] pr-12 text-[15px] text-[#111] placeholder-[#ccc] outline-none"
-              style={{ background: '#f5f5f7', border: tooShort ? '1px solid #f5a623' : 'none' }}
+              style={{ background: '#f5f5f7', border: tooShort ? '1px solid #111' : 'none' }}
             />
             <button onClick={() => setShowNew(v => !v)}
               className="absolute right-3 top-1/2 -translate-y-1/2 p-1">
@@ -260,7 +260,7 @@ function ChangePasswordSheet({ open, onClose, onSaved }: { open: boolean; onClos
             </button>
           </div>
           {tooShort && (
-            <p className="font-mono text-[10px] mt-1.5" style={{ color: '#f5a623' }}>
+            <p className="font-mono text-[10px] mt-1.5" style={{ color: '#111' }}>
               At least 8 characters required
             </p>
           )}
@@ -294,7 +294,7 @@ function ChangePasswordSheet({ open, onClose, onSaved }: { open: boolean; onClos
                 const filled = (next.length >= 8 ? 2 : 1) + (next.length >= 12 ? 1 : 0) + (/[^a-z0-9]/i.test(next) ? 1 : 0) >= i
                 return (
                   <div key={i} className="flex-1 h-[3px] rounded-full transition-all"
-                    style={{ background: filled ? (next.length < 8 ? '#f5a623' : '#4cd964') : '#e5e5ea' }} />
+                    style={{ background: filled ? (next.length < 8 ? '#111' : '#4cd964') : '#e5e5ea' }} />
                 )
               })}
             </div>
@@ -957,7 +957,7 @@ function BuyTokensSheet({ open, onClose, onPurchased }: { open: boolean; onClose
                 <motion.div key="done" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
                   className="flex flex-col items-center py-10 px-6 pb-12">
                   <div className="w-16 h-16 rounded-full bg-[#111] flex items-center justify-center mb-4">
-                    <Zap style={{ width: 28, height: 28, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
+                    <Zap style={{ width: 28, height: 28, color: '#111' }} strokeWidth={2} fill="#111" />
                   </div>
                   <p className="text-[20px] font-bold text-[#111] mb-1">Balance added!</p>
                   <p className="font-mono text-[12px] mb-5" style={{ color: '#aaa' }}>
@@ -986,7 +986,7 @@ function BuyTokensSheet({ open, onClose, onPurchased }: { open: boolean; onClose
                           className="w-full flex items-center gap-3 rounded-[14px] px-4 py-3 text-left transition-all"
                           style={{ border: sel ? '1.5px solid #111' : '1px solid #ebebeb', background: sel ? '#111' : 'white' }}>
                           <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                            style={{ background: '#f5a623' }}>
+                            style={{ background: '#111' }}>
                             <Zap style={{ width: 16, height: 16, color: 'white' }} strokeWidth={2} fill="white" />
                           </div>
                           <div className="flex-1">
@@ -1125,7 +1125,7 @@ function AnswerDetailSheet({ entry, onClose }: { entry: PurchaseEntry | null; on
               {/* Meta row */}
               <div className="flex items-center justify-between pt-4" style={{ borderTop: '0.5px solid #f2f2f2' }}>
                 <div className="flex items-center gap-1.5">
-                  <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
+                  <span style={{ fontWeight: 700, color: '#111', fontSize: 11, lineHeight: 1 }}>$?</span>
                   <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>${entry.price.toFixed(2)}</span>
                 </div>
                 <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>
@@ -1188,7 +1188,7 @@ function MyAnswersSheet({ open, onClose }: { open: boolean; onClose: () => void 
               {/* Tokens paid + timestamp */}
               <div className="flex items-center justify-between mt-2 pl-[42px]">
                 <div className="flex items-center gap-1">
-                  <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
+                  <span style={{ fontWeight: 700, color: '#111', fontSize: 11, lineHeight: 1 }}>$?</span>
                   <span className="font-mono text-[10px]" style={{ color: '#bbb' }}>
                     ${t.price.toFixed(2)}
                   </span>
@@ -1350,7 +1350,7 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-[9px] flex items-center justify-center" style={{ background: '#fff8ed' }}>
-                <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 15, lineHeight: 1 }}>$?</span>
+                <span style={{ fontWeight: 700, color: '#111', fontSize: 15, lineHeight: 1 }}>$?</span>
               </div>
               <p className="text-[14px] font-medium text-[#111]">Balance</p>
             </div>
@@ -1367,7 +1367,7 @@ export default function SettingsPage() {
             className="w-full rounded-[12px] py-3 flex items-center justify-center gap-2 active:opacity-70 transition-opacity"
             style={{ background: '#111' }}
           >
-            <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 15, lineHeight: 1 }}>$?</span>
+            <span style={{ fontWeight: 700, color: '#111', fontSize: 15, lineHeight: 1 }}>$?</span>
             <span style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>Add balance</span>
           </button>
         </div>

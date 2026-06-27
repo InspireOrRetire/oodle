@@ -155,7 +155,7 @@ export default function TopUpSheet({ onClose }: Props) {
                         }}
                       >
                         <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                          style={{ background: '#f5a623' }}>
+                          style={{ background: '#111' }}>
                           <Zap style={{ width: 16, height: 16, color: 'white' }} strokeWidth={2} fill="white" />
                         </div>
                         <div className="flex-1">

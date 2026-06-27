@@ -39,7 +39,7 @@ function SlideTokens() {
     <div className="flex flex-col items-center text-center px-8 pt-10 pb-6">
       <div className="w-24 h-24 rounded-full flex items-center justify-center mb-8"
         style={{ background: '#fff8e7', border: '2px solid #f5e6b0' }}>
-        <Zap className="w-12 h-12" style={{ color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
+        <Zap className="w-12 h-12" style={{ color: '#111' }} strokeWidth={2} fill="#111" />
       </div>
       <h2 className="text-[30px] font-bold text-[#111] mb-4 leading-tight">
         Your balance is your currency
@@ -88,7 +88,7 @@ function SlideCreatorModel() {
       <div className="w-full space-y-4">
         {[
           { step: '1', bg: '#111',     text: 'white', label: 'You ask',           detail: 'Post your question on a creator\'s content' },
-          { step: '2', bg: '#f5a623',  text: 'white', label: 'Creator answers',   detail: 'They write, record, or share exactly what you need' },
+          { step: '2', bg: '#111',  text: 'white', label: 'Creator answers',   detail: 'They write, record, or share exactly what you need' },
           { step: '3', bg: '#10b981',  text: 'white', label: 'You unlock it',     detail: 'Use your balance — others can too, earning the creator passively' },
         ].map((row, i) => (
           <div key={row.step} className="flex items-start gap-4 text-left">
@@ -110,8 +110,8 @@ function SlideCreatorModel() {
       </div>
 
       <div className="mt-8 rounded-2xl px-5 py-4 w-full text-left"
-        style={{ background: '#fffbeb', border: '1px solid #f0e0a0' }}>
-        <p className="text-[13px] text-[#b45309] leading-snug">
+        style={{ background: '#f5f5f5', border: '1px solid #e0e0e0' }}>
+        <p className="text-[13px] text-[#111] leading-snug">
           <span className="font-semibold">Creators earn</span> every time someone unlocks
           their answer — even answers written months ago keep earning.
         </p>
@@ -193,8 +193,8 @@ function SlideFirstPost({
 
       {/* Prompt */}
       <div className="rounded-[16px] px-5 py-4 mb-4"
-        style={{ background: '#fffbeb', border: '1px solid #fde68a' }}>
-        <p className="text-[12px] font-semibold text-[#92400e] uppercase tracking-wide mb-1">Your prompt</p>
+        style={{ background: '#f5f5f5', border: '1px solid #e0e0e0' }}>
+        <p className="text-[12px] font-semibold text-[#111] uppercase tracking-wide mb-1">Your prompt</p>
         <p className="text-[15px] text-[#111] leading-snug italic">
           "What is something your followers always ask you for or about?"
         </p>
@@ -214,7 +214,7 @@ function SlideFirstPost({
       {/* Price */}
       <div className="flex items-center gap-3 mb-5 px-1">
         <div className="flex items-center gap-2">
-          <Zap className="w-4 h-4 flex-shrink-0" style={{ color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />
+          <Zap className="w-4 h-4 flex-shrink-0" style={{ color: '#111' }} strokeWidth={2} fill="#111" />
           <span className="text-[14px] font-semibold text-[#111]">Unlock price</span>
         </div>
         <div className="flex items-center gap-2 ml-auto">

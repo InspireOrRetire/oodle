@@ -142,11 +142,11 @@ export default function CartPage() {
                       <span
                         className="flex items-center gap-1 rounded-full px-2.5 py-1.5 font-mono text-[12px] font-semibold transition-all"
                         style={{
-                          background: checked ? '#fffbeb' : '#f5f5f5',
-                          color:      checked ? '#b45309' : '#bbb',
+                          background: checked ? '#111' : '#f5f5f5',
+                          color:      checked ? '#fff' : '#bbb',
                         }}
                       >
-                        <span style={{ fontWeight: 700, color: checked ? '#f5a623' : '#ccc', fontSize: 11, lineHeight: 1 }}>$?</span>
+                        <span style={{ fontWeight: 700, color: checked ? '#fff' : '#ccc', fontSize: 11, lineHeight: 1 }}>$?</span>
                         {it.price}
                       </span>
                       <button

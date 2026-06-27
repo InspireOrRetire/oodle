@@ -514,8 +514,8 @@ function ThreadItem({
               style={{ ...pillBase, width: 88, background: '#111', gap: 5, paddingLeft: 10, paddingRight: 14 }}
               onClick={() => { snap(0); onUnlock(thread) }}
             >
-              <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#f5a623', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Zap style={{ width: 11, height: 11, color: 'white' }} strokeWidth={2.5} fill="white" />
+              <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Zap style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2.5} fill="#111" />
               </div>
               <span style={{ fontSize: 14, fontWeight: 600, color: 'white', fontFamily: 'DM Mono, monospace' }}>
                 {thread.price}
@@ -962,7 +962,7 @@ function PurchaseSheet({
                             <span className="text-white text-[22px] font-semibold">{initials}</span>
                           </div>
                           <div className="absolute bottom-0 right-0 w-6 h-6 rounded-full flex items-center justify-center ring-2 ring-white"
-                            style={{ background: '#f5a623' }}>
+                            style={{ background: '#111' }}>
                             <Check style={{ width: 11, height: 11, color: 'white' }} strokeWidth={2.5} />
                           </div>
                         </div>
@@ -1055,7 +1055,7 @@ function PurchaseSheet({
                                 background: selected ? '#111' : 'white',
                               }}>
                               <div className="flex items-center justify-center rounded-full flex-shrink-0"
-                                style={{ width: 40, height: 40, background: '#f5a623' }}>
+                                style={{ width: 40, height: 40, background: '#111' }}>
                                 <Zap style={{ width: 18, height: 18, color: 'white' }} strokeWidth={2} fill="white" />
                               </div>
                               <div className="flex-1 min-w-0">

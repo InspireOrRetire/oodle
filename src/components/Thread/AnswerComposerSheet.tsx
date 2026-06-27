@@ -460,7 +460,7 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
                     className="flex items-center gap-1.5 rounded-full px-3.5 py-2"
                     style={{ background: '#111' }}
                   >
-                    {price > 0 && <Zap style={{ width: 12, height: 12, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />}
+                    {price > 0 && <Zap style={{ width: 12, height: 12, color: '#fff' }} strokeWidth={2.5} fill="#fff" />}
                     <span className="font-mono text-[13px] font-semibold text-white">
                       {price === 0 ? 'Free' : `$${price}`}
                     </span>

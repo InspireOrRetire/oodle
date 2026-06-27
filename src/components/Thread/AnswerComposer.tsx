@@ -18,7 +18,7 @@ function makeWaveform(n = 34): number[] {
 
 // ── Waveform visual ───────────────────────────────────────────────────────
 
-function Waveform({ data, color = 'bg-amber-400', animate: animated = false }: { data: number[]; color?: string; animate?: boolean }) {
+function Waveform({ data, color = 'bg-black', animate: animated = false }: { data: number[]; color?: string; animate?: boolean }) {
   return (
     <div className="flex items-center gap-[2px]" style={{ height: 32 }}>
       {data.map((h, i) => (

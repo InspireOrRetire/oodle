@@ -152,11 +152,11 @@ export default function QuestionQueue({
                 <ChevronUp
                   className="w-4 h-4"
                   strokeWidth={2.5}
-                  style={{ color: alreadyUpvoted ? '#f5a623' : '#ccc' }}
+                  style={{ color: alreadyUpvoted ? '#111' : '#ccc' }}
                 />
                 <span
                   className="text-[11px] font-semibold font-mono"
-                  style={{ color: alreadyUpvoted ? '#f5a623' : '#bbb' }}
+                  style={{ color: alreadyUpvoted ? '#111' : '#bbb' }}
                 >
                   {q.upvote_count}
                 </span>

@@ -115,7 +115,27 @@
       "Bash(grep -n \"price\\\\|Price\\\\|\\\\$\\\\|dollar\\\\|tip\\\\|chip\\\\|preset\" /Users/donlike/Downloads/smartlink/src/components/Post/AskQuestionSheet.tsx)",
       "Bash(sed -i '' 's/{ id: .p1., tokens: 50,  price: 4\\\\.99  }/{ id: '\"'\"'p1'\"'\"', tokens: 5,  price: 4.99  }/' /Users/donlike/Downloads/smartlink/src/components/Menu/TopUpSheet.tsx)",
       "Bash(sed -i '' 's/{ id: .p2., tokens: 120, price: 9\\\\.99,  tag: .Most popular. }/{ id: '\"'\"'p2'\"'\"', tokens: 10, price: 9.99,  tag: '\"'\"'Most popular'\"'\"' }/' /Users/donlike/Downloads/smartlink/src/components/Menu/TopUpSheet.tsx)",
-      "Bash(sed -i '' 's/{ id: .p3., tokens: 300, price: 24\\\\.99, tag: .Best value.   }/{ id: '\"'\"'p3'\"'\"', tokens: 25, price: 24.99, tag: '\"'\"'Best value'\"'\"'   }/' /Users/donlike/Downloads/smartlink/src/components/Menu/TopUpSheet.tsx)"
+      "Bash(sed -i '' 's/{ id: .p3., tokens: 300, price: 24\\\\.99, tag: .Best value.   }/{ id: '\"'\"'p3'\"'\"', tokens: 25, price: 24.99, tag: '\"'\"'Best value'\"'\"'   }/' /Users/donlike/Downloads/smartlink/src/components/Menu/TopUpSheet.tsx)",
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(grep -n \"\\\\${\\\\|\\\\.toFixed\\\\|balance\\\\|Balance\\\\|wallet\\\\|Wallet\" /Users/donlike/Downloads/smartlink/src/components/Menu/TopUpSheet.tsx)",
+      "Bash(grep -n \"toFixed\\\\|balance\\\\|Balance\\\\|wallet\\\\|Wallet\\\\|\\\\${\\\\|\\\\\\\\\\\\$\" /Users/donlike/Downloads/smartlink/src/components/Menu/MenuDrawer.tsx)",
+      "Bash(grep -n \"Your balance\\\\|toFixed\\\\|balance\\\\|Balance\\\\|\\\\${\\\\|\\\\\\\\\\\\$\" /Users/donlike/Downloads/smartlink/src/pages/ProfilePage.tsx)",
+      "Bash(grep -n \"\\\\${\\\\|\\\\.toFixed\\\\|balance\\\\|Balance\" /Users/donlike/Downloads/smartlink/src/components/Post/PurchaseSheet.tsx)",
+      "Bash(grep -rn \"Unlock [0-9]\\\\|Unlock \\\\${\" /Users/donlike/Downloads/smartlink/src/)",
+      "Bash(npx supabase *)",
+      "Bash(yes)",
+      "Bash(xargs -I{} echo \"npx supabase migration repair --status applied {}\")",
+      "Bash(grep -rn \"184\\\\.50\\\\|712\\\\.00\\\\|2_840\\\\|allTimeTokens\\\\|weekEarnings\\\\|monthEarnings\\\\|Chase Bank\\\\|4821\\\\|4242\\\\|useState\\(0\\)\\\\s*\\\\/\\\\/\\\\s*token\\\\|balance.*not in schema\\\\|hardcoded\\\\|\\\\$120\\\\|TODO\\\\|fake\" /Users/donlike/Downloads/smartlink/src --include=\"*.tsx\" --include=\"*.ts\")",
+      "mcp__visualize__read_me",
+      "mcp__visualize__show_widget",
+      "Bash(python3 -c \"import sys,json; [print\\(f['slug'], f['status']\\) for f in json.load\\(sys.stdin\\)['functions']]\")",
+      "Bash(git -C /Users/donlike/Downloads/smartlink status)",
+      "Bash(git -C /Users/donlike/Downloads/smartlink log --oneline -5)",
+      "Bash(git -C /Users/donlike/Downloads/smartlink diff --stat)",
+      "Bash(git -C /Users/donlike/Downloads/smartlink add src/components/Cart/CartCheckoutSheet.tsx src/lib/database.types.ts src/pages/SettingsPage.tsx supabase/migrations/021_post_purchases_nullable_thread.sql supabase/migrations/022_user_settings.sql supabase/functions/unlock-with-balance/)",
+      "Bash(git -C /Users/donlike/Downloads/smartlink commit -m ' *)",
+      "Bash(git -C /Users/donlike/Downloads/smartlink push origin dev)"
     ]
   }
 }
