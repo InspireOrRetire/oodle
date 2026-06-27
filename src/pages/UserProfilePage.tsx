@@ -333,10 +333,21 @@ function ProfilePostCard({ post, profile, navigate }: { post: PostRow; profile: 
             {(displayName[0] ?? '?').toUpperCase()}
           </div>
         )}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 flex items-center gap-1.5">
           <span className="text-[14px] font-semibold text-[#111]">{displayName}</span>
-          <span className="font-mono text-[11px] ml-2" style={{ color: '#bbb' }}>· {ago}</span>
+          <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>· {ago}</span>
         </div>
+        {post.price != null && post.price > 0 && (
+          <button
+            onClick={e => { e.stopPropagation(); navigate(`/post/${post.id}`) }}
+            className="inline-flex items-center justify-center rounded-full px-3 py-1 flex-shrink-0 active:opacity-75 transition-opacity"
+            style={{ background: '#111' }}
+          >
+            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight">
+              <Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{oo(post.price)}
+            </span>
+          </button>
+        )}
       </div>
 
       {/* Caption */}
@@ -364,11 +375,6 @@ function ProfilePostCard({ post, profile, navigate }: { post: PostRow; profile: 
         {(post.question_count ?? 0) > 0 && (
           <span className="text-[11px]" style={{ color: '#bbb' }}>
             {post.question_count} question{post.question_count !== 1 ? 's' : ''}
-          </span>
-        )}
-        {post.price != null && post.price > 0 && (
-          <span className="inline-flex items-center gap-0.5 font-mono text-[11px]" style={{ color: '#888' }}>
-            <Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{oo(post.price)}
           </span>
         )}
       </div>
