@@ -2532,13 +2532,21 @@ function CreatePostSheet({
   function removeListItem(i: number) { setListItems(p => p.length > 1 ? p.filter((_, idx) => idx !== i) : [{ type: 'line', text: '' }]) }
 
   async function handlePost() {
-    if (!userId || userId === 'explore-guest') { setError('Sign in to create posts.'); return }
     if (!canPost) {
       setError(isAnswerMode ? 'Add some content first.' : 'Write something or add a photo first.')
       return
     }
     setSaving(true); setError(null)
     try {
+      // Always resolve the auth user at post time — avoids stale prop
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      const posterId = authUser?.id ?? userId
+      if (!posterId || posterId === 'explore-guest') {
+        setError('Sign in to create posts.')
+        setSaving(false)
+        return
+      }
+
       const postId  = crypto.randomUUID()
       const imgList = isAnswerMode ? images : qImages
       const vidFile = isAnswerMode ? video : qVideo
@@ -2547,7 +2555,7 @@ function CreatePostSheet({
       // Insert the post immediately with empty image_urls — uploads happen in background
       const insertPayload: Record<string, unknown> = {
         id:         postId,
-        creator_id: userId,
+        creator_id: posterId,
         caption:    caption.trim() || null,
         image_urls: [],
         price:      priceNum || null,
@@ -2583,18 +2591,18 @@ function CreatePostSheet({
           const uploadedUrls: string[] = []
           for (let i = 0; i < imgList.length; i++) {
             const { file } = imgList[i]
-            const path = `${userId}/${postId}/${i}.${file.name.split('.').pop() ?? 'jpg'}`
+            const path = `${posterId}/${postId}/${i}.${file.name.split('.').pop() ?? 'jpg'}`
             const { error } = await supabase.storage.from('post-images').upload(path, file, { upsert: true, contentType: file.type })
             if (!error) uploadedUrls.push(supabase.storage.from('post-images').getPublicUrl(path).data.publicUrl)
             else console.warn('Image upload error:', error.message)
           }
           if (vidFile) {
-            const path = `${userId}/${postId}/video.${vidFile.file.name.split('.').pop() ?? 'mp4'}`
+            const path = `${posterId}/${postId}/video.${vidFile.file.name.split('.').pop() ?? 'mp4'}`
             const { error } = await supabase.storage.from('post-images').upload(path, vidFile.file, { upsert: true, contentType: vidFile.file.type })
             if (!error) uploadedUrls.push(supabase.storage.from('post-images').getPublicUrl(path).data.publicUrl)
           }
           if (pdfFile) {
-            const path = `${userId}/${postId}/doc.${pdfFile.name.split('.').pop() ?? 'pdf'}`
+            const path = `${posterId}/${postId}/doc.${pdfFile.name.split('.').pop() ?? 'pdf'}`
             const { error } = await supabase.storage.from('post-images').upload(path, pdfFile, { upsert: true, contentType: pdfFile.type })
             if (!error) uploadedUrls.push(supabase.storage.from('post-images').getPublicUrl(path).data.publicUrl)
           }
@@ -2685,9 +2693,7 @@ function CreatePostSheet({
                 onClick={handlePost}
                 className="px-4 py-[7px] rounded-full text-[13px] font-semibold transition-all active:opacity-70"
                 style={canPost
-                  ? (isAnswerMode
-                    ? { background: '#E8B800', color: '#111' }
-                    : { background: '#111', color: '#fff' })
+                  ? { background: '#111', color: '#fff' }
                   : { background: '#f0f0f0', color: '#bbb' }}
               >
                 {saving ? 'Posting…' : isAnswerMode ? 'Price & post' : 'Post'}
@@ -2722,9 +2728,7 @@ function CreatePostSheet({
                         onClick={() => setMode(opt.key)}
                         className="flex-1 py-[9px] px-3 rounded-[10px] text-[13px] font-semibold transition-all"
                         style={mode === opt.key
-                          ? (opt.key === 'answer'
-                            ? { background: '#E8B800', color: '#111' }
-                            : { background: '#111', color: '#fff' })
+                          ? { background: '#111', color: '#fff' }
                           : { background: 'transparent', color: '#999' }}
                       >
                         {opt.label}
@@ -2759,11 +2763,11 @@ function CreatePostSheet({
                       >
                         {/* ── Price block — Apple Cash style ── */}
                         <div className="mb-4 rounded-[20px] overflow-hidden"
-                          style={{ border: '1.5px solid #E8B800', background: 'rgba(232,184,0,0.04)' }}>
+                          style={{ border: '1.5px solid #111', background: 'rgba(232,184,0,0.04)' }}>
                           {/* Label */}
                           <div className="flex items-center justify-center gap-1.5 px-4 py-2.5"
                             style={{ borderBottom: '0.5px solid rgba(232,184,0,0.2)' }}>
-                            <Zap style={{ width: 11, height: 11, color: '#E8B800', flexShrink: 0 }} strokeWidth={2} fill="#E8B800" />
+                            <Zap style={{ width: 11, height: 11, color: '#111', flexShrink: 0 }} strokeWidth={2} fill="#111" />
                             <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: '#b88c00' }}>Answer price</span>
                           </div>
                           {/* Controls */}
@@ -3079,9 +3083,7 @@ function CreatePostSheet({
                 disabled={!canPost}
                 className="w-full rounded-[14px] py-[14px] text-[15px] font-semibold transition-all active:opacity-70"
                 style={canPost
-                  ? (isAnswerMode
-                    ? { background: '#E8B800', color: '#111' }
-                    : { background: '#111111', color: '#fff' })
+                  ? { background: '#111', color: '#fff' }
                   : { background: '#f0f0f0', color: '#c0c0c0' }}
               >
                 {saving ? 'Posting…' : isAnswerMode ? 'Price & post' : 'Post'}
