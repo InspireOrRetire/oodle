@@ -1,11 +1,12 @@
 import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, MoreHorizontal, MapPin, Search, X } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, MapPin, Search, X, Lock } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import type { UserRow, PostRow } from '../lib/database.types'
 import { useAuth } from '../contexts/AuthContext'
 import AMASheet from '../components/Profile/AMASheet'
+import { oo } from '../lib/oo'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -366,7 +367,9 @@ function ProfilePostCard({ post, profile, navigate }: { post: PostRow; profile: 
           </span>
         )}
         {post.price != null && post.price > 0 && (
-          <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>⚡{post.price}</span>
+          <span className="inline-flex items-center gap-0.5 font-mono text-[11px]" style={{ color: '#888' }}>
+            <Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{oo(post.price)}
+          </span>
         )}
       </div>
     </div>
@@ -645,20 +648,20 @@ export default function UserProfilePage() {
               if (!currentUser || !profile) return
               const next = !following
               setFollowing(next)
-              let newCount = 0
+              // Optimistic update
               setProfile(prev => {
                 if (!prev) return prev
-                newCount = Math.max(0, (prev.followers_count ?? 0) + (next ? 1 : -1))
-                return { ...prev, followers_count: newCount }
+                return { ...prev, followers_count: Math.max(0, (prev.followers_count ?? 0) + (next ? 1 : -1)) }
               })
               if (next) {
                 await supabase.from('user_following').insert({ follower_id: currentUser.id, creator_id: profile.id })
-                await supabase.from('users').update({ followers_count: newCount }).eq('id', profile.id)
               } else {
                 await supabase.from('user_following').delete()
                   .eq('follower_id', currentUser.id).eq('creator_id', profile.id)
-                await supabase.from('users').update({ followers_count: newCount }).eq('id', profile.id)
               }
+              // Re-fetch the real count so it matches what the trigger wrote
+              const { data } = await supabase.from('users').select('followers_count').eq('id', profile.id).single()
+              if (data) setProfile(prev => prev ? { ...prev, followers_count: data.followers_count ?? 0 } : prev)
             }}
             className="flex-1 rounded-[8px] py-[7px] text-[14px] font-semibold transition-all"
             style={following
