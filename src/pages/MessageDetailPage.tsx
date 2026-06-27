@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { oo } from '../lib/oo'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, MapPin, Square, Plus, Star, Zap, X, Camera, Video, FileText, Lock, AlignLeft, Type, Search, ChevronUp, ChevronDown, Flag } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -974,10 +975,14 @@ export default function MessageDetailPage() {
                 <div className="flex items-center gap-2.5 mb-2">
                   <Avatar url={creatorProfile.avatar_url} name={creatorName} size={7} />
                   <p className="font-semibold text-[13px] text-[#111]">@{creatorName}</p>
-                  <div className="ml-auto flex items-center gap-1 rounded-full px-2.5 py-1" style={{ background: '#111' }}>
-                    <span style={{ fontWeight: 700, color: '#111', fontSize: 11, lineHeight: 1 }}>$?</span>
-                    <span className="text-[12px] font-bold text-white">${thread.price.toFixed(2)}</span>
-                  </div>
+                  <button
+                    onClick={() => thread.post_id && navigate(`/post/${thread.post_id}`)}
+                    className="ml-auto inline-flex items-center gap-1 rounded-full px-2.5 py-1 active:opacity-70 transition-opacity"
+                    style={{ background: '#111' }}
+                  >
+                    <Lock style={{ width: 9, height: 9, color: 'white' }} strokeWidth={2.5} />
+                    <span className="text-[12px] font-bold text-white">{oo(thread.price)}</span>
+                  </button>
                 </div>
                 <p className="text-[14px] text-gray-700 leading-[1.5] line-clamp-2">{teaser}</p>
                 {!isCreator && (
@@ -1100,11 +1105,11 @@ export default function MessageDetailPage() {
           <button
             onClick={() => navigate(`/post/${thread.post_id}`)}
             className="w-full flex items-center justify-center gap-2.5 py-[15px] rounded-[16px] active:scale-[0.98] transition-transform"
-            style={{ background: '#E8B800' }}
+            style={{ background: '#111' }}
           >
-            <Zap className="w-[15px] h-[15px]" style={{ color: '#111' }} strokeWidth={2.5} fill="#111" />
-            <span className="text-[15px] font-bold text-[#111]">
-              I want this · ${thread.price.toFixed(2)}
+            <Lock className="w-[15px] h-[15px] text-white" strokeWidth={2.5} />
+            <span className="text-[15px] font-bold text-white">
+              I want this · {oo(thread.price)}
             </span>
           </button>
         </div>
@@ -1522,7 +1527,7 @@ export default function MessageDetailPage() {
                             className="font-mono text-[10px]"
                             style={{ color: '#10b981' }}
                           >
-                            you keep ~${(answerPrice * 0.07).toFixed(2)}
+                            you keep ~$?{(answerPrice * 0.07).toFixed(2)}
                           </motion.p>
                         ) : (
                           <motion.p
@@ -1533,7 +1538,7 @@ export default function MessageDetailPage() {
                             className="font-mono text-[10px]"
                             style={{ color: '#bbb' }}
                           >
-                            you keep $0.00
+                            you keep $?0.00
                           </motion.p>
                         )}
                       </AnimatePresence>
@@ -1625,10 +1630,10 @@ export default function MessageDetailPage() {
                   }}
                   disabled={!hasContent}
                   className="w-full flex items-center justify-center gap-2 py-3 rounded-[14px] transition-all disabled:opacity-30"
-                  style={{ background: '#E8B800' }}
+                  style={{ background: '#111' }}
                 >
-                  <Zap style={{ width: 14, height: 14, color: '#111' }} strokeWidth={2.5} fill="#111" />
-                  <span className="text-[14px] font-bold text-[#111]">Send answer</span>
+                  <Zap style={{ width: 14, height: 14, color: 'white' }} strokeWidth={2.5} fill="white" />
+                  <span className="text-[14px] font-bold text-white">Send answer</span>
                 </button>
 
                 {/* ── Location search sheet ── */}
