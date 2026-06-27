@@ -3143,14 +3143,29 @@ export default function ProfilePage() {
   const { scrollContainerRef } = useLayout()
   const isOwnProfile = loc.pathname === '/profile'
 
+  // Live counts fetched from DB (AuthContext profile is only loaded once at startup and goes stale)
+  const [liveCounts, setLiveCounts] = useState<{ followers_count: number; following_count: number; answers_count: number } | null>(null)
+
+  useEffect(() => {
+    if (!user || user.id === 'explore-guest') return
+    const uid = user.id
+    // Fetch counts fresh every time the profile page mounts
+    Promise.all([
+      supabase.from('users').select('followers_count, following_count').eq('id', uid).single(),
+      supabase.from('threads').select('id', { count: 'exact', head: true }).eq('creator_id', uid).eq('status', 'answered'),
+    ]).then(([{ data: u }, { count }]) => {
+      if (u) setLiveCounts({ followers_count: u.followers_count ?? 0, following_count: u.following_count ?? 0, answers_count: count ?? 0 })
+    })
+  }, [user?.id])
+
   // Active user identity — from real auth profile
   const activeProfile = {
     display_name:    realProfile?.display_name ?? realProfile?.username ?? 'Your name',
     username:        realProfile?.username ?? '',
     avatar_url:      realProfile?.avatar_url ?? null,
     bio:             (realProfile as { bio?: string | null } | null)?.bio ?? '',
-    followers_count: (realProfile as { followers_count?: number } | null)?.followers_count ?? 0,
-    following_count: (realProfile as { following_count?: number } | null)?.following_count ?? 0,
+    followers_count: liveCounts?.followers_count ?? (realProfile as { followers_count?: number } | null)?.followers_count ?? 0,
+    following_count: liveCounts?.following_count ?? (realProfile as { following_count?: number } | null)?.following_count ?? 0,
   }
 
   const [realThreads,     setRealThreads]     = useState<AnswerThread[]>([])
@@ -3256,7 +3271,7 @@ export default function ProfilePage() {
     return () => { cancelled = true; clearTimeout(timeout) }
   }, [user?.id, authLoading])
 
-  const answeredCount = realThreads.filter(t => t.type !== 'post').length
+  const answeredCount = liveCounts?.answers_count ?? realThreads.filter(t => t.type !== 'post').length
 
   // Followers sheet + social proof
   const [followersSheetOpen, setFollowersSheetOpen] = useState(false)
