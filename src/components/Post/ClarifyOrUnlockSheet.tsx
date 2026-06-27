@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Zap, MessageCircle, Check, ShoppingCart } from 'lucide-react'
+import { X, MessageCircle, Check, ShoppingCart, Lock } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { createThreadWithMedia } from '../../services/threadService'
 import { cartService } from '../../services/cartService'
@@ -142,22 +142,19 @@ export default function ClarifyOrUnlockSheet({ target, onClose, onUnlock }: Prop
               {/* Unlock */}
               <button
                 onClick={() => { onUnlock(); onClose() }}
-                className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl mb-3 active:opacity-80 transition-opacity"
-                style={{ background: '#111' }}
+                className="w-full flex items-center justify-center py-4 rounded-full mb-3 active:opacity-80 transition-opacity"
+                style={{ background: '#000' }}
               >
-                <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#f5a623', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Zap style={{ width: 11, height: 11, color: 'white' }} strokeWidth={2.5} fill="white" />
-                </div>
-                <span className="text-[15px] font-semibold text-white">
-                  Unlock answer
-                  <span className="ml-1.5 font-mono opacity-70">· {target.price}</span>
+                <span className="inline-flex items-center gap-1.5 text-[15px] font-semibold text-white">
+                  <Lock style={{ width: 13, height: 13 }} strokeWidth={2.5} />
+                  {target.price.toFixed(2)}
                 </span>
               </button>
 
               {/* Clarify */}
               <button
                 onClick={() => setStep('compose')}
-                className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl mb-3 active:opacity-70 transition-opacity"
+                className="w-full flex items-center justify-center gap-2 py-4 rounded-full mb-3 active:opacity-70 transition-opacity"
                 style={{ border: '1.5px solid #e5e5e5', background: 'white' }}
               >
                 <MessageCircle style={{ width: 15, height: 15, color: '#555' }} strokeWidth={1.75} />

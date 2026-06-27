@@ -6,7 +6,6 @@ import { useAuth } from '../../contexts/AuthContext'
 import AskQuestionSheet from './AskQuestionSheet'
 import ReactionBar from './ReactionBar'
 import PurchaseSheet from './PurchaseSheet'
-import TokenIcon from '../TokenIcon'
 
 interface Props { post: Post; onClose: () => void; onReact: (id: string, emoji: string) => void }
 

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { ArrowLeft, MoreHorizontal, MapPin, Eye, Zap, Check, MessageCircle, X as XIcon } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, MapPin, Eye, Zap, Check, MessageCircle, X as XIcon, Lock } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { FeedItem } from '../services/feedService'
 import { fetchPostById, composedPostToFeedItem } from '../services/feedService'
@@ -13,6 +13,7 @@ import { cartCountText } from '../services/cartService'
 import { createThreadWithMedia } from '../services/threadService'
 import { myQuestionsStore } from '../services/myQuestionsStore'
 import { useAuth } from '../contexts/AuthContext'
+import { oo } from '../lib/oo'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -266,21 +267,15 @@ export default function PostDetailPage() {
                   creator:  item.creator,
                   question: item.question,
                   price:    price ?? 0,
+                  postId:   item.id,
                 })}
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-[16px] active:opacity-80 transition-opacity mb-3"
-                style={{ background: '#111' }}
+                className="w-full flex items-center justify-center py-3.5 rounded-full active:opacity-80 transition-opacity mb-3"
+                style={{ background: '#000' }}
               >
-                <div style={{
-                  width: 18, height: 18, borderRadius: '50%', background: '#f5a623',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                }}>
-                  <Zap style={{ width: 10, height: 10, color: 'white' }} strokeWidth={2.5} fill="white" />
-                </div>
                 <span className="text-[14px] font-semibold text-white">
-                  I want this
-                  {price != null && (
-                    <span className="ml-1.5 font-mono opacity-75">· ⚡{price}</span>
-                  )}
+                  {price != null
+                    ? <span className="inline-flex items-center gap-1.5"><Lock style={{ width: 13, height: 13 }} strokeWidth={2.5} />{price.toFixed(2)}</span>
+                    : 'I want this'}
                 </span>
               </button>
             )}
@@ -356,33 +351,10 @@ export default function PostDetailPage() {
                     {/* Question */}
                     <p className="text-[14px] text-[#222] leading-[1.55] mb-3">{reply.question}</p>
 
-                    {/* Data points row */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {/* Price to unlock */}
-                      <div
-                        className="flex items-center gap-1 rounded-full px-2.5 py-1"
-                        style={{ background: '#fffbeb', border: '0.5px solid #fde68a' }}
-                      >
-                        <Zap style={{ width: 9, height: 9, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
-                        <span className="font-mono text-[11px] font-semibold" style={{ color: '#b45309' }}>
-                          ${reply.price.toFixed(2)}
-                        </span>
-                      </div>
-
-                      {/* Answered badge */}
-                      <div
-                        className="flex items-center gap-1 rounded-full px-2.5 py-1"
-                        style={{ background: '#f0fdf4', border: '0.5px solid #bbf7d0' }}
-                      >
-                        <Check style={{ width: 9, height: 9, color: '#10b981' }} strokeWidth={2.5} />
-                        <span className="text-[11px] font-semibold" style={{ color: '#059669' }}>Answered</span>
-                      </div>
-
-                      {/* Social proof */}
-                      <span className="text-[11px]" style={{ color: '#ccc' }}>
-                        {unlockCount} unlocked
-                      </span>
-                    </div>
+                    {/* Social proof */}
+                    <span className="text-[11px]" style={{ color: '#ccc' }}>
+                      {unlockCount} unlocked
+                    </span>
                   </div>
                 </div>
 
@@ -420,11 +392,10 @@ export default function PostDetailPage() {
                         </div>
                         <button
                           onClick={() => setClarifyTarget({ postId: item.id, creatorId: item.creator.id ?? '', creator: item.creator, question: reply.question, price: reply.price })}
-                          className="flex items-center gap-1.5 flex-shrink-0 rounded-[20px] px-3.5 py-2 active:scale-95 transition-transform"
-                          style={{ background: '#111' }}
+                          className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3.5 py-2 active:scale-95 transition-transform"
+                          style={{ background: '#000' }}
                         >
-                          <Zap style={{ width: 10, height: 10, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
-                          <span className="font-mono text-[12px] font-semibold text-white">⚡{reply.price}</span>
+                          <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-white tracking-tight"><Lock style={{ width: 10, height: 10 }} strokeWidth={2.5} />{reply.price.toFixed(2)}</span>
                         </button>
                       </div>
                     </div>
@@ -467,11 +438,10 @@ export default function PostDetailPage() {
                         <p className="flex-1 text-[14px] text-[#222] leading-[1.55]">{reply.question}</p>
                         <button
                           onClick={() => setClarifyTarget({ postId: item.id, creatorId: item.creator.id ?? '', creator: item.creator, question: reply.question, price: reply.price })}
-                          className="flex items-center gap-1.5 flex-shrink-0 rounded-[20px] px-2.5 py-1.5 active:scale-95 transition-transform"
-                          style={{ background: '#111', marginTop: 1 }}
+                          className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-2.5 py-1.5 active:scale-95 transition-transform"
+                          style={{ background: '#000', marginTop: 1 }}
                         >
-                          <Zap style={{ width: 10, height: 10, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
-                          <span className="font-mono text-[11px] font-semibold text-white">{reply.price}</span>
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight"><Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{reply.price.toFixed(2)}</span>
                         </button>
                       </div>
                       {cartCountText(reply.cart_count) && (
@@ -532,7 +502,7 @@ export default function PostDetailPage() {
             target={clarifyTarget}
             onClose={() => setClarifyTarget(null)}
             onUnlock={() => {
-              setUnlockTarget({ creator: { ...clarifyTarget.creator, avatar_url: clarifyTarget.creator.avatar_url ?? undefined }, question: clarifyTarget.question, price: clarifyTarget.price })
+              setUnlockTarget({ creator: { ...clarifyTarget.creator, avatar_url: clarifyTarget.creator.avatar_url ?? undefined }, question: clarifyTarget.question, price: clarifyTarget.price, postId: clarifyTarget.postId })
               setClarifyTarget(null)
             }}
           />

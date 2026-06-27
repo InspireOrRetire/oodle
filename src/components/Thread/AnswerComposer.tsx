@@ -4,7 +4,6 @@ import { X, GripVertical, MapPin, Mic, Square, Plus, ArrowUp, CheckCircle2 } fro
 import type { AnswerBlock, TextBlock, PhotoBlock, LocationBlock, AudioBlock, ListBlock } from '../../lib/database.types'
 import PlusMenu, { PlusMenuOption } from './PlusMenu'
 import LocationSearchSheet from './LocationSearchSheet'
-import TokenIcon from '../TokenIcon'
 import MapTileCard from '../UI/MapTileCard'
 
 // ── Helpers ───────────────────────────────────────────────────────────────

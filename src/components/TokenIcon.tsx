@@ -1,18 +1,12 @@
-import { Zap } from 'lucide-react'
-
 interface Props { size?: number; className?: string }
 
 export default function TokenIcon({ size = 16, className = '' }: Props) {
   return (
     <span
-      className={`inline-flex items-center justify-center rounded-full bg-amber-400 flex-shrink-0 ${className}`}
-      style={{ width: size, height: size }}
+      className={`inline-flex items-center justify-center font-bold flex-shrink-0 ${className}`}
+      style={{ fontSize: Math.round(size * 0.75), color: '#f5a623', lineHeight: 1, letterSpacing: '-0.02em' }}
     >
-      <Zap
-        style={{ width: size * 0.55, height: size * 0.55 }}
-        fill="white"
-        strokeWidth={0}
-      />
+      $?
     </span>
   )
 }

@@ -975,7 +975,7 @@ export default function MessageDetailPage() {
                   <Avatar url={creatorProfile.avatar_url} name={creatorName} size={7} />
                   <p className="font-semibold text-[13px] text-[#111]">@{creatorName}</p>
                   <div className="ml-auto flex items-center gap-1 rounded-full px-2.5 py-1" style={{ background: '#111' }}>
-                    <Zap style={{ width: 10, height: 10, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
+                    <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
                     <span className="text-[12px] font-bold text-white">${thread.price.toFixed(2)}</span>
                   </div>
                 </div>

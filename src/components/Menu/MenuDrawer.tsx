@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { X, Wallet, Users, Zap, FileText, MessageSquare, History, ShoppingBag, ShoppingCart, Leaf, Scan, HelpCircle, Settings, ChevronRight, LogOut } from 'lucide-react'
+import { X, Wallet, Users, Zap, ShoppingBag, ShoppingCart, Leaf, HelpCircle, Settings, ChevronRight, LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { supabase } from '../../lib/supabase'
-import TokenIcon from '../TokenIcon'
+import { oo } from '../../lib/oo'
 import TopUpSheet from './TopUpSheet'
 
 interface Props { isOpen: boolean; onClose: () => void }
@@ -43,11 +43,8 @@ export default function MenuDrawer({ isOpen, onClose }: Props) {
           {/* Top nav items */}
           <div className="space-y-1 mb-1">
             {[
-              { icon: Users,        label: 'Discover Friends', path: '/'          },
+              { icon: Users, label: 'Discover Friends', path: '/' },
               ...(isCreator ? [{ icon: Zap, label: 'Creator Center', path: '/settings' }] : []),
-              { icon: FileText,     label: 'Drafts',           path: null         },
-              { icon: MessageSquare,label: 'My Comments',      path: null         },
-              { icon: History,      label: 'History',          path: null         },
             ].map(item => (
               <button
                 key={item.label}
@@ -87,8 +84,7 @@ export default function MenuDrawer({ isOpen, onClose }: Props) {
                 <span className="text-[15px] text-gray-900">Wallet</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <TokenIcon size={16} />
-                <span className="text-green-500 font-medium text-[15px]">${tokenBalance.toFixed(2)}</span>
+                <span className="text-green-500 font-medium text-[15px]">{oo(tokenBalance)}</span>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </div>
             </button>
@@ -96,17 +92,29 @@ export default function MenuDrawer({ isOpen, onClose }: Props) {
             {/* Balance row */}
             <button
               onClick={() => setShowTopUp(true)}
-              className="w-full flex items-center justify-between py-3 px-3 rounded-lg hover:bg-amber-50 transition-colors"
+              className="w-full flex items-center justify-between py-3 px-3 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <TokenIcon size={20} />
+                <span className="font-bold text-[15px] text-gray-900">$?</span>
                 <span className="text-[15px] text-gray-900">Balance</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-amber-500 font-medium text-[15px]">${tokenBalance.toFixed(2)}</span>
+                <span className="font-medium text-[15px] text-gray-900">{oo(tokenBalance)}</span>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </div>
             </button>
+
+            {/* Low balance / empty wallet nudge */}
+            {tokenBalance === 0 && (
+              <p className="text-[12px] px-3 pb-1" style={{ color: '#999' }}>
+                Your wallet is empty. Load funds to start unlocking answers.
+              </p>
+            )}
+            {tokenBalance > 0 && tokenBalance < 5 && (
+              <p className="text-[12px] px-3 pb-1" style={{ color: '#999' }}>
+                Your balance is running low. Add funds to keep asking.
+              </p>
+            )}
           </div>
 
           <div className="h-px bg-gray-100 my-3" />
@@ -127,9 +135,8 @@ export default function MenuDrawer({ isOpen, onClose }: Props) {
         <div className="border-t border-gray-100 py-4">
           <div className="flex justify-around">
             {[
-              { icon: Scan,       label: 'Scan',        action: undefined              },
-              { icon: HelpCircle, label: 'Help Center',  action: () => go('/help')     },
-              { icon: Settings,   label: 'Settings',     action: () => go('/settings') },
+              { icon: HelpCircle, label: 'Help Center', action: () => go('/help')     },
+              { icon: Settings,   label: 'Settings',    action: () => go('/settings') },
             ].map(item => (
               <button key={item.label} onClick={item.action} className="flex flex-col items-center gap-1">
                 <div className="p-2 bg-gray-100 rounded-full">
