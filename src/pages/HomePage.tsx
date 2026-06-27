@@ -1266,12 +1266,14 @@ function NewPostSheet({
   username,
   userId,
   onClose,
+  onPosted,
 }: {
   open: boolean
   avatarUrl?: string
   username: string
   userId: string
   onClose: () => void
+  onPosted?: () => void
 }) {
   type PostMode = 'questions' | 'answer'
   type ListRow  = { type: 'title' | 'line'; text: string }
@@ -1337,69 +1339,19 @@ function NewPostSheet({
     setPosted(true)
     setPostError(null)
 
-    function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
-      return Promise.race([
-        promise,
-        new Promise<T>((_, reject) =>
-          setTimeout(() => reject(new Error(`${label} timed out after ${ms / 1000}s`)), ms)
-        ),
-      ])
-    }
-
     try {
-      const postId  = crypto.randomUUID()
-      const imgList = isAnswerMode ? images : qImages
-      const vidFile = isAnswerMode ? video  : qVideo
-
-      const uploadedUrls: string[] = []
-      for (let i = 0; i < imgList.length; i++) {
-        const { file } = imgList[i]
-        const ext  = file.name.split('.').pop() ?? 'jpg'
-        const path = `${userId}/${postId}/${i}.${ext}`
-        try {
-          const { error } = await withTimeout(
-            supabase.storage.from('post-images').upload(path, file, { upsert: true, contentType: file.type }),
-            30000, 'Image upload'
-          )
-          if (!error) uploadedUrls.push(supabase.storage.from('post-images').getPublicUrl(path).data.publicUrl)
-          else console.warn('Image upload error:', error.message)
-        } catch (upErr) {
-          console.warn('Image upload failed, posting without image:', upErr)
-        }
-      }
-      if (vidFile) {
-        const ext  = vidFile.file.name.split('.').pop() ?? 'mp4'
-        const path = `${userId}/${postId}/video.${ext}`
-        try {
-          const { error } = await withTimeout(
-            supabase.storage.from('post-images').upload(path, vidFile.file, { upsert: true, contentType: vidFile.file.type }),
-            60000, 'Video upload'
-          )
-          if (!error) uploadedUrls.push(supabase.storage.from('post-images').getPublicUrl(path).data.publicUrl)
-        } catch (upErr) {
-          console.warn('Video upload failed:', upErr)
-        }
-      }
-      if (pdfFile) {
-        const ext  = pdfFile.name.split('.').pop() ?? 'pdf'
-        const path = `${userId}/${postId}/doc.${ext}`
-        try {
-          const { error } = await withTimeout(
-            supabase.storage.from('post-images').upload(path, pdfFile, { upsert: true, contentType: pdfFile.type }),
-            30000, 'File upload'
-          )
-          if (!error) uploadedUrls.push(supabase.storage.from('post-images').getPublicUrl(path).data.publicUrl)
-        } catch (upErr) {
-          console.warn('File upload failed:', upErr)
-        }
-      }
-
+      const postId   = crypto.randomUUID()
+      const imgList  = isAnswerMode ? images : qImages
+      const vidFile  = isAnswerMode ? video  : qVideo
       const priceNum = isAnswerMode ? (parseFloat(price) || 0) : 0
+
+      // Insert the post immediately with empty image_urls so the sheet
+      // closes fast. Images are uploaded in the background and patch the row.
       const insertPayload: Record<string, unknown> = {
         id:         postId,
         creator_id: userId,
         caption:    caption.trim() || null,
-        image_urls: uploadedUrls,
+        image_urls: [],
         price:      priceNum || null,
       }
       if (location) {
@@ -1408,14 +1360,48 @@ function NewPostSheet({
         insertPayload.location_lng     = location.lng
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: insErr } = await withTimeout(
-        (supabase as any).from('posts').insert(insertPayload),
-        15000, 'Post'
-      )
+      const { error: insErr } = await (supabase as any).from('posts').insert(insertPayload)
       if (insErr) throw new Error(insErr.message ?? 'Failed to create post')
-      setTimeout(onClose, 1200)
+
+      // Close immediately — user sees the post in feed right away
+      onPosted?.()
+      setTimeout(onClose, 800)
+
+      // Upload media in the background and patch image_urls when done
+      const hasMedia = imgList.length > 0 || vidFile || pdfFile
+      if (hasMedia) {
+        ;(async () => {
+          const uploadedUrls: string[] = []
+          for (let i = 0; i < imgList.length; i++) {
+            const { file } = imgList[i]
+            const ext  = file.name.split('.').pop() ?? 'jpg'
+            const path = `${userId}/${postId}/${i}.${ext}`
+            const { error } = await supabase.storage.from('post-images').upload(path, file, { upsert: true, contentType: file.type })
+            if (!error) uploadedUrls.push(supabase.storage.from('post-images').getPublicUrl(path).data.publicUrl)
+            else console.warn('Image upload error:', error.message)
+          }
+          if (vidFile) {
+            const ext  = vidFile.file.name.split('.').pop() ?? 'mp4'
+            const path = `${userId}/${postId}/video.${ext}`
+            const { error } = await supabase.storage.from('post-images').upload(path, vidFile.file, { upsert: true, contentType: vidFile.file.type })
+            if (!error) uploadedUrls.push(supabase.storage.from('post-images').getPublicUrl(path).data.publicUrl)
+            else console.warn('Video upload error:', error.message)
+          }
+          if (pdfFile) {
+            const ext  = pdfFile.name.split('.').pop() ?? 'pdf'
+            const path = `${userId}/${postId}/doc.${ext}`
+            const { error } = await supabase.storage.from('post-images').upload(path, pdfFile, { upsert: true, contentType: pdfFile.type })
+            if (!error) uploadedUrls.push(supabase.storage.from('post-images').getPublicUrl(path).data.publicUrl)
+            else console.warn('Doc upload error:', error.message)
+          }
+          if (uploadedUrls.length > 0) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await (supabase as any).from('posts').update({ image_urls: uploadedUrls }).eq('id', postId)
+          }
+        })().catch(e => console.warn('Background upload failed:', e))
+      }
     } catch (e: unknown) {
-      console.error('[HomeAskSheet] post failed:', e)
+      console.error('[handlePost] failed:', e)
       const msg = e instanceof Error ? e.message : 'Something went wrong. Please try again.'
       setPostError(msg)
       setPosted(false)
@@ -2022,6 +2008,9 @@ export default function HomePage() {
   const [feedLoading, setFeedLoading] = useState(true)
   const [feedError,   setFeedError]   = useState<string | null>(null)
 
+  const [feedVersion, setFeedVersion] = useState(0)
+  const refreshFeed = useCallback(() => setFeedVersion(v => v + 1), [])
+
   useEffect(() => {
     // Auth still resolving — wait for it
     if (authLoading) return
@@ -2039,7 +2028,7 @@ export default function HomePage() {
         if (!cancelled) {
           clearTimeout(timeout)
           const items = composed.map(composedPostToFeedItem)
-          setFeed(items)   // real users see real data (or empty state — no mock fallback)
+          setFeed(items)
         }
       })
       .catch(err => {
@@ -2047,7 +2036,7 @@ export default function HomePage() {
       })
       .finally(() => { if (!cancelled) setFeedLoading(false) })
     return () => { cancelled = true; clearTimeout(timeout) }
-  }, [user?.id, authLoading, isExploreMode])
+  }, [user?.id, authLoading, isExploreMode, feedVersion])
 
   // ── Restore scroll position when returning from post detail ────────────
   useEffect(() => {
@@ -3168,6 +3157,7 @@ export default function HomePage() {
         username={activeProfile.username}
         userId={user?.id ?? ''}
         onClose={() => setNewPostOpen(false)}
+        onPosted={refreshFeed}
       />
 
       {/* ── Floating compose FAB (visible when scrolled past compose bar) ── */}
