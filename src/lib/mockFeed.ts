@@ -510,7 +510,7 @@ const COLOR_MAP: Record<string, string> = {
   'mock-creator-3': '#0ea5e9',
   'mock-creator-4': '#dc2626',
   'mock-creator-5': '#7c3aed',
-  'mock-creator-6': '#b45309',
+  'mock-creator-6': '#555',
   'mock-creator-7': '#555',
   'mock-creator-8': '#0ea5e9',
 }

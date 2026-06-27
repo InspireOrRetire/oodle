@@ -151,9 +151,9 @@ export default function SaveSheet({
                               style={{ background: sel ? '#111' : '#f0f0f2' }}
                             >
                               <Bookmark
-                                style={{ width: 20, height: 20, color: sel ? '#f5a623' : '#bbb' }}
+                                style={{ width: 20, height: 20, color: sel ? '#fff' : '#bbb' }}
                                 strokeWidth={1.75}
-                                fill={sel ? '#f5a623' : 'none'}
+                                fill={sel ? '#fff' : 'none'}
                               />
                             </div>
 

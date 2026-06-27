@@ -461,9 +461,9 @@ export default function PostDetailPage() {
             <div className="flex flex-col items-center justify-center pt-10 pb-6 text-center">
               <div
                 className="w-12 h-12 rounded-full flex items-center justify-center mb-3"
-                style={{ background: '#fffbeb', border: '1px solid #fde68a' }}
+                style={{ background: '#f5f5f5', border: '1px solid #e0e0e0' }}
               >
-                <Zap className="w-5 h-5" style={{ color: '#f5a623' }} strokeWidth={1.75} fill="#f5a623" />
+                <Zap className="w-5 h-5" style={{ color: '#111' }} strokeWidth={1.75} fill="#111" />
               </div>
               <p className="text-[14px] font-semibold text-[#111] mb-1">Be the first to ask</p>
               <p className="text-[13px]" style={{ color: '#aaa' }}>

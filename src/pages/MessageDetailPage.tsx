@@ -70,7 +70,7 @@ function ThreadNote({ id, content, time, avatarUrl, username, isSelf, isFlagged,
         {isFlagged && (
           <div className="flex items-center gap-1 mb-0.5">
             <span className="text-[9px]">📌</span>
-            <span className="font-mono text-[9px] text-amber-500">Key question</span>
+            <span className="font-mono text-[9px] text-black">Key question</span>
           </div>
         )}
 
@@ -103,9 +103,9 @@ function ThreadNote({ id, content, time, avatarUrl, username, isSelf, isFlagged,
             style={isSelf
               ? { background: '#111', color: '#fff', borderRadius: '18px 18px 4px 18px' }
               : {
-                  background: isFlagged ? '#fffbeb' : '#F2F2F7',
+                  background: isFlagged ? '#f0f0f0' : '#F2F2F7',
                   color: '#111', borderRadius: '18px 18px 18px 4px',
-                  border: isFlagged ? '1px solid #f5a623' : 'none',
+                  border: isFlagged ? '1px solid #999' : 'none',
                 }
             }
             onPointerDown={startPress} onPointerUp={cancelPress} onPointerLeave={cancelPress}
@@ -186,7 +186,7 @@ function AnswerBlockView({ block }: { block: AnswerBlock }) {
 
   if (block.type === 'photo') {
     return (
-      <div className="rounded-2xl overflow-hidden border border-amber-100">
+      <div className="rounded-2xl overflow-hidden border border-gray-200">
         <img src={block.url} alt="" className="w-full max-h-72 object-cover" />
       </div>
     )
@@ -215,10 +215,10 @@ function AnswerBlockView({ block }: { block: AnswerBlock }) {
     // Generate a static waveform visualization from duration
     const bars = Array.from({ length: 24 }, (_, i) => 0.3 + 0.5 * Math.abs(Math.sin(i * 0.7 + 1.2)))
     return (
-      <div className="bg-amber-50 rounded-2xl px-4 py-3 flex items-center gap-3 border border-amber-100">
+      <div className="bg-gray-100 rounded-2xl px-4 py-3 flex items-center gap-3 border border-gray-200">
         <button
           onClick={() => { setPlaying(p => !p); if (!playing) setTimeout(() => setPlaying(false), block.duration * 1000) }}
-          className="w-9 h-9 rounded-full bg-amber-400 flex items-center justify-center flex-shrink-0"
+          className="w-9 h-9 rounded-full bg-black flex items-center justify-center flex-shrink-0"
         >
           {playing
             ? <Square className="w-3.5 h-3.5 text-white" fill="white" />
@@ -227,11 +227,11 @@ function AnswerBlockView({ block }: { block: AnswerBlock }) {
         </button>
         <div className="flex-1 flex items-center gap-[2px]" style={{ height: 28 }}>
           {bars.map((h, i) => (
-            <div key={i} className={`w-[3px] rounded-full ${playing ? 'bg-amber-400' : 'bg-amber-200'}`}
+            <div key={i} className={`w-[3px] rounded-full ${playing ? 'bg-black' : 'bg-gray-400'}`}
               style={{ height: `${Math.max(3, h * 28)}px` }} />
           ))}
         </div>
-        <span className="text-[11px] text-amber-600 font-medium flex-shrink-0">{block.duration}s</span>
+        <span className="text-[11px] text-gray-500 font-medium flex-shrink-0">{block.duration}s</span>
       </div>
     )
   }
@@ -241,7 +241,7 @@ function AnswerBlockView({ block }: { block: AnswerBlock }) {
       <div className="space-y-1.5">
         {block.items.map((item, i) => (
           <div key={i} className="flex items-start gap-2.5">
-            <span className="text-[13px] text-amber-500 font-semibold flex-shrink-0 mt-0.5 w-4 text-right">
+            <span className="text-[13px] text-black font-semibold flex-shrink-0 mt-0.5 w-4 text-right">
               {block.ordered ? `${i + 1}.` : '•'}
             </span>
             <span className="text-[15px] text-gray-900 leading-snug">{item}</span>
@@ -750,8 +750,8 @@ export default function MessageDetailPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl px-4 py-4" style={{ background: '#fffbeb', border: '1.5px solid #f0d090' }}>
-              <p className="text-[11px] font-semibold text-amber-600 uppercase tracking-widest mb-2">Your answer</p>
+            <div className="rounded-2xl px-4 py-4" style={{ background: '#f5f5f5', border: '1.5px solid #e0e0e0' }}>
+              <p className="text-[11px] font-semibold text-black uppercase tracking-widest mb-2">Your answer</p>
               <p className="text-[14px] text-gray-800 leading-snug">
                 {answerBlocks && answerBlocks.length > 0
                   ? answerBlocks.filter(b => b.type === 'text').map(b => (b as { content: string }).content).join('\n\n')
@@ -817,9 +817,9 @@ export default function MessageDetailPage() {
         {/* DM question hint — no originating post, creator view */}
         {isCreator && !thread.post_id && (
           <div className="flex items-center gap-2.5 mx-2 px-4 py-3 rounded-[14px]"
-            style={{ background: '#fffbeb', border: '0.5px solid #f5e090' }}>
-            <Flag style={{ width: 13, height: 13, color: '#f5a623', flexShrink: 0 }} strokeWidth={2} />
-            <p className="text-[12px] leading-snug" style={{ color: '#b45309' }}>
+            style={{ background: '#f5f5f5', border: '0.5px solid #e0e0e0' }}>
+            <Flag style={{ width: 13, height: 13, color: '#555', flexShrink: 0 }} strokeWidth={2} />
+            <p className="text-[12px] leading-snug" style={{ color: '#111' }}>
               <span className="font-semibold">DM question</span> — hold any message to flag it as the key question for your queue.
             </p>
           </div>
@@ -975,7 +975,7 @@ export default function MessageDetailPage() {
                   <Avatar url={creatorProfile.avatar_url} name={creatorName} size={7} />
                   <p className="font-semibold text-[13px] text-[#111]">@{creatorName}</p>
                   <div className="ml-auto flex items-center gap-1 rounded-full px-2.5 py-1" style={{ background: '#111' }}>
-                    <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
+                    <span style={{ fontWeight: 700, color: '#111', fontSize: 11, lineHeight: 1 }}>$?</span>
                     <span className="text-[12px] font-bold text-white">${thread.price.toFixed(2)}</span>
                   </div>
                 </div>
@@ -1035,7 +1035,7 @@ export default function MessageDetailPage() {
                       </span>
                       {avgRating !== null && ratingCount > 0 && (
                         <div className="flex items-center gap-1 ml-auto">
-                          <Star className="w-3 h-3" style={{ color: '#f5a623', fill: '#f5a623' }} />
+                          <Star className="w-3 h-3" style={{ color: '#111', fill: '#111' }} />
                           <span className="text-[12px] font-semibold text-gray-700">{avgRating}</span>
                           <span className="text-[11px] text-gray-400">({ratingCount})</span>
                         </div>
@@ -1066,7 +1066,7 @@ export default function MessageDetailPage() {
                           className="transition-transform active:scale-110"
                         >
                           <Star className="w-7 h-7 transition-colors duration-100"
-                            style={{ color: active ? '#f5a623' : '#e5e7eb', fill: active ? '#f5a623' : 'transparent' }}
+                            style={{ color: active ? '#111' : '#e5e7eb', fill: active ? '#111' : 'transparent' }}
                             strokeWidth={1.5} />
                         </button>
                       )
@@ -1541,7 +1541,7 @@ export default function MessageDetailPage() {
                       {/* Stepper pill */}
                       <div className="flex items-center gap-1.5 rounded-full pl-2.5 pr-1.5 py-1.5"
                         style={{ background: '#111' }}>
-                        <Zap style={{ width: 10, height: 10, color: '#f5a623' }} strokeWidth={2.5} fill="#f5a623" />
+                        <Zap style={{ width: 10, height: 10, color: '#111' }} strokeWidth={2.5} fill="#111" />
                         {/* Down arrow — only when price > 0 */}
                         {answerPrice > 0 && (
                           <button

@@ -75,7 +75,7 @@ function initials(name: string): string {
     .slice(0, 2)
 }
 
-const AVATAR_COLORS = ['#111', '#555', '#8b5cf6', '#dc2626', '#b45309', '#7c3aed', '#0ea5e9']
+const AVATAR_COLORS = ['#111', '#555', '#8b5cf6', '#dc2626', '#333', '#7c3aed', '#0ea5e9']
 function colorFor(id: string): string {
   let h = 0
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0

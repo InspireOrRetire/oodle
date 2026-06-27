@@ -44,7 +44,7 @@ function ChatRow({
         </button>
         <button onClick={() => { snap(0); setTimeout(() => onFlag(id), 160) }}
           className="flex-1 h-[52px] rounded-[14px] flex flex-col items-center justify-center gap-1"
-          style={{ background: isFlagged ? '#c05621' : '#f5a623' }}>
+          style={{ background: isFlagged ? '#333' : '#111' }}>
           <Flag style={{ width: 16, height: 16, color: 'white' }} strokeWidth={2} fill={isFlagged ? 'white' : 'none'} />
           <span className="font-mono text-[9px] text-white">{isFlagged ? 'Unflag' : 'Flag'}</span>
         </button>
@@ -107,7 +107,7 @@ function ChatRow({
           </div>
         )}
         <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-          {isFlagged && <Flag style={{ width: 13, height: 13, color: '#f5a623' }} strokeWidth={2} fill="#f5a623" />}
+          {isFlagged && <Flag style={{ width: 13, height: 13, color: '#111' }} strokeWidth={2} fill="#111" />}
           {showUnread && unread && <div className="w-[9px] h-[9px] rounded-full bg-gray-900" />}
           {badge === 'action' && (
             <span className="font-mono text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: '#fff3e0', color: '#e65100' }}>reply</span>

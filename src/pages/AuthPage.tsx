@@ -86,7 +86,7 @@ export default function AuthPage() {
         <p className="text-green-600 text-sm mb-3">Email resent — check your inbox.</p>
       )}
       {resendStatus === 'error' && (
-        <p className="text-amber-600 text-sm mb-3">
+        <p className="text-gray-600 text-sm mb-3">
           Email limit reached. You can request another in about an hour.
         </p>
       )}

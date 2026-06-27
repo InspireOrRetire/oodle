@@ -175,7 +175,7 @@ export default function UnlockSheet({
                         <div className="relative mb-2">
                           <CreatorAv target={target} size={72} />
                           <div className="absolute bottom-0 right-0 w-6 h-6 rounded-full flex items-center justify-center ring-2 ring-white"
-                            style={{ background: '#f5a623' }}>
+                            style={{ background: '#111' }}>
                             <Check style={{ width: 11, height: 11, color: 'white' }} strokeWidth={2.5} />
                           </div>
                         </div>
@@ -267,7 +267,7 @@ export default function UnlockSheet({
                               className="w-full flex items-center gap-3 rounded-[14px] px-4 py-3.5 text-left transition-all"
                               style={{ border: sel ? '1.5px solid #111' : '1px solid #ebebeb', background: sel ? '#111' : 'white' }}>
                               <div className="flex items-center justify-center rounded-full flex-shrink-0"
-                                style={{ width: 40, height: 40, background: '#f5a623' }}>
+                                style={{ width: 40, height: 40, background: '#111' }}>
                                 <Zap style={{ width: 18, height: 18, color: 'white' }} strokeWidth={2} fill="white" />
                               </div>
                               <div className="flex-1 min-w-0">

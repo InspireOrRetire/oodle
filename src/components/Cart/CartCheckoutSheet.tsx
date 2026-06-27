@@ -103,7 +103,7 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                       <div className="flex items-center justify-between mb-5">
                         <p className="text-[18px] font-bold text-[#111]">Order summary</p>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: '#f5f5f7' }}>
-                          <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
+                          <span style={{ fontWeight: 700, color: '#111', fontSize: 11, lineHeight: 1 }}>$?</span>
                           <span className="font-mono text-[12px] font-semibold text-[#111]">{count} answer{count !== 1 ? 's' : ''}</span>
                         </div>
                       </div>
@@ -118,8 +118,8 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                               <p className="text-[13px] leading-snug line-clamp-2 text-[#111]">{it.question}</p>
                             </div>
                             <span className="flex items-center gap-1 rounded-full px-2.5 py-1.5 flex-shrink-0 font-mono text-[11px] font-semibold"
-                              style={{ background: '#fffbeb', color: '#b45309' }}>
-                              <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
+                              style={{ background: '#f5f5f5', color: '#111' }}>
+                              <span style={{ fontWeight: 700, color: '#111', fontSize: 11, lineHeight: 1 }}>$?</span>
                               {it.price}
                             </span>
                           </div>
@@ -131,7 +131,7 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-[13px]" style={{ color: '#888' }}>Total</span>
                           <span className="flex items-center gap-1 font-mono text-[15px] font-bold text-[#111]">
-                            <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 11, lineHeight: 1 }}>$?</span>
+                            <span style={{ fontWeight: 700, color: '#111', fontSize: 11, lineHeight: 1 }}>$?</span>
                             {total}
                           </span>
                         </div>
@@ -179,7 +179,7 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                             className="w-full rounded-[14px] py-[15px] flex items-center justify-center gap-2 active:opacity-80"
                             style={{ background: '#111' }}
                           >
-                            <span style={{ fontWeight: 700, color: '#f5a623', fontSize: 15, lineHeight: 1 }}>$?</span>
+                            <span style={{ fontWeight: 700, color: '#111', fontSize: 15, lineHeight: 1 }}>$?</span>
                             <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>Add balance</span>
                           </button>
                         </div>

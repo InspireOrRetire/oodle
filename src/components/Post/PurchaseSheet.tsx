@@ -16,12 +16,12 @@ interface Props {
 }
 
 const PARTICLES = [
-  { angle: 0,   color: 'bg-amber-400' },
-  { angle: 60,  color: 'bg-yellow-300' },
-  { angle: 120, color: 'bg-orange-400' },
-  { angle: 180, color: 'bg-amber-500' },
-  { angle: 240, color: 'bg-yellow-400' },
-  { angle: 300, color: 'bg-orange-300' },
+  { angle: 0,   color: 'bg-black' },
+  { angle: 60,  color: 'bg-gray-600' },
+  { angle: 120, color: 'bg-gray-400' },
+  { angle: 180, color: 'bg-black' },
+  { angle: 240, color: 'bg-gray-700' },
+  { angle: 300, color: 'bg-gray-500' },
 ]
 
 const slide = {
@@ -89,7 +89,7 @@ export default function PurchaseSheet({ question, post, balance, onClose, onPurc
                 <div className="relative mb-3">
                   <img src={post.avatar_url ?? ''} alt={post.username}
                     className="w-16 h-16 rounded-full object-cover" />
-                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-amber-400 rounded-full flex items-center justify-center ring-2 ring-white">
+                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-black rounded-full flex items-center justify-center ring-2 ring-white">
                     <span className="text-white text-[10px] font-bold">✓</span>
                   </div>
                 </div>
@@ -208,7 +208,7 @@ export default function PurchaseSheet({ question, post, balance, onClose, onPurc
               {/* Spinning amber ring with token icon inside */}
               <div className="relative w-16 h-16 mb-5">
                 <motion.div
-                  className="absolute inset-0 rounded-full border-4 border-amber-400 border-t-transparent"
+                  className="absolute inset-0 rounded-full border-4 border-black border-t-transparent"
                   animate={{ rotate: 360 }}
                   transition={{ duration: 0.85, repeat: Infinity, ease: 'linear' }}
                 />

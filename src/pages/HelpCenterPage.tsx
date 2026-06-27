@@ -398,7 +398,7 @@ export default function HelpCenterPage() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="flex-1">
-            <p className="text-[11px] font-bold text-amber-500 uppercase tracking-widest">OODLE</p>
+            <p className="text-[11px] font-bold text-black uppercase tracking-widest">OODLE</p>
             <h1 className="text-[17px] font-bold text-gray-900 leading-tight">Help Center</h1>
           </div>
         </div>
@@ -463,7 +463,7 @@ export default function HelpCenterPage() {
       {!query && (
         <>
           {/* Hero */}
-          <div className="mx-4 mt-4 mb-5 bg-gradient-to-br from-amber-400 to-orange-400 rounded-3xl px-5 py-6 text-white">
+          <div className="mx-4 mt-4 mb-5 bg-black rounded-3xl px-5 py-6 text-white">
             <p className="text-[12px] font-semibold uppercase tracking-wider opacity-80 mb-1">Welcome to</p>
             <p className="text-[22px] font-bold mb-1">OODLE Help Center</p>
             <p className="text-[13px] opacity-80 leading-relaxed">

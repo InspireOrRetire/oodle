@@ -151,7 +151,7 @@ export default function AMASheet({
                 />
                 <span
                   className="absolute bottom-3 right-3 text-[11px] font-mono"
-                  style={{ color: text.length >= MAX_CHARS ? '#f5a623' : '#ccc' }}
+                  style={{ color: text.length >= MAX_CHARS ? '#111' : '#ccc' }}
                 >
                   {text.length}/{MAX_CHARS}
                 </span>
