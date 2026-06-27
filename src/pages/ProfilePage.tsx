@@ -2539,64 +2539,30 @@ function CreatePostSheet({
     }
     setSaving(true); setError(null)
     try {
-      const postId = crypto.randomUUID()
+      const postId  = crypto.randomUUID()
       const imgList = isAnswerMode ? images : qImages
       const vidFile = isAnswerMode ? video : qVideo
-
-      // Upload images
-      const uploadedUrls: string[] = []
-      for (let i = 0; i < imgList.length; i++) {
-        const { file } = imgList[i]
-        const path = `${userId}/${postId}/${i}.${file.name.split('.').pop() ?? 'jpg'}`
-        const { error: upErr } = await supabase.storage.from('post-images').upload(path, file, { upsert: true, contentType: file.type })
-        if (upErr) throw new Error(`Image upload failed: ${upErr.message}. Make sure you're logged in and the image is a JPEG, PNG, GIF, or WebP.`)
-        uploadedUrls.push(supabase.storage.from('post-images').getPublicUrl(path).data.publicUrl)
-      }
-
-      // Upload video
-      let videoUrl: string | null = null
-      if (vidFile) {
-        const path = `${userId}/${postId}/video.${vidFile.file.name.split('.').pop() ?? 'mp4'}`
-        const { error: vErr } = await supabase.storage.from('post-images').upload(path, vidFile.file, { upsert: true, contentType: vidFile.file.type })
-        if (!vErr) videoUrl = supabase.storage.from('post-images').getPublicUrl(path).data.publicUrl
-      }
-
-      // Upload PDF
-      let pdfUrl: string | null = null
-      if (pdfFile) {
-        const path = `${userId}/${postId}/doc.${pdfFile.name.split('.').pop() ?? 'pdf'}`
-        const { error: pErr } = await supabase.storage.from('post-images').upload(path, pdfFile, { upsert: true, contentType: pdfFile.type })
-        if (!pErr) pdfUrl = supabase.storage.from('post-images').getPublicUrl(path).data.publicUrl
-      }
-
-      const allUrls = [...uploadedUrls, ...(videoUrl ? [videoUrl] : []), ...(pdfUrl ? [pdfUrl] : [])]
       const priceNum = isAnswerMode ? (parseFloat(price) || 0) : 0
 
+      // Insert the post immediately with empty image_urls — uploads happen in background
       const insertPayload: Record<string, unknown> = {
         id:         postId,
         creator_id: userId,
         caption:    caption.trim() || null,
-        image_urls: allUrls,
+        image_urls: [],
         price:      priceNum || null,
       }
-      // Only include location fields if the user set a location
-      // (migration 008 adds these columns — omit entirely if not set to avoid schema-cache errors)
       if (location) {
         insertPayload.location_address = location.label
         insertPayload.location_lat     = location.lat
         insertPayload.location_lng     = location.lng
       }
 
-      // Insert without select — avoids RLS auth.role() read-back issues.
-      // We already have all the data locally so no need to read it back.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: insErr } = await (supabase as any)
-        .from('posts')
-        .insert(insertPayload)
-
+      const { error: insErr } = await (supabase as any).from('posts').insert(insertPayload)
       if (insErr) throw insErr
 
-      // Success — pass post to parent immediately, then reset sheet
+      // Success — notify parent and reset immediately
       onCreated({
         id:       postId,
         type:     'post',
@@ -2605,10 +2571,39 @@ function CreatePostSheet({
         caption:  caption.trim(),
         question: '',
         price:    priceNum,
-        images:   allUrls,
+        images:   [],
         creator:  creatorObj,
       })
       reset()
+
+      // Upload media in background then patch the row
+      const hasMedia = imgList.length > 0 || vidFile || pdfFile
+      if (hasMedia) {
+        ;(async () => {
+          const uploadedUrls: string[] = []
+          for (let i = 0; i < imgList.length; i++) {
+            const { file } = imgList[i]
+            const path = `${userId}/${postId}/${i}.${file.name.split('.').pop() ?? 'jpg'}`
+            const { error } = await supabase.storage.from('post-images').upload(path, file, { upsert: true, contentType: file.type })
+            if (!error) uploadedUrls.push(supabase.storage.from('post-images').getPublicUrl(path).data.publicUrl)
+            else console.warn('Image upload error:', error.message)
+          }
+          if (vidFile) {
+            const path = `${userId}/${postId}/video.${vidFile.file.name.split('.').pop() ?? 'mp4'}`
+            const { error } = await supabase.storage.from('post-images').upload(path, vidFile.file, { upsert: true, contentType: vidFile.file.type })
+            if (!error) uploadedUrls.push(supabase.storage.from('post-images').getPublicUrl(path).data.publicUrl)
+          }
+          if (pdfFile) {
+            const path = `${userId}/${postId}/doc.${pdfFile.name.split('.').pop() ?? 'pdf'}`
+            const { error } = await supabase.storage.from('post-images').upload(path, pdfFile, { upsert: true, contentType: pdfFile.type })
+            if (!error) uploadedUrls.push(supabase.storage.from('post-images').getPublicUrl(path).data.publicUrl)
+          }
+          if (uploadedUrls.length > 0) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await (supabase as any).from('posts').update({ image_urls: uploadedUrls }).eq('id', postId)
+          }
+        })().catch(e => console.warn('Background upload failed:', e))
+      }
     } catch (e: unknown) {
       setError((e as { message?: string })?.message || 'Failed to create post')
       setSaving(false)

@@ -96,10 +96,11 @@ function scoreDiscoveryPost(
   // ── Category overlap ──────────────────────────────────────────────────────
   // What fraction of the post's categories match something the user already follows?
   let categoryScore = 0
-  if (post.categories.length > 0 && followedCategories.length > 0) {
+  const cats = post.categories ?? []
+  if (cats.length > 0 && followedCategories.length > 0) {
     const followedSet = new Set(followedCategories.map(c => c.toLowerCase()))
-    const matches = post.categories.filter(c => followedSet.has(c.toLowerCase())).length
-    categoryScore = matches / post.categories.length
+    const matches = cats.filter(c => followedSet.has(c.toLowerCase())).length
+    categoryScore = matches / cats.length
   }
 
   // ── Engagement velocity ───────────────────────────────────────────────────
