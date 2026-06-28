@@ -86,9 +86,7 @@ export function composedPostToFeedItem(cp: ComposedPost): FeedItem {
   const username    = cp.creator_username ?? ''
   const displayName = cp.creator_display_name ?? username
   const postType    = (cp.post_type ?? 'type1') as 'type1' | 'type2'
-  const isType2     = postType === 'type2'
-  const isPaid      = isType2 || (cp.price !== null && cp.price > 0)
-  const isLocked    = isPaid && !cp.is_purchased
+  const isLocked    = (cp.price !== null && cp.price > 0) && !cp.is_purchased
 
   return {
     id: cp.id,
@@ -104,7 +102,7 @@ export function composedPostToFeedItem(cp: ComposedPost): FeedItem {
     },
     time_ago:         formatDistanceToNow(cp.created_at),
     views:            0,
-    type:             isPaid ? 'qa' : 'post',
+    type:             'post' as const,
     post_type:        postType,
     text:             cp.caption        ?? undefined,
     images:           cp.image_urls     ?? [],

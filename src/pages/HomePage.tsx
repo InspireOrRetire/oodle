@@ -221,9 +221,22 @@ function FeedCard({
                 <span className="font-mono text-[11px] flex-shrink-0" style={{ color: '#bbb' }}>
                   · {item.time_ago}
                 </span>
-                <div className="ml-auto flex items-center gap-1 flex-shrink-0">
-                  <Eye style={{ width: 11, height: 11, color: '#ccc' }} strokeWidth={1.75} />
-                  <span className="font-mono text-[10px]" style={{ color: '#ccc' }}>{fmtCount(item.views)}</span>
+                <div className="ml-auto flex items-center gap-2 flex-shrink-0">
+                  {item.price && item.price > 0 ? (
+                    <button
+                      onClick={e => { e.stopPropagation(); onUnlock(item) }}
+                      className="inline-flex items-center gap-1 rounded-full px-3 py-1 active:opacity-75 transition-opacity"
+                      style={{ background: '#111' }}
+                    >
+                      <Lock style={{ width: 9, height: 9, color: 'white' }} strokeWidth={2.5} />
+                      <span className="text-[11px] font-semibold text-white tracking-tight">{oo(item.price)}</span>
+                    </button>
+                  ) : (
+                    <>
+                      <Eye style={{ width: 11, height: 11, color: '#ccc' }} strokeWidth={1.75} />
+                      <span className="font-mono text-[10px]" style={{ color: '#ccc' }}>{fmtCount(item.views)}</span>
+                    </>
+                  )}
                 </div>
               </div>
               {/* Text */}
@@ -243,12 +256,48 @@ function FeedCard({
                   <span className="text-[13px]" style={{ color: '#666' }}>📍 {item.location_address}</span>
                 </div>
               )}
-              {/* ── Metadata row (tap card to interact) ── */}
-              <div className="flex items-center gap-2 pt-2 pb-0.5">
-                {item.comments > 0 && (
-                  <span className="text-[11px]" style={{ color: '#bbb' }}>
-                    {item.comments} question{item.comments !== 1 ? 's' : ''}
-                  </span>
+              {/* ── Action row ── */}
+              <div className="flex items-center justify-between py-2.5" style={{ borderTop: '0.5px solid #f5f5f7' }}>
+                {item.price && item.price > 0 ? (
+                  /* Priced post: prominent unlock CTA + save */
+                  <>
+                    <button
+                      onClick={e => { e.stopPropagation(); onUnlock(item) }}
+                      className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 active:opacity-75 transition-opacity"
+                      style={{ background: '#111' }}
+                    >
+                      <Lock style={{ width: 13, height: 13, color: 'white' }} strokeWidth={1.75} />
+                      <span className="text-[12px] font-semibold text-white">Unlock · {oo(item.price)}</span>
+                    </button>
+                    <button
+                      onClick={e => { e.stopPropagation(); onSaveToggle() }}
+                      className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 active:opacity-70 transition-opacity"
+                      style={{ background: saved ? '#111' : '#f5f5f7' }}
+                    >
+                      <Bookmark style={{ width: 13, height: 13, color: saved ? 'white' : '#555' }} strokeWidth={1.75} fill={saved ? 'white' : 'none'} />
+                      <span className="text-[12px] font-medium" style={{ color: saved ? 'white' : '#555' }}>{saved ? 'Saved' : 'Save'}</span>
+                    </button>
+                  </>
+                ) : (
+                  /* Free post: Ask + Save */
+                  <>
+                    <button
+                      onClick={e => { e.stopPropagation(); onAsk?.() }}
+                      className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 active:opacity-70 transition-opacity"
+                      style={{ background: '#f5f5f7' }}
+                    >
+                      <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
+                      <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
+                    </button>
+                    <button
+                      onClick={e => { e.stopPropagation(); onSaveToggle() }}
+                      className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 active:opacity-70 transition-opacity"
+                      style={{ background: saved ? '#111' : '#f5f5f7' }}
+                    >
+                      <Bookmark style={{ width: 13, height: 13, color: saved ? 'white' : '#555' }} strokeWidth={1.75} fill={saved ? 'white' : 'none'} />
+                      <span className="text-[12px] font-medium" style={{ color: saved ? 'white' : '#555' }}>{saved ? 'Saved' : 'Save'}</span>
+                    </button>
+                  </>
                 )}
               </div>
             </div>
