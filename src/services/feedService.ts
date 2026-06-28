@@ -191,11 +191,15 @@ export async function fetchComposedFeed(userId: string): Promise<ComposedPost[]>
   if (error) throw error
   if (!data)  return []
 
-  const result = (data as unknown) as {
-    followedPosts:             import('../lib/feedComposer').RawPost[]
-    discoveryPosts:            import('../lib/feedComposer').RawPost[]
-    followedCreatorCategories: string[]
-    followedCreatorCount:      number
+  // The live RPC may return snake_case keys (older DB version) or camelCase
+  // (migration-applied version). Normalise both so the composer always gets
+  // what it expects regardless of which DB version is running.
+  const raw = data as any
+  const result = {
+    followedPosts:             (raw.followedPosts ?? raw.followed_posts ?? []) as import('../lib/feedComposer').RawPost[],
+    discoveryPosts:            (raw.discoveryPosts ?? raw.discovery_posts ?? []) as import('../lib/feedComposer').RawPost[],
+    followedCreatorCategories: (raw.followedCreatorCategories ?? raw.followed_creator_categories ?? []) as string[],
+    followedCreatorCount:      (raw.followedCreatorCount ?? raw.followed_count ?? 0) as number,
   }
 
   // If the RPC's time window excluded all followed posts but the user does
