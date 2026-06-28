@@ -7,6 +7,7 @@ import type { UserRow, PostRow } from '../lib/database.types'
 import { useAuth } from '../contexts/AuthContext'
 import AMASheet from '../components/Profile/AMASheet'
 import { oo } from '../lib/oo'
+const cp = (n: number) => n % 1 === 0 ? String(n) : n.toFixed(2)
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -344,7 +345,7 @@ function ProfilePostCard({ post, profile, navigate }: { post: PostRow; profile: 
             style={{ background: '#111' }}
           >
             <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight">
-              <Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{oo(post.price)}
+              <Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{cp(post.price)}
             </span>
           </button>
         )}

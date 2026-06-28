@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Share2, Menu, Eye, Plus, Minus, MoreHorizontal, Link, Zap, Bookmark, Check, ArrowLeft, Mail, Heart, MessageCircle, ChevronUp, ChevronDown, Copy, AtSign, Camera, ChevronRight as ChevronRightIcon, Image, Video, MapPin, List, Type, FileText, X, Search, Lock } from 'lucide-react'
 import { oo } from '../lib/oo'
+// Plain number for card price pills — no $? prefix on timeline cards
+const cp = (n: number) => n % 1 === 0 ? String(n) : n.toFixed(2)
 import { QRCodeSVG } from 'qrcode.react'
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
@@ -518,7 +520,7 @@ function ThreadItem({
                 <Zap style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2.5} fill="#111" />
               </div>
               <span style={{ fontSize: 14, fontWeight: 600, color: 'white', fontFamily: 'DM Mono, monospace' }}>
-                {oo(thread.price)}
+                {cp(thread.price)}
               </span>
             </button>
           )}
@@ -556,7 +558,7 @@ function ThreadItem({
                         className="inline-flex items-center justify-center rounded-full px-3 py-1 active:opacity-70 transition-opacity"
                         style={{ background: '#f0f0f2' }}
                       >
-                        <span className="text-[11px] font-semibold text-[#555] tracking-tight">{oo(thread.price)}</span>
+                        <span className="text-[11px] font-semibold text-[#555] tracking-tight">{cp(thread.price)}</span>
                       </button>
                     ) : (
                       <button
@@ -565,7 +567,7 @@ function ThreadItem({
                         style={{ background: '#111' }}
                       >
                         <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight">
-                          <Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{oo(thread.price)}
+                          <Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{cp(thread.price)}
                         </span>
                       </button>
                     )
@@ -667,7 +669,7 @@ function ThreadItem({
                               className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-70 transition-opacity"
                               style={{ background: '#f0f0f2', marginTop: 1 }}
                             >
-                              <span className="text-[11px] font-semibold text-[#555] tracking-tight">{oo(thread.price)}</span>
+                              <span className="text-[11px] font-semibold text-[#555] tracking-tight">{cp(thread.price)}</span>
                             </button>
                           ) : (
                             <button
@@ -675,7 +677,7 @@ function ThreadItem({
                               className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-75 transition-opacity"
                               style={{ background: '#000', marginTop: 1 }}
                             >
-                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight"><Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{oo(thread.price)}</span>
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight"><Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{cp(thread.price)}</span>
                             </button>
                           )
                         )}
@@ -761,7 +763,7 @@ function ThreadItem({
                                 className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-70 transition-opacity"
                                 style={{ background: '#f0f0f2', marginTop: 1 }}
                               >
-                                <span className="text-[11px] font-semibold text-[#555] tracking-tight">{oo(thread.price)}</span>
+                                <span className="text-[11px] font-semibold text-[#555] tracking-tight">{cp(thread.price)}</span>
                               </button>
                             ) : (
                               <button
@@ -769,7 +771,7 @@ function ThreadItem({
                                 className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-75 transition-opacity"
                                 style={{ background: '#000', marginTop: 1 }}
                               >
-                                <span className="text-[11px] font-semibold text-white tracking-tight">{oo(thread.price)}</span>
+                                <span className="text-[11px] font-semibold text-white tracking-tight">{cp(thread.price)}</span>
                               </button>
                             )
                           )}
