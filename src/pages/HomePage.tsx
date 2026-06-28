@@ -99,6 +99,8 @@ function VerifiedBadge() {
 // ─── Feed card — matches ProfilePage ThreadItem layout exactly ────────────────
 
 const REVEAL_W = 208   // ··· (48) + bookmark (48) + ⚡price (88) + gap (8×2) + pad (12×2)
+// Plain number for card price pills — no $? prefix on timeline cards
+const cp = (n: number) => n % 1 === 0 ? String(n) : n.toFixed(2)
 
 function FeedCard({
   item,
@@ -229,7 +231,7 @@ function FeedCard({
                       style={{ background: '#111' }}
                     >
                       <Lock style={{ width: 9, height: 9, color: 'white' }} strokeWidth={2.5} />
-                      <span className="text-[11px] font-semibold text-white tracking-tight">{oo(item.price)}</span>
+                      <span className="text-[11px] font-semibold text-white tracking-tight">{cp(item.price!)}</span>
                     </button>
                   ) : (
                     <>
@@ -267,7 +269,7 @@ function FeedCard({
                       style={{ background: '#111' }}
                     >
                       <Lock style={{ width: 13, height: 13, color: 'white' }} strokeWidth={1.75} />
-                      <span className="text-[12px] font-semibold text-white">Unlock · {oo(item.price)}</span>
+                      <span className="text-[12px] font-semibold text-white">Unlock · {cp(item.price!)}</span>
                     </button>
                     <button
                       onClick={e => { e.stopPropagation(); onSaveToggle() }}
@@ -497,7 +499,7 @@ function FeedCard({
                             className="flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-75 transition-opacity"
                             style={{ background: '#000', marginTop: 1 }}
                           >
-                            <span className="font-mono text-[11px] font-semibold text-white">{oo(reply.price)}</span>
+                            <span className="font-mono text-[11px] font-semibold text-white">{cp(reply.price)}</span>
                           </button>
                         </div>
                       </div>
