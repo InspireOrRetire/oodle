@@ -232,7 +232,7 @@ function FollowersSheet({
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-[15px] font-semibold text-[#111] truncate">{u.display_name ?? u.username}</p>
-                    {u.username && <p className="font-mono text-[12px] text-[#aaa] truncate">@{u.username}</p>}
+                    {u.username && <p className="text-[12px] text-[#aaa] truncate">@{u.username}</p>}
                   </div>
                 </button>
                 {currentUserId && u.id !== currentUserId && (
@@ -336,16 +336,16 @@ function ProfilePostCard({ post, profile, navigate }: { post: PostRow; profile: 
         )}
         <div className="flex-1 min-w-0 flex items-center gap-1.5">
           <span className="text-[14px] font-semibold text-[#111]">{displayName}</span>
-          <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>· {ago}</span>
+          <span className="text-[11px]" style={{ color: '#bbb' }}>· {ago}</span>
         </div>
         {post.price != null && post.price > 0 && (
           <button
             onClick={e => { e.stopPropagation(); navigate(`/post/${post.id}`) }}
             className="inline-flex items-center justify-center rounded-full px-3 py-1 flex-shrink-0 active:opacity-75 transition-opacity"
-            style={{ background: '#111' }}
+            style={{ background: 'white', border: '1px solid #e0e0e0' }}
           >
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight">
-              <Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{cp(post.price)}
+            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#111] tracking-tight">
+              <Lock style={{ width: 9, height: 9, color: '#111' }} strokeWidth={2.5} />{cp(post.price)}
             </span>
           </button>
         )}

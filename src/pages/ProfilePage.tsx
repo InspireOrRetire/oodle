@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Share2, Menu, Eye, Plus, Minus, MoreHorizontal, Link, Zap, Bookmark, Check, ArrowLeft, Mail, Heart, MessageCircle, ChevronUp, ChevronDown, Copy, AtSign, Camera, ChevronRight as ChevronRightIcon, Image, Video, MapPin, List, Type, FileText, X, Search, Lock } from 'lucide-react'
+import { Share2, Menu, Plus, Minus, MoreHorizontal, Link, Zap, Bookmark, Check, ArrowLeft, Mail, Heart, MessageCircle, ChevronUp, ChevronDown, Copy, AtSign, Camera, ChevronRight as ChevronRightIcon, Image, Video, MapPin, List, Type, FileText, X, Search, Lock } from 'lucide-react'
 import { oo } from '../lib/oo'
 // Plain number for card price pills — no $? prefix on timeline cards
 const cp = (n: number) => n % 1 === 0 ? String(n) : n.toFixed(2)
@@ -128,7 +128,7 @@ function FollowersSheetProfile({
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-[15px] font-semibold text-[#111] truncate">{u.display_name ?? u.username}</p>
-                    {u.username && <p className="font-mono text-[12px] text-[#aaa] truncate">@{u.username}</p>}
+                    {u.username && <p className="text-[12px] text-[#aaa] truncate">@{u.username}</p>}
                   </div>
                 </button>
                 {currentUserId && u.id !== currentUserId && (
@@ -394,7 +394,7 @@ function ActionRow({
       <button onClick={onAsk} className="flex items-center gap-1 active:opacity-60 transition-opacity">
         <MessageCircle style={{ width: 16, height: 16, color: '#c0c0c8', flexShrink: 0 }} strokeWidth={1.75} />
         {questionCount > 0 && (
-          <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>{fmtN(questionCount)}</span>
+          <span className="text-[11px]" style={{ color: '#bbb' }}>{fmtN(questionCount)}</span>
         )}
       </button>
 
@@ -409,7 +409,7 @@ function ActionRow({
           fill={saved ? '#111' : 'none'}
         />
         {saveCount > 0 && (
-          <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>{fmtN(saveCount)}</span>
+          <span className="text-[11px]" style={{ color: '#bbb' }}>{fmtN(saveCount)}</span>
         )}
       </button>
 
@@ -549,7 +549,7 @@ function ThreadItem({
                 <span className="text-[14px] font-semibold text-[#111] truncate">
                   {creator.display_name}
                 </span>
-                <span className="font-mono text-[11px] text-[#bbb] flex-shrink-0">{thread.time_ago}</span>
+                <span className="text-[11px] text-[#bbb] flex-shrink-0">{thread.time_ago}</span>
                 <div className="ml-auto flex items-center gap-2 flex-shrink-0">
                   {thread.price > 0 && (
                     isOwner ? (
@@ -572,10 +572,6 @@ function ThreadItem({
                       </button>
                     )
                   )}
-                  <Eye className="w-3 h-3 text-[#ccc]" />
-                  <span className="font-mono text-[11px] text-[#ccc]">
-                    {thread.views >= 1000 ? `${(thread.views / 1000).toFixed(1)}K` : thread.views}
-                  </span>
                 </div>
               </div>
               {thread.caption && (
@@ -615,13 +611,8 @@ function ThreadItem({
                 <div className="flex-1 min-w-0 pb-2">
                   <div className="flex items-center gap-1.5 mb-1.5">
                     <span className="text-[14px] font-medium text-[#111] truncate">{creator.display_name}</span>
-                    <span className="font-mono text-[11px] text-[#bbb] flex-shrink-0">{thread.time_ago}</span>
-                    <div className="ml-auto flex items-center gap-1 flex-shrink-0">
-                      <Eye className="w-3 h-3 text-[#ccc]" />
-                      <span className="font-mono text-[11px] text-[#ccc]">
-                        {thread.views >= 1000 ? `${(thread.views / 1000).toFixed(1)}K` : thread.views}
-                      </span>
-                    </div>
+                    <span className="text-[11px] text-[#bbb] flex-shrink-0">{thread.time_ago}</span>
+                    <div className="ml-auto" />
                   </div>
                   {thread.images && thread.images.length > 0 && (
                     <div className="mb-2">
@@ -657,7 +648,7 @@ function ThreadItem({
                     <div className="flex-1 min-w-0 pb-3">
                       <div className="flex items-center gap-1.5 mb-1">
                         <span className="text-[13px] font-normal text-[#111]">@{reply.username}</span>
-                        <span className="font-mono text-[11px] text-[#bbb]">· {reply.time_ago}</span>
+                        <span className="text-[11px] text-[#bbb]">· {reply.time_ago}</span>
                         {!isOwnAsker && <MoreHorizontal className="w-4 h-4 text-[#ccc] ml-auto flex-shrink-0" />}
                       </div>
                       <div className="flex items-start gap-2 mb-2">
@@ -688,7 +679,7 @@ function ThreadItem({
                           <div className="w-[14px] h-[14px] rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
                             <Check style={{ width: 8, height: 8, color: 'white' }} strokeWidth={3} />
                           </div>
-                          <span className="font-mono text-[10px] font-semibold" style={{ color: '#16a34a' }}>
+                          <span className="text-[10px] font-semibold" style={{ color: '#16a34a' }}>
                             Purchased · saved to your library
                           </span>
                         </div>
@@ -751,7 +742,7 @@ function ThreadItem({
                       <div className="flex-1 min-w-0 pb-3">
                         <div className="flex items-center gap-1.5 mb-1">
                           <span className="text-[13px] font-normal text-[#111]">@{reply.username}</span>
-                          <span className="font-mono text-[11px] text-[#bbb]">· {reply.time_ago}</span>
+                          <span className="text-[11px] text-[#bbb]">· {reply.time_ago}</span>
                           {!isOwnAsker && <MoreHorizontal className="w-4 h-4 text-[#ccc] ml-auto flex-shrink-0" />}
                         </div>
                         <div className="flex items-start gap-2 mb-2">
@@ -791,7 +782,7 @@ function ThreadItem({
                       <div className="flex-1 min-w-0 flex items-start gap-2 pt-2"
                         style={i > 0 ? { borderTop: '0.5px solid #f5f5f7' } : {}}>
                         <p className="flex-1 text-[13px] text-[#222] leading-[1.55] line-clamp-2">
-                          <span className="font-mono text-[11px] text-[#bbb] mr-1">↳</span>
+                          <span className="text-[11px] text-[#bbb] mr-1">↳</span>
                           {q.text}
                         </p>
                         <div
@@ -1001,7 +992,7 @@ function PurchaseSheet({
                       <div className="flex items-center justify-center mb-1">
                         <span style={{ fontSize: 48, fontWeight: 700, color: '#111', lineHeight: 1 }}>{oo(price)}</span>
                       </div>
-                      <p className="text-center font-mono text-[12px] mb-0.5" style={{ color: '#aaa' }}>
+                      <p className="text-center text-[12px] mb-0.5" style={{ color: '#aaa' }}>
                         Your balance: {oo(balance)}
                       </p>
                       {!hasBalance && balance === 0 && (
@@ -1019,7 +1010,7 @@ function PurchaseSheet({
                       <div className="flex flex-col gap-2.5 mt-5">
 
                         {unlockErr && (
-                          <p className="text-center font-mono text-[11px] text-red-500">{unlockErr}</p>
+                          <p className="text-center text-[11px] text-red-500">{unlockErr}</p>
                         )}
 
                         <button
@@ -1038,7 +1029,7 @@ function PurchaseSheet({
                         </button>
                       </div>
 
-                      <p className="text-center font-mono text-[10px] mt-2" style={{ color: '#d0d0d0' }}>
+                      <p className="text-center text-[10px] mt-2" style={{ color: '#d0d0d0' }}>
                         Balance is non-refundable
                       </p>
                     </div>
@@ -1062,7 +1053,7 @@ function PurchaseSheet({
                         <span className="text-[17px] font-bold text-[#111]">Add balance</span>
                       </div>
 
-                      <p className="font-mono text-[11px] mb-4" style={{ color: '#aaa' }}>
+                      <p className="text-[11px] mb-4" style={{ color: '#aaa' }}>
                         Current balance: {oo(balance)}
                       </p>
 
@@ -1088,7 +1079,7 @@ function PurchaseSheet({
                                     {oo(p.tokens)} balance
                                   </span>
                                   {p.tag && (
-                                    <span className="font-mono text-[9px] px-[6px] py-[2px] rounded-[4px]"
+                                    <span className="text-[9px] px-[6px] py-[2px] rounded-[4px]"
                                       style={{
                                         background: selected ? 'rgba(255,255,255,0.15)' : '#f0f0f0',
                                         color:      selected ? 'rgba(255,255,255,0.8)' : '#888',
@@ -1097,7 +1088,7 @@ function PurchaseSheet({
                                     </span>
                                   )}
                                 </div>
-                                <span className="font-mono text-[11px]"
+                                <span className="text-[11px]"
                                   style={{ color: selected ? 'rgba(255,255,255,0.5)' : '#bbb' }}>
                                   ≈ {Math.floor(p.tokens / Math.max(price, 1))} unlocks
                                 </span>
@@ -1125,7 +1116,7 @@ function PurchaseSheet({
                         }
                       </button>
 
-                      <p className="text-center font-mono text-[10px] mt-4" style={{ color: '#d0d0d0' }}>
+                      <p className="text-center text-[10px] mt-4" style={{ color: '#d0d0d0' }}>
                         Balance is non-refundable
                       </p>
                     </div>
@@ -1157,7 +1148,7 @@ function PurchaseSheet({
                     <motion.p
                       initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                       transition={{ delay: 0.28 }}
-                      className="font-mono text-[12px] text-center mb-5"
+                      className="text-[12px] text-center mb-5"
                       style={{ color: '#aaa' }}>
                       Saved permanently to your library
                     </motion.p>
@@ -1174,7 +1165,7 @@ function PurchaseSheet({
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[12px] font-semibold text-[#111] leading-tight">Confirmation sent</p>
-                        <p className="font-mono text-[10px] mt-[2px]" style={{ color: '#aaa' }}>
+                        <p className="text-[10px] mt-[2px]" style={{ color: '#aaa' }}>
                           Check your email for a link back to this answer
                         </p>
                       </div>
@@ -1479,14 +1470,14 @@ function OwnedToast({ show, onOpen, onDismiss }: { show: boolean; onOpen: () => 
               <Check style={{ width: 12, height: 12, color: 'white' }} strokeWidth={2.5} />
             </div>
             <div className="flex-1">
-              <p className="font-mono text-[12px] text-white font-semibold leading-tight">Already purchased</p>
-              <p className="font-mono text-[10px] mt-[1px]" style={{ color: '#aaa' }}>You already own this answer</p>
+              <p className="text-[12px] text-white font-semibold leading-tight">Already purchased</p>
+              <p className="text-[10px] mt-[1px]" style={{ color: '#aaa' }}>You already own this answer</p>
             </div>
             <button
               onClick={() => { onDismiss(); onOpen() }}
               className="rounded-[10px] px-3 py-1.5 flex-shrink-0"
               style={{ background: '#16a34a' }}>
-              <span className="font-mono text-[11px] text-white font-semibold">View</span>
+              <span className="text-[11px] text-white font-semibold">View</span>
             </button>
           </div>
         </motion.div>
@@ -1603,7 +1594,7 @@ function AskSheet({
                     >
                       <div>
                         <span className="text-[17px] font-bold text-[#111]">Questions</span>
-                        <span className="font-mono text-[11px] text-[#bbb] ml-2">@{creator.username}</span>
+                        <span className="text-[11px] text-[#bbb] ml-2">@{creator.username}</span>
                       </div>
                       <button onClick={handleClose}
                         className="text-[15px] font-semibold" style={{ color: '#111' }}>
@@ -1616,7 +1607,7 @@ function AskSheet({
                       <CreatorAvatar size={36} initials={creator.initials} avatarUrl={creator.avatar_url} />
                       <div>
                         <p className="text-[13px] font-semibold text-[#111]">{creator.display_name}</p>
-                        <p className="font-mono text-[10px] text-[#aaa]">@{creator.username}</p>
+                        <p className="text-[10px] text-[#aaa]">@{creator.username}</p>
                       </div>
                     </div>
 
@@ -1634,7 +1625,7 @@ function AskSheet({
                           >
                             <div className="flex items-start gap-2">
                               <p className="flex-1 text-[13px] text-[#222] leading-[1.55]">
-                                <span className="font-mono text-[11px] text-[#bbb] mr-1">↳</span>
+                                <span className="text-[11px] text-[#bbb] mr-1">↳</span>
                                 {q.text}
                               </p>
                               <div
@@ -1649,7 +1640,7 @@ function AskSheet({
                                 </span>
                               </div>
                             </div>
-                            <p className="font-mono text-[10px] mt-1" style={{ color: q.status === 'answered' ? '#16a34a' : '#bbb' }}>
+                            <p className="text-[10px] mt-1" style={{ color: q.status === 'answered' ? '#16a34a' : '#bbb' }}>
                               {q.status === 'answered' ? '✓ answered' : '· pending reply'}
                             </p>
                           </div>
@@ -1663,10 +1654,10 @@ function AskSheet({
                         style={{ background: '#000' }}
                       >
                         <MessageCircle style={{ width: 15, height: 15, color: 'white' }} strokeWidth={1.75} />
-                        <span style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>Ask another question</span>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>Ask</span>
                       </button>
 
-                      <p className="text-center font-mono text-[10px] mt-2" style={{ color: '#d0d0d0' }}>
+                      <p className="text-center text-[10px] mt-2" style={{ color: '#d0d0d0' }}>
                         Each question is a private direct message
                       </p>
                     </div>
@@ -1709,7 +1700,7 @@ function AskSheet({
                               <Check style={{ width: 26, height: 26, color: 'white' }} strokeWidth={2.5} />
                             </div>
                             <p className="text-[16px] font-bold text-[#111] mb-1">Question sent</p>
-                            <p className="font-mono text-[11px] text-[#aaa] text-center">
+                            <p className="text-[11px] text-[#aaa] text-center">
                               @{creator.username} will be notified
                             </p>
                           </motion.div>
@@ -1720,7 +1711,7 @@ function AskSheet({
                               <CreatorAvatar size={36} initials={creator.initials} avatarUrl={creator.avatar_url} />
                               <div>
                                 <p className="text-[13px] font-semibold text-[#111]">{creator.display_name}</p>
-                                <p className="font-mono text-[10px] text-[#aaa]">@{creator.username}</p>
+                                <p className="text-[10px] text-[#aaa]">@{creator.username}</p>
                               </div>
                             </div>
 
@@ -1751,7 +1742,7 @@ function AskSheet({
                                     >
                                       <span>{before}{before ? ' ' : ''}</span>
                                       <span
-                                        className="inline-flex items-center font-mono"
+                                        className="inline-flex items-center"
                                         style={{
                                           fontSize: 12,
                                           color: '#444',
@@ -1781,7 +1772,7 @@ function AskSheet({
                                       boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.08)',
                                     }}
                                   >
-                                    <span className="font-mono text-[12px]" style={{ color: '#555' }}>$?</span>
+                                    <span className="text-[12px]" style={{ color: '#555' }}>$?</span>
                                   </button>}
                                 </div>
                               )
@@ -1795,7 +1786,7 @@ function AskSheet({
                               return (
                                 <>
                                   <div className="flex items-center gap-1.5 mt-3 mb-5">
-                                    <span className="font-mono text-[10px]" style={{ color: '#bbb' }}>
+                                    <span className="text-[10px]" style={{ color: '#bbb' }}>
                                       {!locked
                                         ? 'end with $? to send · price set per answer'
                                         : canSend
@@ -1948,8 +1939,8 @@ function ShareProfileSheet({
                 </div>
 
                 {/* Handle below QR */}
-                <p className="font-mono text-[13px] font-semibold text-[#111] mb-[2px]">@{username}</p>
-                <p className="font-mono text-[10px] text-[#bbb]">oodle.app/@{username}</p>
+                <p className="text-[13px] font-semibold text-[#111] mb-[2px]">@{username}</p>
+                <p className="text-[10px] text-[#bbb]">oodle.app/@{username}</p>
               </div>
 
               {/* Action row */}
@@ -1966,7 +1957,7 @@ function ShareProfileSheet({
                     <Copy style={{ width: 20, height: 20, color: '#333' }} strokeWidth={1.75} />
                   )}
                   <span
-                    className="font-mono text-[10px] font-semibold uppercase tracking-[0.04em]"
+                    className="text-[10px] font-semibold uppercase tracking-[0.04em]"
                     style={{ color: copied === 'link' ? 'white' : '#555' }}
                   >
                     {copied === 'link' ? 'Copied!' : 'Copy link'}
@@ -1980,7 +1971,7 @@ function ShareProfileSheet({
                   style={{ background: '#f0f0f2' }}
                 >
                   <Share2 style={{ width: 20, height: 20, color: '#333' }} strokeWidth={1.75} />
-                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.04em] text-[#555]">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.04em] text-[#555]">
                     Share
                   </span>
                 </button>
@@ -1997,7 +1988,7 @@ function ShareProfileSheet({
                     <AtSign style={{ width: 20, height: 20, color: '#333' }} strokeWidth={1.75} />
                   )}
                   <span
-                    className="font-mono text-[10px] font-semibold uppercase tracking-[0.04em]"
+                    className="text-[10px] font-semibold uppercase tracking-[0.04em]"
                     style={{ color: copied === 'handle' ? 'white' : '#555' }}
                   >
                     {copied === 'handle' ? 'Copied!' : 'Copy handle'}
@@ -2012,10 +2003,10 @@ function ShareProfileSheet({
                 style={{ background: '#f5f5f7' }}
               >
                 <Link style={{ width: 13, height: 13, color: '#aaa', flexShrink: 0 }} strokeWidth={2} />
-                <span className="font-mono text-[12px] text-[#555] flex-1 text-left truncate">
+                <span className="text-[12px] text-[#555] flex-1 text-left truncate">
                   oodle.app/@{username}
                 </span>
-                <span className="font-mono text-[10px] text-[#bbb] flex-shrink-0">tap to copy</span>
+                <span className="text-[10px] text-[#bbb] flex-shrink-0">tap to copy</span>
               </button>
 
             </div>
@@ -2080,7 +2071,7 @@ function EditPriceSheet({
                   <span className="text-[10px] text-[#bbb]">current</span>
                 </div>
               </div>
-              <p className="font-mono text-[11px] mb-5" style={{ color: '#aaa' }}>
+              <p className="text-[11px] mb-5" style={{ color: '#aaa' }}>
                 Set how much peers pay to unlock this answer
               </p>
 
@@ -2119,7 +2110,7 @@ function EditPriceSheet({
               {/* Change indicator — only shows when value differs from current */}
               <div className="h-[22px] flex items-center px-1 mb-2">
                 {value !== currentPrice && (
-                  <p className="font-mono text-[10px]" style={{ color: '#bbb' }}>
+                  <p className="text-[10px]" style={{ color: '#bbb' }}>
                     changing from{' '}
                     <span style={{ color: '#888', fontWeight: 600 }}>
                       {currentPrice === 0 ? 'free' : `$${currentPrice}`}
@@ -2138,7 +2129,7 @@ function EditPriceSheet({
                   <button
                     key={p}
                     onClick={() => setValue(p)}
-                    className="rounded-[20px] px-3.5 py-1.5 font-mono text-[12px] font-semibold transition-all active:opacity-70"
+                    className="rounded-[20px] px-3.5 py-1.5 text-[12px] font-semibold transition-all active:opacity-70"
                     style={{
                       background: value === p ? '#111' : '#f0f0f2',
                       color: value === p ? 'white' : '#555',
@@ -2154,7 +2145,7 @@ function EditPriceSheet({
                 <div className="flex items-center gap-2 rounded-[12px] px-4 py-3 mb-5"
                   style={{ background: '#f0fdf4', border: '0.5px solid #c8e6c9' }}>
                   <Zap style={{ width: 12, height: 12, color: '#3a9a4a' }} strokeWidth={2} fill="#3a9a4a" />
-                  <span className="font-mono text-[11px]" style={{ color: '#3a9a4a' }}>
+                  <span className="text-[11px]" style={{ color: '#3a9a4a' }}>
                     You earn ~${(value * 0.85).toFixed(2)} per unlock after fees
                   </span>
                 </div>
@@ -2353,7 +2344,7 @@ function ProfileEditPage({ open, onClose, onSaved }: { open: boolean; onClose: (
 
             {/* ── Field group: Identity ── */}
             <div className="px-4 pt-5 pb-1">
-              <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-[#aaa] mb-2">Identity</p>
+              <p className="text-[10px] uppercase tracking-[0.08em] text-[#aaa] mb-2">Identity</p>
             </div>
             <div className="bg-white" style={{ borderTop: '0.5px solid #f2f2f2', borderBottom: '0.5px solid #f2f2f2' }}>
 
@@ -2386,7 +2377,7 @@ function ProfileEditPage({ open, onClose, onSaved }: { open: boolean; onClose: (
 
             {/* ── Bio ── */}
             <div className="px-4 pt-5 pb-1">
-              <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-[#aaa] mb-2">Bio</p>
+              <p className="text-[10px] uppercase tracking-[0.08em] text-[#aaa] mb-2">Bio</p>
             </div>
             <div className="bg-white px-4 py-4"
               style={{ borderTop: '0.5px solid #f2f2f2', borderBottom: '0.5px solid #f2f2f2' }}>
@@ -2397,12 +2388,12 @@ function ProfileEditPage({ open, onClose, onSaved }: { open: boolean; onClose: (
                 placeholder="Tell people about yourself…"
                 className="w-full text-[15px] text-[#111] placeholder-[#ccc] bg-transparent outline-none resize-none leading-relaxed"
               />
-              <p className="font-mono text-[10px] text-right mt-1" style={{ color: '#ccc' }}>{bio.length}/150</p>
+              <p className="text-[10px] text-right mt-1" style={{ color: '#ccc' }}>{bio.length}/150</p>
             </div>
 
             {/* ── Categories ── */}
             <div className="px-4 pt-5 pb-1">
-              <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-[#aaa] mb-2">Topics you answer</p>
+              <p className="text-[10px] uppercase tracking-[0.08em] text-[#aaa] mb-2">Topics you answer</p>
             </div>
             <div className="px-4 pb-6">
               <div className="flex flex-wrap gap-2">
@@ -2939,7 +2930,7 @@ function CreatePostSheet({
                                   </button>
                                 )}
                               </div>
-                              <p className="px-4 py-2 text-[11px] font-mono" style={{ color: '#c0c0c0' }}>
+                              <p className="px-4 py-2 text-[11px]" style={{ color: '#c0c0c0' }}>
                                 Link is hidden until the peer completes purchase
                               </p>
                             </motion.div>
@@ -2996,7 +2987,7 @@ function CreatePostSheet({
                                       className="flex-1 bg-transparent outline-none text-[15px] font-bold text-[#111] placeholder-[#c0c0c0] py-2.5 uppercase tracking-wide" />
                                   ) : (
                                     <>
-                                      <span className="text-[#c0c0c0] text-[13px] font-mono flex-shrink-0 w-5 text-right select-none">
+                                      <span className="text-[#c0c0c0] text-[13px] flex-shrink-0 w-5 text-right select-none">
                                         {listItems.slice(0, i).filter(r => r.type === 'line').length + 1}.
                                       </span>
                                       <input value={row.text} onChange={e => updateListItem(i, e.target.value)}
@@ -3413,7 +3404,7 @@ export default function ProfilePage() {
                 style={{ bottom: -11 }}
               >
                 <div className="w-[5px] h-[5px] rounded-full flex-shrink-0" style={{ background: '#4cd964' }} />
-                <span className="font-mono text-[8px] text-white tracking-[0.04em]">active</span>
+                <span className="text-[8px] text-white tracking-[0.04em]">active</span>
               </div>
             </div>
 
@@ -3422,7 +3413,7 @@ export default function ProfilePage() {
               <p className="text-[15px] font-semibold text-[#111] leading-tight mb-[2px]">
                 {activeProfile.display_name}
               </p>
-              <p className="font-mono text-[11px] text-[#aaa] mb-[6px]">
+              <p className="text-[11px] text-[#aaa] mb-[6px]">
                 @{activeProfile.username}
               </p>
               <p className="text-[12px] text-[#888] leading-[1.4] mb-[6px]">{activeProfile.bio}</p>
@@ -3436,7 +3427,7 @@ export default function ProfilePage() {
               className="flex-1 text-center active:opacity-60 transition-opacity"
             >
               <p className="text-[14px] font-semibold text-[#111]">{activeProfile.followers_count >= 1000 ? `${(activeProfile.followers_count / 1000).toFixed(1)}K` : activeProfile.followers_count}</p>
-              <p className="font-mono text-[9px] text-[#bbb] uppercase tracking-[0.05em] mt-[1px]">followers</p>
+              <p className="text-[9px] text-[#bbb] uppercase tracking-[0.05em] mt-[1px]">followers</p>
             </button>
             <button
               onClick={() => { setFollowersSheetTab('following'); setFollowersSheetOpen(true) }}
@@ -3444,7 +3435,7 @@ export default function ProfilePage() {
               style={{ borderLeft: '0.5px solid #f2f2f2' }}
             >
               <p className="text-[14px] font-semibold text-[#111]">{activeProfile.following_count}</p>
-              <p className="font-mono text-[9px] text-[#bbb] uppercase tracking-[0.05em] mt-[1px]">following</p>
+              <p className="text-[9px] text-[#bbb] uppercase tracking-[0.05em] mt-[1px]">following</p>
             </button>
             <button
               onClick={() => { setFollowersSheetTab('followers'); setFollowersSheetOpen(true) }}
@@ -3452,7 +3443,7 @@ export default function ProfilePage() {
               style={{ borderLeft: '0.5px solid #f2f2f2' }}
             >
               <p className="text-[14px] font-semibold text-[#111]">{answeredCount}</p>
-              <p className="font-mono text-[9px] text-[#bbb] uppercase tracking-[0.05em] mt-[1px]">answers</p>
+              <p className="text-[9px] text-[#bbb] uppercase tracking-[0.05em] mt-[1px]">answers</p>
             </button>
           </div>
 
@@ -3493,7 +3484,7 @@ export default function ProfilePage() {
               onClick={() => { iosKbRef.current?.focus(); setAskOpen(true) }}
               className="w-full bg-[#111] rounded-[12px] py-[11px] mt-[10px] active:opacity-80 transition-opacity"
             >
-              <span className="font-mono text-[12px] text-white tracking-[0.04em]">
+              <span className="text-[12px] text-white tracking-[0.04em]">
                 ask a question
               </span>
             </button>
@@ -3530,7 +3521,7 @@ export default function ProfilePage() {
         ) : timelineError ? (
           <div className="flex flex-col items-center justify-center py-20 px-8 text-center">
             <p className="text-[15px] font-semibold text-red-500 mb-1">⚠️ Couldn't load posts</p>
-            <p className="text-[12px] text-[#aaa] leading-snug font-mono">{timelineError}</p>
+            <p className="text-[12px] text-[#aaa] leading-snug">{timelineError}</p>
           </div>
         ) : realThreads.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 px-8 text-center">
@@ -3588,7 +3579,7 @@ export default function ProfilePage() {
                     className="py-8 text-center"
                   >
                     <p className="text-[15px] font-semibold text-[#111] mb-1">Question sent</p>
-                    <p className="font-mono text-[11px] text-[#aaa]">
+                    <p className="text-[11px] text-[#aaa]">
                       @{activeProfile.username} will be notified
                     </p>
                   </motion.div>
@@ -3601,7 +3592,7 @@ export default function ProfilePage() {
                         </div>
                         <div>
                           <p className="text-[13px] font-semibold text-[#111]">{activeProfile.display_name}</p>
-                          <p className="font-mono text-[10px] text-[#aaa]">@{activeProfile.username}</p>
+                          <p className="text-[10px] text-[#aaa]">@{activeProfile.username}</p>
                         </div>
                       </div>
                       <button
@@ -3624,14 +3615,14 @@ export default function ProfilePage() {
 
                     <div className="flex items-center justify-between mt-3">
                       <div>
-                          <span className="font-mono text-[11px] text-[#aaa]">price set per answer</span>
+                          <span className="text-[11px] text-[#aaa]">price set per answer</span>
                       </div>
                       <button
                         onClick={handleSendAsk}
                         disabled={!askText.trim().endsWith('?')}
                         className="bg-[#111] rounded-[10px] px-5 py-2.5 disabled:opacity-30 transition-opacity"
                       >
-                        <span className="font-mono text-[12px] text-white tracking-[0.02em]">send</span>
+                        <span className="text-[12px] text-white tracking-[0.02em]">send</span>
                       </button>
                     </div>
                   </motion.div>
@@ -3770,7 +3761,7 @@ export default function ProfilePage() {
                     {priceSavedToast === 0 ? 'free' : oo(priceSavedToast)}
                   </span>
                 </div>
-                <span className="font-mono text-[11px] mt-0.5" style={{ color: 'rgba(0,0,0,0.38)' }}>
+                <span className="text-[11px] mt-0.5" style={{ color: 'rgba(0,0,0,0.38)' }}>
                   ~${(priceSavedToast * 0.85).toFixed(2)} per unlock
                 </span>
               </motion.div>

@@ -92,7 +92,7 @@ export default function Layout() {
                     <div className="w-[5px] h-[5px] rounded-full transition-colors"
                       style={{ background: active ? '#111111' : '#cccccc' }} />
                     <span
-                      className="font-mono text-[9px] uppercase tracking-[0.05em] transition-colors"
+                      className="text-[9px] uppercase tracking-[0.05em] transition-colors"
                       style={{ color: active ? '#111111' : '#cccccc' }}
                     >
                       {tab.label}

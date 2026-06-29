@@ -160,7 +160,7 @@ export default function SaveSheet({
                             {/* Label */}
                             <div className="flex-1 min-w-0 text-left">
                               <p className="text-[14px] font-semibold text-[#111]">General</p>
-                              <p className="font-mono text-[11px] text-[#bbb] mt-[2px]">saved without a category</p>
+                              <p className="text-[11px] text-[#bbb] mt-[2px]">saved without a category</p>
                             </div>
 
                             {/* Checkmark */}
@@ -179,7 +179,7 @@ export default function SaveSheet({
 
                       {/* ── Categories divider ── */}
                       <div className="px-4 pt-4 pb-2">
-                        <p className="font-mono text-[10px] uppercase tracking-widest" style={{ color: '#bbb' }}>
+                        <p className="text-[10px] uppercase tracking-widest" style={{ color: '#bbb' }}>
                           Categories
                         </p>
                       </div>
@@ -216,7 +216,7 @@ export default function SaveSheet({
                             {/* Name + count */}
                             <div className="flex-1 min-w-0 text-left">
                               <p className="text-[14px] font-semibold text-[#111] truncate">{col.name}</p>
-                              <p className="font-mono text-[11px] text-[#bbb] mt-[2px]">{col.count} saved</p>
+                              <p className="text-[11px] text-[#bbb] mt-[2px]">{col.count} saved</p>
                             </div>
 
                             {/* Checkmark */}
@@ -262,7 +262,7 @@ export default function SaveSheet({
                       <button onClick={handleCreate} disabled={!newName.trim()}
                         className="w-full rounded-[12px] py-[14px] mt-5 active:opacity-80 transition-opacity disabled:opacity-30"
                         style={{ background: '#111' }}>
-                        <span className="font-mono text-[13px] text-white tracking-[0.03em]">create</span>
+                        <span className="text-[13px] text-white tracking-[0.03em]">create</span>
                       </button>
                     </div>
                   </motion.div>

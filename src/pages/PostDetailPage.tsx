@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { ArrowLeft, MoreHorizontal, MapPin, Eye, Zap, Check, MessageCircle, X as XIcon, Lock } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, MapPin, Zap, Check, MessageCircle, X as XIcon, Lock, Bookmark } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { FeedItem } from '../services/feedService'
-import { fetchPostById, composedPostToFeedItem } from '../services/feedService'
+import { fetchPostById, composedPostToFeedItem, incrementPostView } from '../services/feedService'
 import { MOCK_FEED_ITEMS } from '../lib/mockFeed'
 import VerifiedBadge from '../components/prsnc/VerifiedBadge'
 import PostMediaCarousel from '../components/Post/PostMediaCarousel'
@@ -14,6 +14,9 @@ import { createThreadWithMedia } from '../services/threadService'
 import { myQuestionsStore } from '../services/myQuestionsStore'
 import { useAuth } from '../contexts/AuthContext'
 import { oo } from '../lib/oo'
+import { savePost, unsavePost } from '../services/savedService'
+import { supabase } from '../lib/supabase'
+import PostOptionsSheet from '../components/Post/PostOptionsSheet'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -56,6 +59,8 @@ export default function PostDetailPage() {
   const askTextareaRef = useRef<HTMLTextAreaElement>(null)
   // iOS keyboard
   const iosKbRef = useRef<HTMLInputElement>(null)
+  const [isSaved, setIsSaved] = useState(false)
+  const [optionsOpen, setOptionsOpen] = useState(false)
 
   // Prefer item passed via navigation state (no reload flash)
   const navState = location.state as { item?: FeedItem; focusedReplyIndex?: number } | null
@@ -67,6 +72,25 @@ export default function PostDetailPage() {
     MOCK_FEED_ITEMS.find(i => i.id === postId) ??
     null
 
+  // Increment view count once per post load
+  useEffect(() => {
+    if (!postId || postId.startsWith('mock-') || isExploreMode) return
+    incrementPostView(postId)
+  }, [postId])
+
+  // Check saved state
+  useEffect(() => {
+    if (!postId || !user || isExploreMode) return
+    supabase.from('saved_items').select('saved_id').eq('user_id', user.id).eq('post_id', postId).maybeSingle()
+      .then(({ data }) => setIsSaved(!!data))
+  }, [postId, user?.id])
+
+  async function toggleSave() {
+    if (!user || !postId) return
+    if (isSaved) { setIsSaved(false); await unsavePost(user.id, postId) }
+    else         { setIsSaved(true);  await savePost(user.id, postId) }
+  }
+
   // If no item in nav state, fetch real post from Supabase
   useEffect(() => {
     if (navState?.item || !postId || !user || isExploreMode) return
@@ -76,6 +100,7 @@ export default function PostDetailPage() {
       .then(data => {
         // Map to FeedItem shape
         const c = data.creator as { id: string; username: string; display_name: string; avatar_url: string | null }
+        const d = data as typeof data & { views?: number }
         const mapped: FeedItem = {
           id:           data.id,
           type:         'qa',
@@ -90,7 +115,7 @@ export default function PostDetailPage() {
             response_rate: null,
           },
           time_ago:     'just now',
-          views:        0,
+          views:        (d.views ?? 0) + 1,
           text:         data.caption ?? '',
           images:       data.image_urls ?? [],
           price:        data.price ?? 0,
@@ -180,7 +205,7 @@ export default function PostDetailPage() {
             </span>
           )}
         </div>
-        <button className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-50">
+        <button onClick={() => setOptionsOpen(true)} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-50">
           <MoreHorizontal className="w-5 h-5 text-gray-400" strokeWidth={1.75} />
         </button>
       </div>
@@ -211,13 +236,10 @@ export default function PostDetailPage() {
                   {item.creator.display_name}
                 </span>
                 {item.creator.verified && <VerifiedBadge />}
-                <span className="font-mono text-[11px] flex-shrink-0" style={{ color: '#bbb' }}>
+                <span className="text-[11px] flex-shrink-0" style={{ color: '#bbb' }}>
                   · {item.time_ago}
                 </span>
-                <div className="ml-auto flex items-center gap-1 flex-shrink-0">
-                  <Eye style={{ width: 11, height: 11, color: '#ccc' }} strokeWidth={1.75} />
-                  <span className="font-mono text-[10px]" style={{ color: '#ccc' }}>{fmtCount(item.views)}</span>
-                </div>
+                <div className="ml-auto" />
               </div>
               {item.creator.response_rate !== null && item.creator.response_rate !== undefined && (
                 <div className="flex items-center gap-1 mt-1">
@@ -281,20 +303,47 @@ export default function PostDetailPage() {
             )}
 
             {/* Always-visible Ask bar */}
-            <div className="flex items-center justify-between">
-              <p className="text-[12px]" style={{ color: '#aaa' }}>
-                {isType2 && hasReplies
-                  ? 'Tap a question below to purchase that answer'
+            <p className="text-[12px] mb-2" style={{ color: '#aaa' }}>
+              {isType2 && hasReplies
+                ? 'Tap a question below to purchase that answer'
+                : !hasReplies
+                  ? 'Be the first to ask a question'
                   : 'Ask a question below'}
-              </p>
-              <button
-                onClick={openAsk}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-full active:opacity-70 transition-opacity flex-shrink-0 ml-3"
-                style={{ border: '1px solid #e0e0e0', background: 'white' }}
-              >
-                <MessageCircle style={{ width: 12, height: 12, color: '#555' }} strokeWidth={2} />
-                <span className="text-[12px] font-semibold" style={{ color: '#333' }}>Ask</span>
-              </button>
+            </p>
+            <div className="relative" style={{ minHeight: 40 }}>
+              {/* Ask pinned dead-center — never moves */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <button
+                  onClick={openAsk}
+                  className="flex items-center gap-1.5 active:opacity-70 transition-opacity pointer-events-auto"
+                >
+                  <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
+                  <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
+                </button>
+              </div>
+              {/* Save anchored just right of Ask */}
+              <div className="absolute inset-y-0 flex items-center pointer-events-none" style={{ left: 'calc(50% + 38px)' }}>
+                <button
+                  onClick={toggleSave}
+                  className="flex items-center gap-1.5 active:opacity-70 transition-opacity pointer-events-auto"
+                  style={isSaved ? { background: '#111', borderRadius: 99, padding: '4px 10px' } : {}}
+                >
+                  <Bookmark style={{ width: 12, height: 12, color: isSaved ? 'white' : '#555' }} strokeWidth={2} fill={isSaved ? 'white' : 'none'} />
+                  <span className="text-[12px] font-semibold" style={{ color: isSaved ? 'white' : '#333' }}>{isSaved ? 'Saved' : 'Save'}</span>
+                </button>
+              </div>
+              {/* Price on far right when present */}
+              {item.isLocked && price != null && price > 0 && (
+                <div className="absolute inset-y-0 right-0 flex items-center pointer-events-none">
+                  <button
+                    onClick={() => setUnlockTarget({ creator: item.creator, question: item.question, price: price ?? 0, postId: item.id })}
+                    className="inline-flex items-center gap-1 active:opacity-75 transition-opacity pointer-events-auto"
+                  >
+                    <Lock style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
+                    <span className="text-[12px] font-semibold text-[#111] tracking-tight">{price % 1 === 0 ? String(price) : price.toFixed(2)}</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -345,7 +394,7 @@ export default function PostDetailPage() {
                     {/* Name + time */}
                     <div className="flex items-center gap-1.5 mb-1.5">
                       <span className="text-[13px] font-semibold text-[#111]">@{reply.username}</span>
-                      <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>· {reply.time_ago}</span>
+                      <span className="text-[11px]" style={{ color: '#bbb' }}>· {reply.time_ago}</span>
                     </div>
 
                     {/* Question */}
@@ -432,7 +481,7 @@ export default function PostDetailPage() {
                     <div className="flex-1 min-w-0 pb-5">
                       <div className="flex items-center gap-1.5 mb-1.5">
                         <span className="text-[13px] font-semibold text-[#111]">@{reply.username}</span>
-                        <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>· {reply.time_ago}</span>
+                        <span className="text-[11px]" style={{ color: '#bbb' }}>· {reply.time_ago}</span>
                       </div>
                       <div className="flex items-start gap-2 mb-1">
                         <p className="flex-1 text-[14px] text-[#222] leading-[1.55]">{reply.question}</p>
@@ -491,6 +540,9 @@ export default function PostDetailPage() {
           )}
         </div>
       </div>
+
+      {/* ── Post options sheet ── */}
+      <PostOptionsSheet open={optionsOpen} onClose={() => setOptionsOpen(false)} />
 
       {/* ── Unlock sheet ── */}
       <UnlockSheet target={unlockTarget} onClose={() => setUnlockTarget(null)} />
@@ -572,7 +624,7 @@ export default function PostDetailPage() {
                         />
                         <div>
                           <p className="text-[13px] font-semibold text-[#111]">{item.creator.display_name}</p>
-                          <p className="font-mono text-[10px]" style={{ color: '#aaa' }}>@{item.creator.username}</p>
+                          <p className="text-[10px]" style={{ color: '#aaa' }}>@{item.creator.username}</p>
                         </div>
                       </div>
 
@@ -598,7 +650,7 @@ export default function PostDetailPage() {
                             </div>
 
                             <div className="flex justify-end mt-1.5 mb-4">
-                              <p className="font-mono text-[10px]" style={{ color: '#bbb' }}>
+                              <p className="text-[10px]" style={{ color: '#bbb' }}>
                                 {askText.length}/280
                               </p>
                             </div>
@@ -684,7 +736,7 @@ export default function PostDetailPage() {
                       <Check style={{ width: 26, height: 26, color: 'white' }} strokeWidth={2.5} />
                     </motion.div>
                     <p className="text-[16px] font-bold text-[#111] mb-1">Question sent</p>
-                    <p className="font-mono text-[11px] text-center" style={{ color: '#aaa' }}>
+                    <p className="text-[11px] text-center" style={{ color: '#aaa' }}>
                       @{item.creator.username} will be notified
                     </p>
                   </motion.div>

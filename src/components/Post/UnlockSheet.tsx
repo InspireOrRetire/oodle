@@ -190,11 +190,18 @@ export default function UnlockSheet({
                       )}
 
                       {/* Price display */}
-                      <div className="flex items-center justify-center mb-1">
-                        <span style={{ fontSize: 48, fontWeight: 700, color: '#111', lineHeight: 1 }}>{oo(price)}</span>
+                      <div className="flex items-center end justify-center gap-2 mb-1">
+                        <span style={{
+                          fontSize: 12, fontWeight: 800, color: 'white', lineHeight: 1,
+                          background: '#f5c842',
+                          borderRadius: '50%',
+                          width: 32, height: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                          flexShrink: 0, letterSpacing: '-0.02em',
+                        }}>$?</span>
+                        <span style={{ fontSize: 48, fontWeight: 700, color: '#111', lineHeight: 1 }}>{price.toFixed(2)}</span>
                       </div>
-                      <p className="text-center font-mono text-[12px] mb-0.5" style={{ color: '#aaa' }}>
-                        Your balance: {oo(balance)}
+                      <p className="text-center text-[12px] mb-0.5" style={{ color: '#aaa' }}>
+                        Your balance: {balance.toFixed(2)}
                       </p>
                       {!hasBalance && balance === 0 && (
                         <p className="text-center text-[12px]" style={{ color: '#888' }}>
@@ -209,7 +216,7 @@ export default function UnlockSheet({
 
                       {/* Error */}
                       {error && (
-                        <p className="text-center font-mono text-[11px] mt-3" style={{ color: '#e53e3e' }}>{error}</p>
+                        <p className="text-center text-[11px] mt-3" style={{ color: '#e53e3e' }}>{error}</p>
                       )}
 
                       {/* Payment CTAs */}
@@ -234,11 +241,11 @@ export default function UnlockSheet({
                             onClick={() => nav('buy-tokens')}
                             className="w-full py-2 flex items-center justify-center active:opacity-60"
                           >
-                            <span className="font-mono text-[11px]" style={{ color: '#aaa' }}>Add balance</span>
+                            <span className="text-[11px]" style={{ color: '#aaa' }}>Add balance</span>
                           </button>
                         )}
                       </div>
-                      <p className="text-center font-mono text-[10px] mt-2" style={{ color: '#d0d0d0' }}>
+                      <p className="text-center text-[10px] mt-2" style={{ color: '#d0d0d0' }}>
                         Balance is non-refundable
                       </p>
                     </div>
@@ -256,7 +263,7 @@ export default function UnlockSheet({
                         </button>
                         <span className="text-[17px] font-bold text-[#111]">Add balance</span>
                       </div>
-                      <p className="font-mono text-[11px] mb-4" style={{ color: '#aaa' }}>
+                      <p className="text-[11px] mb-4" style={{ color: '#aaa' }}>
                         Current balance: {oo(balance)}
                       </p>
                       <div className="flex flex-col gap-3 mb-5">
@@ -276,13 +283,13 @@ export default function UnlockSheet({
                                     {oo(p.tokens)} balance
                                   </span>
                                   {p.tag && (
-                                    <span className="font-mono text-[9px] px-[6px] py-[2px] rounded-[4px]"
+                                    <span className="text-[9px] px-[6px] py-[2px] rounded-[4px]"
                                       style={{ background: sel ? 'rgba(255,255,255,0.15)' : '#f0f0f0', color: sel ? 'rgba(255,255,255,0.8)' : '#888' }}>
                                       {p.tag}
                                     </span>
                                   )}
                                 </div>
-                                <span className="font-mono text-[11px]" style={{ color: sel ? 'rgba(255,255,255,0.5)' : '#bbb' }}>
+                                <span className="text-[11px]" style={{ color: sel ? 'rgba(255,255,255,0.5)' : '#bbb' }}>
                                   ≈ {Math.floor(p.tokens / Math.max(price, 1))} unlocks
                                 </span>
                               </div>
@@ -294,7 +301,7 @@ export default function UnlockSheet({
                         })}
                       </div>
                       {error && (
-                        <p className="text-center font-mono text-[11px] mb-2" style={{ color: '#e53e3e' }}>{error}</p>
+                        <p className="text-center text-[11px] mb-2" style={{ color: '#e53e3e' }}>{error}</p>
                       )}
                       <button onClick={handleTopUp} disabled={topping}
                         className="w-full rounded-full py-[14px] flex items-center justify-center gap-2 active:opacity-80 disabled:opacity-70"
@@ -326,7 +333,7 @@ export default function UnlockSheet({
                       Unlocked
                     </motion.p>
                     <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
-                      className="font-mono text-[12px] text-center mb-9" style={{ color: '#aaa' }}>
+                      className="text-[12px] text-center mb-9" style={{ color: '#aaa' }}>
                       You can now view the full answer
                     </motion.p>
                     <motion.button

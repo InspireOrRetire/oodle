@@ -139,12 +139,12 @@ export default function AskQuestionSheet({ post, onClose }: Props) {
                     ) : f.type.startsWith('video') ? (
                       <div className="w-[68px] h-[68px] rounded-xl bg-gray-100 flex flex-col items-center justify-center gap-1">
                         <Video className="w-5 h-5 text-gray-400" strokeWidth={1.5} />
-                        <span className="text-[9px] text-gray-400 font-mono">video</span>
+                        <span className="text-[9px] text-gray-400">video</span>
                       </div>
                     ) : (
                       <div className="w-[68px] h-[68px] rounded-xl bg-gray-100 flex flex-col items-center justify-center gap-1 px-1">
                         <FileText className="w-5 h-5 text-gray-400" strokeWidth={1.5} />
-                        <span className="text-[9px] text-gray-400 font-mono text-center truncate w-full px-1">{f.name.split('.').pop()}</span>
+                        <span className="text-[9px] text-gray-400 text-center truncate w-full px-1">{f.name.split('.').pop()}</span>
                       </div>
                     )}
                     <button

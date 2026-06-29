@@ -155,7 +155,7 @@ export default function QuestionQueue({
                   style={{ color: alreadyUpvoted ? '#111' : '#ccc' }}
                 />
                 <span
-                  className="text-[11px] font-semibold font-mono"
+                  className="text-[11px] font-semibold"
                   style={{ color: alreadyUpvoted ? '#111' : '#bbb' }}
                 >
                   {q.upvote_count}

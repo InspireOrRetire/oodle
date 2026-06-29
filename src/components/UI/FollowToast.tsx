@@ -47,7 +47,7 @@ export default function FollowToast({ username, onDismiss }: Props) {
               boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
             }}
           >
-            <p className="font-mono text-[13px] tracking-[0.02em]" style={{ color: '#1c1c1e' }}>
+            <p className="text-[13px] tracking-[0.02em]" style={{ color: '#1c1c1e' }}>
               following @{username}
             </p>
           </motion.div>

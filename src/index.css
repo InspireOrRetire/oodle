@@ -23,7 +23,6 @@
   --pk3: rgba(255,60,170,0.06);
   --cy: #3cdfff;
   --fn: 'Inter', sans-serif;
-  --mono: 'IBM Plex Mono', monospace;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }

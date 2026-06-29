@@ -26,7 +26,7 @@ function Toast({ message }: { message: string | null }) {
           <div className="flex items-center gap-2 rounded-[14px] px-4 py-2.5 shadow-xl"
             style={{ background: '#111' }}>
             <Check style={{ width: 13, height: 13, color: '#4cd964', flexShrink: 0 }} strokeWidth={2.5} />
-            <span className="font-mono text-[12px] text-white">{message}</span>
+            <span className="text-[12px] text-white">{message}</span>
           </div>
         </motion.div>
       )}
@@ -57,7 +57,7 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mb-4">
-      <p className="font-mono text-[10px] uppercase tracking-[0.08em] px-4 pb-2 pt-1" style={{ color: '#aaa' }}>
+      <p className="text-[10px] uppercase tracking-[0.08em] px-4 pb-2 pt-1" style={{ color: '#aaa' }}>
         {title}
       </p>
       <div className="mx-3 bg-white rounded-[16px] overflow-hidden" style={{ border: '0.5px solid #ebebeb' }}>
@@ -94,10 +94,10 @@ function Row({
         <p className="text-[14px] font-medium leading-tight" style={{ color: danger ? '#e53e3e' : '#111' }}>
           {label}
         </p>
-        {sublabel && <p className="font-mono text-[10px] mt-[1px]" style={{ color: '#bbb' }}>{sublabel}</p>}
+        {sublabel && <p className="text-[10px] mt-[1px]" style={{ color: '#bbb' }}>{sublabel}</p>}
       </div>
       {value && !isToggle && (
-        <span className="font-mono text-[12px] flex-shrink-0" style={{ color: '#aaa' }}>{value}</span>
+        <span className="text-[12px] flex-shrink-0" style={{ color: '#aaa' }}>{value}</span>
       )}
       {isToggle && onToggle && <Toggle on={isOn!} onChange={onToggle} />}
       {chevron && <ChevronRight style={{ width: 14, height: 14, color: '#ccc', flexShrink: 0 }} strokeWidth={1.75} />}
@@ -153,7 +153,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="font-mono text-[10px] uppercase tracking-[0.06em] mb-2 block" style={{ color: '#aaa' }}>
+      <label className="text-[10px] uppercase tracking-[0.06em] mb-2 block" style={{ color: '#aaa' }}>
         {label}
       </label>
       <input
@@ -164,7 +164,7 @@ function Field({
         className="w-full rounded-[12px] px-4 py-[13px] text-[15px] text-[#111] placeholder-[#ccc] outline-none"
         style={{ background: '#f5f5f7' }}
       />
-      {hint && <p className="font-mono text-[10px] mt-1.5" style={{ color: '#bbb' }}>{hint}</p>}
+      {hint && <p className="text-[10px] mt-1.5" style={{ color: '#bbb' }}>{hint}</p>}
     </div>
   )
 }
@@ -215,7 +215,7 @@ function ChangePasswordSheet({ open, onClose, onSaved }: { open: boolean; onClos
 
         {/* Current password */}
         <div>
-          <label className="font-mono text-[10px] uppercase tracking-[0.06em] mb-2 block" style={{ color: '#aaa' }}>
+          <label className="text-[10px] uppercase tracking-[0.06em] mb-2 block" style={{ color: '#aaa' }}>
             Current password
           </label>
           <div className="relative">
@@ -239,7 +239,7 @@ function ChangePasswordSheet({ open, onClose, onSaved }: { open: boolean; onClos
 
         {/* New password */}
         <div>
-          <label className="font-mono text-[10px] uppercase tracking-[0.06em] mb-2 block" style={{ color: '#aaa' }}>
+          <label className="text-[10px] uppercase tracking-[0.06em] mb-2 block" style={{ color: '#aaa' }}>
             New password
           </label>
           <div className="relative">
@@ -260,7 +260,7 @@ function ChangePasswordSheet({ open, onClose, onSaved }: { open: boolean; onClos
             </button>
           </div>
           {tooShort && (
-            <p className="font-mono text-[10px] mt-1.5" style={{ color: '#111' }}>
+            <p className="text-[10px] mt-1.5" style={{ color: '#111' }}>
               At least 8 characters required
             </p>
           )}
@@ -268,7 +268,7 @@ function ChangePasswordSheet({ open, onClose, onSaved }: { open: boolean; onClos
 
         {/* Confirm */}
         <div>
-          <label className="font-mono text-[10px] uppercase tracking-[0.06em] mb-2 block" style={{ color: '#aaa' }}>
+          <label className="text-[10px] uppercase tracking-[0.06em] mb-2 block" style={{ color: '#aaa' }}>
             Confirm new password
           </label>
           <input
@@ -280,7 +280,7 @@ function ChangePasswordSheet({ open, onClose, onSaved }: { open: boolean; onClos
             style={{ background: '#f5f5f7', border: mismatch ? '1px solid #e53e3e' : 'none' }}
           />
           {mismatch && (
-            <p className="font-mono text-[10px] mt-1.5" style={{ color: '#e53e3e' }}>
+            <p className="text-[10px] mt-1.5" style={{ color: '#e53e3e' }}>
               Passwords don't match
             </p>
           )}
@@ -298,7 +298,7 @@ function ChangePasswordSheet({ open, onClose, onSaved }: { open: boolean; onClos
                 )
               })}
             </div>
-            <p className="font-mono text-[9px] mt-1" style={{ color: '#bbb' }}>
+            <p className="text-[9px] mt-1" style={{ color: '#bbb' }}>
               {next.length < 8 ? 'Too short' : next.length < 12 ? 'OK' : /[^a-z0-9]/i.test(next) ? 'Strong' : 'Good'}
             </p>
           </div>
@@ -351,26 +351,26 @@ function EditUsernameSheet({
     <SheetShell open={open} onClose={handleClose} title="Change username">
       <div className="px-5 pt-5 pb-10 flex flex-col gap-4">
         <div>
-          <label className="font-mono text-[10px] uppercase tracking-[0.06em] mb-2 block" style={{ color: '#aaa' }}>
+          <label className="text-[10px] uppercase tracking-[0.06em] mb-2 block" style={{ color: '#aaa' }}>
             Username
           </label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono text-[15px]"
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[15px]"
               style={{ color: '#bbb' }}>@</span>
             <input
               autoFocus
               type="text"
               value={value}
               onChange={e => setValue(e.target.value.toLowerCase().replace(/[^a-z0-9._]/g, '').slice(0, 24))}
-              className="w-full rounded-[12px] pl-8 pr-4 py-[13px] text-[15px] text-[#111] placeholder-[#ccc] outline-none font-mono"
+              className="w-full rounded-[12px] pl-8 pr-4 py-[13px] text-[15px] text-[#111] placeholder-[#ccc] outline-none"
               style={{ background: '#f5f5f7' }}
             />
           </div>
-          <p className="font-mono text-[10px] mt-1.5" style={{ color: '#bbb' }}>
+          <p className="text-[10px] mt-1.5" style={{ color: '#bbb' }}>
             3–24 chars · letters, numbers, dots, underscores
           </p>
           {error && (
-            <p className="font-mono text-[11px] mt-1" style={{ color: '#e53e3e' }}>{error}</p>
+            <p className="text-[11px] mt-1" style={{ color: '#e53e3e' }}>{error}</p>
           )}
         </div>
         <button
@@ -496,7 +496,7 @@ function EditProfileSheet({
 
         <Field label="Display name" value={name} onChange={setName} placeholder="Your name" />
         <div>
-          <label className="font-mono text-[10px] uppercase tracking-[0.06em] mb-2 block" style={{ color: '#aaa' }}>
+          <label className="text-[10px] uppercase tracking-[0.06em] mb-2 block" style={{ color: '#aaa' }}>
             Bio
           </label>
           <textarea
@@ -507,14 +507,14 @@ function EditProfileSheet({
             className="w-full rounded-[12px] px-4 py-3 text-[15px] text-[#111] placeholder-[#ccc] outline-none resize-none leading-relaxed"
             style={{ background: '#f5f5f7' }}
           />
-          <p className="font-mono text-[10px] mt-1" style={{ color: '#bbb' }}>
+          <p className="text-[10px] mt-1" style={{ color: '#bbb' }}>
             {bio.length}/150
           </p>
         </div>
         <Field label="Link in bio" value={link} onChange={setLink} placeholder="yoursite.com" />
 
         {error && (
-          <p className="font-mono text-[11px]" style={{ color: '#e53e3e' }}>{error}</p>
+          <p className="text-[11px]" style={{ color: '#e53e3e' }}>{error}</p>
         )}
 
         <button
@@ -591,12 +591,12 @@ function PayoutSheet({ open, onClose, onSaved }: { open: boolean; onClose: () =>
                                               </div>
                                               <div>
                                                             <p className="text-[15px] font-semibold text-[#111]">Stripe Connect</p>
-                                                            <p className="font-mono text-[11px]" style={{ color: statusColor }}>
+                                                            <p className="text-[11px]" style={{ color: statusColor }}>
                                                               {status === 'loading' ? 'Checking…' : statusLabel}
                                                             </p>
                                               </div>
                                   </div>
-                                  <p className="font-mono text-[11px]" style={{ color: '#aaa' }}>
+                                  <p className="text-[11px]" style={{ color: '#aaa' }}>
                                               Payouts sent every Monday · 2–3 business days
                                   </p>
                         </div>
@@ -621,7 +621,7 @@ function PayoutSheet({ open, onClose, onSaved }: { open: boolean; onClose: () =>
                   {status === 'connected' && (
                       <div className="flex items-center gap-2 rounded-[12px] px-4 py-3" style={{ background: '#f0fdf4', border: '0.5px solid #bbf7d0' }}>
                                   <Check style={{ width: 14, height: 14, color: '#16a34a', flexShrink: 0 }} strokeWidth={2.5} />
-                                  <span className="font-mono text-[12px]" style={{ color: '#16a34a' }}>Payouts enabled</span>
+                                  <span className="text-[12px]" style={{ color: '#16a34a' }}>Payouts enabled</span>
                       </div>
                         )}
                 
@@ -680,11 +680,11 @@ function PaymentMethodsSheet({ open, onClose, onSaved }: { open: boolean; onClos
                   style={{ border: '0.5px solid #ebebeb', background: 'white' }}>
                   <div className="w-10 h-7 rounded-[5px] flex items-center justify-center flex-shrink-0"
                     style={{ background: '#f4f4f6' }}>
-                    <span className="font-mono text-[9px] font-bold" style={{ color: '#333' }}>{c.brand}</span>
+                    <span className="text-[9px] font-bold" style={{ color: '#333' }}>{c.brand}</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[14px] font-medium text-[#111]">•••• {c.last4}</p>
-                    <p className="font-mono text-[10px]" style={{ color: '#bbb' }}>Expires {c.expiry}</p>
+                    <p className="text-[10px]" style={{ color: '#bbb' }}>Expires {c.expiry}</p>
                   </div>
                   <button onClick={() => removeCard(c.id)} className="p-1.5 rounded-full"
                     style={{ background: '#fff0f0' }}>
@@ -693,7 +693,7 @@ function PaymentMethodsSheet({ open, onClose, onSaved }: { open: boolean; onClos
                 </div>
               ))}
               {cards.length === 0 && (
-                <p className="text-center font-mono text-[12px] py-6" style={{ color: '#ccc' }}>
+                <p className="text-center text-[12px] py-6" style={{ color: '#ccc' }}>
                   No payment methods saved
                 </p>
               )}
@@ -709,29 +709,29 @@ function PaymentMethodsSheet({ open, onClose, onSaved }: { open: boolean; onClos
           <div className="flex flex-col gap-4">
             <p className="text-[15px] font-semibold text-[#111]">Add card</p>
             <div>
-              <label className="font-mono text-[10px] uppercase tracking-[0.06em] mb-2 block" style={{ color: '#aaa' }}>Card number</label>
+              <label className="text-[10px] uppercase tracking-[0.06em] mb-2 block" style={{ color: '#aaa' }}>Card number</label>
               <div className="rounded-[12px] px-4 py-[13px] flex items-center gap-2" style={{ background: '#f5f5f7' }}>
                 <CreditCard style={{ width: 16, height: 16, color: '#bbb', flexShrink: 0 }} strokeWidth={1.75} />
                 <input type="text" inputMode="numeric" placeholder="1234  5678  9012  3456"
                   value={num} onChange={e => setNum(fmtCard(e.target.value))}
-                  className="flex-1 bg-transparent text-[15px] text-[#111] placeholder-[#ccc] outline-none font-mono tracking-wider" />
-                {brand(num) && <span className="font-mono text-[9px] font-bold px-[5px] py-[2px] rounded-[3px]"
+                  className="flex-1 bg-transparent text-[15px] text-[#111] placeholder-[#ccc] outline-none tracking-wider" />
+                {brand(num) && <span className="text-[9px] font-bold px-[5px] py-[2px] rounded-[3px]"
                   style={{ background: '#111', color: 'white' }}>{brand(num)}</span>}
               </div>
             </div>
             <div className="flex gap-3">
               <div className="flex-1">
-                <label className="font-mono text-[10px] uppercase tracking-[0.06em] mb-2 block" style={{ color: '#aaa' }}>Expiry</label>
+                <label className="text-[10px] uppercase tracking-[0.06em] mb-2 block" style={{ color: '#aaa' }}>Expiry</label>
                 <input type="text" inputMode="numeric" placeholder="MM / YY"
                   value={exp} onChange={e => setExp(fmtExp(e.target.value))}
-                  className="w-full rounded-[12px] px-4 py-[13px] text-[15px] text-[#111] placeholder-[#ccc] outline-none font-mono"
+                  className="w-full rounded-[12px] px-4 py-[13px] text-[15px] text-[#111] placeholder-[#ccc] outline-none"
                   style={{ background: '#f5f5f7' }} />
               </div>
               <div className="flex-1">
-                <label className="font-mono text-[10px] uppercase tracking-[0.06em] mb-2 block" style={{ color: '#aaa' }}>CVC</label>
+                <label className="text-[10px] uppercase tracking-[0.06em] mb-2 block" style={{ color: '#aaa' }}>CVC</label>
                 <input type="text" inputMode="numeric" placeholder="•••" maxLength={4}
                   value={cvc} onChange={e => setCvc(e.target.value.replace(/\D/g,'').slice(0,4))}
-                  className="w-full rounded-[12px] px-4 py-[13px] text-[15px] text-[#111] placeholder-[#ccc] outline-none font-mono"
+                  className="w-full rounded-[12px] px-4 py-[13px] text-[15px] text-[#111] placeholder-[#ccc] outline-none"
                   style={{ background: '#f5f5f7' }} />
               </div>
             </div>
@@ -774,7 +774,7 @@ function BlockedAccountsSheet({ open, onClose }: { open: boolean; onClose: () =>
               <Shield style={{ width: 22, height: 22, color: '#ccc' }} strokeWidth={1.5} />
             </div>
             <p className="text-[14px] font-medium text-[#111] mb-1">No blocked accounts</p>
-            <p className="font-mono text-[11px] text-center" style={{ color: '#bbb' }}>
+            <p className="text-[11px] text-center" style={{ color: '#bbb' }}>
               When you block someone they'll appear here
             </p>
           </div>
@@ -785,10 +785,10 @@ function BlockedAccountsSheet({ open, onClose }: { open: boolean; onClose: () =>
                 style={{ borderBottom: i < blocked.length - 1 ? '0.5px solid #f5f5f7' : 'none' }}>
                 <img src={u.avatar} alt={u.username}
                   className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
-                <p className="flex-1 font-mono text-[13px] text-[#111]">@{u.username}</p>
+                <p className="flex-1 text-[13px] text-[#111]">@{u.username}</p>
                 <button
                   onClick={() => setBlocked(prev => prev.filter(b => b.id !== u.id))}
-                  className="rounded-[9px] px-3 py-1.5 font-mono text-[11px] active:opacity-70"
+                  className="rounded-[9px] px-3 py-1.5 text-[11px] active:opacity-70"
                   style={{ background: '#f5f5f7', border: '0.5px solid #ebebeb', color: '#555' }}
                 >
                   Unblock
@@ -839,7 +839,7 @@ function PrivacyPolicySheet({ open, onClose }: { open: boolean; onClose: () => v
             <p className="text-[13px] leading-[1.6]" style={{ color: '#555' }}>{s.body}</p>
           </div>
         ))}
-        <p className="font-mono text-[10px]" style={{ color: '#bbb' }}>Last updated: January 2025</p>
+        <p className="text-[10px]" style={{ color: '#bbb' }}>Last updated: January 2025</p>
       </div>
     </SheetShell>
   )
@@ -879,7 +879,7 @@ function DeleteAccountSheet({ open, onClose, onConfirm }: { open: boolean; onClo
 
         <div className="rounded-[14px] px-4 py-3 mb-5"
           style={{ background: '#fff8f8', border: '0.5px solid #fcc' }}>
-          <p className="font-mono text-[11px]" style={{ color: '#e53e3e' }}>
+          <p className="text-[11px]" style={{ color: '#e53e3e' }}>
             Type <span className="font-bold">DELETE</span> to confirm
           </p>
         </div>
@@ -889,7 +889,7 @@ function DeleteAccountSheet({ open, onClose, onConfirm }: { open: boolean; onClo
           value={text}
           onChange={e => setText(e.target.value)}
           placeholder="DELETE"
-          className="w-full rounded-[12px] px-4 py-[13px] text-[15px] font-mono placeholder-[#ccc] outline-none mb-4"
+          className="w-full rounded-[12px] px-4 py-[13px] text-[15px] placeholder-[#ccc] outline-none mb-4"
           style={{
             background: '#f5f5f7',
             color: confirmed ? '#e53e3e' : '#111',
@@ -910,7 +910,7 @@ function DeleteAccountSheet({ open, onClose, onConfirm }: { open: boolean; onClo
         </button>
 
         <button onClick={handleClose}
-          className="w-full py-3 mt-2 font-mono text-[12px] active:opacity-60"
+          className="w-full py-3 mt-2 text-[12px] active:opacity-60"
           style={{ color: '#aaa' }}>
           Cancel, keep my account
         </button>
@@ -960,12 +960,12 @@ function BuyTokensSheet({ open, onClose, onPurchased }: { open: boolean; onClose
                     <Zap style={{ width: 28, height: 28, color: '#111' }} strokeWidth={2} fill="#111" />
                   </div>
                   <p className="text-[20px] font-bold text-[#111] mb-1">Balance added!</p>
-                  <p className="font-mono text-[12px] mb-5" style={{ color: '#aaa' }}>
+                  <p className="text-[12px] mb-5" style={{ color: '#aaa' }}>
                     ${selected.tokens} added to your balance
                   </p>
                   {/* Placement 3 — post-purchase nudge */}
                   <div className="w-full rounded-[12px] px-4 py-3 text-center" style={{ background: '#f9f9f9', border: '0.5px solid #ebebeb' }}>
-                    <p className="font-mono text-[11px]" style={{ color: '#aaa', lineHeight: 1.55 }}>
+                    <p className="text-[11px]" style={{ color: '#aaa', lineHeight: 1.55 }}>
                       Next time, fund at oodle.com for bonus credits on every top-up
                     </p>
                   </div>
@@ -974,7 +974,7 @@ function BuyTokensSheet({ open, onClose, onPurchased }: { open: boolean; onClose
                 <motion.div key="form" initial={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <div className="px-5 pt-4 pb-2">
                     <p className="text-[18px] font-bold text-[#111] mb-1">Add balance</p>
-                    <p className="font-mono text-[11px]" style={{ color: '#aaa' }}>
+                    <p className="text-[11px]" style={{ color: '#aaa' }}>
                       Use your balance to unlock answers from any creator
                     </p>
                   </div>
@@ -995,13 +995,13 @@ function BuyTokensSheet({ open, onClose, onPurchased }: { open: boolean; onClose
                                 ${p.tokens} balance
                               </span>
                               {p.tag && (
-                                <span className="font-mono text-[9px] px-[5px] py-[2px] rounded-[4px]"
+                                <span className="text-[9px] px-[5px] py-[2px] rounded-[4px]"
                                   style={{ background: sel ? 'rgba(255,255,255,0.15)' : '#f0f0f0', color: sel ? 'rgba(255,255,255,0.75)' : '#888' }}>
                                   {p.tag}
                                 </span>
                               )}
                             </div>
-                            <p className="font-mono text-[10px] mt-[1px]"
+                            <p className="text-[10px] mt-[1px]"
                               style={{ color: sel ? 'rgba(255,255,255,0.5)' : '#bbb' }}>
                               ${p.tokens} added to your balance
                             </p>
@@ -1016,7 +1016,7 @@ function BuyTokensSheet({ open, onClose, onPurchased }: { open: boolean; onClose
                   </div>
                   <div className="px-5 pb-10 pt-1 flex flex-col gap-2.5">
                     {/* Placement 2 — above pay button */}
-                    <p className="text-center font-mono text-[11px]" style={{ color: '#bbb', lineHeight: 1.5 }}>
+                    <p className="text-center text-[11px]" style={{ color: '#bbb', lineHeight: 1.5 }}>
                       Heads up — your credits go further when you fund at oodle.com
                     </p>
                     <button onClick={handleBuy} disabled={loading}
@@ -1099,11 +1099,11 @@ function AnswerDetailSheet({ entry, onClose }: { entry: PurchaseEntry | null; on
               </button>
               <div className="flex-1 min-w-0">
                 <p className="text-[16px] font-bold text-[#111] truncate">{entry.creator.display_name}</p>
-                <p className="font-mono text-[10px]" style={{ color: '#aaa' }}>@{entry.creator.username}</p>
+                <p className="text-[10px]" style={{ color: '#aaa' }}>@{entry.creator.username}</p>
               </div>
               <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-[20px]" style={{ background: '#f0fdf4' }}>
                 <Check style={{ width: 10, height: 10, color: '#16a34a' }} strokeWidth={2.5} />
-                <span className="font-mono text-[9px] font-semibold" style={{ color: '#16a34a' }}>UNLOCKED</span>
+                <span className="text-[9px] font-semibold" style={{ color: '#16a34a' }}>UNLOCKED</span>
               </div>
             </div>
 
@@ -1112,13 +1112,13 @@ function AnswerDetailSheet({ entry, onClose }: { entry: PurchaseEntry | null; on
 
               {/* Question bubble */}
               <div className="rounded-[14px] px-4 py-3.5 mb-5" style={{ background: '#f4f4f6' }}>
-                <p className="font-mono text-[10px] uppercase tracking-[0.07em] mb-1.5" style={{ color: '#bbb' }}>Question</p>
+                <p className="text-[10px] uppercase tracking-[0.07em] mb-1.5" style={{ color: '#bbb' }}>Question</p>
                 <p className="text-[14px] text-[#222] leading-[1.55]">"{entry.question}"</p>
               </div>
 
               {/* Answer */}
               <div className="mb-5">
-                <p className="font-mono text-[10px] uppercase tracking-[0.07em] mb-2" style={{ color: '#bbb' }}>Answer</p>
+                <p className="text-[10px] uppercase tracking-[0.07em] mb-2" style={{ color: '#bbb' }}>Answer</p>
                 <p className="text-[14px] text-[#222] leading-[1.7]">{entry.answer}</p>
               </div>
 
@@ -1126,9 +1126,9 @@ function AnswerDetailSheet({ entry, onClose }: { entry: PurchaseEntry | null; on
               <div className="flex items-center justify-between pt-4" style={{ borderTop: '0.5px solid #f2f2f2' }}>
                 <div className="flex items-center gap-1.5">
                   <span style={{ fontWeight: 700, color: '#111', fontSize: 11, lineHeight: 1 }}>$?</span>
-                  <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>${entry.price.toFixed(2)}</span>
+                  <span className="text-[11px]" style={{ color: '#bbb' }}>${entry.price.toFixed(2)}</span>
                 </div>
-                <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>
+                <span className="text-[11px]" style={{ color: '#bbb' }}>
                   {purchasedAgo(entry.purchased_at)}
                 </span>
               </div>
@@ -1173,27 +1173,27 @@ function MyAnswersSheet({ open, onClose }: { open: boolean; onClose: () => void 
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[13px] font-semibold text-[#111] truncate">{t.creator.display_name}</p>
-                  <p className="font-mono text-[10px]" style={{ color: '#aaa' }}>@{t.creator.username}</p>
+                  <p className="text-[10px]" style={{ color: '#aaa' }}>@{t.creator.username}</p>
                 </div>
                 <div className="flex items-center gap-1 px-2 py-1 rounded-[20px]" style={{ background: '#f0fdf4' }}>
                   <Check style={{ width: 10, height: 10, color: '#16a34a' }} strokeWidth={2.5} />
-                  <span className="font-mono text-[9px] font-semibold" style={{ color: '#16a34a' }}>UNLOCKED</span>
+                  <span className="text-[9px] font-semibold" style={{ color: '#16a34a' }}>UNLOCKED</span>
                 </div>
               </div>
               {/* Question */}
               <p className="text-[13px] text-[#333] leading-[1.5] line-clamp-2 pl-[42px]">
-                <span className="font-mono text-[10px] mr-1" style={{ color: '#ccc' }}>↳</span>
+                <span className="text-[10px] mr-1" style={{ color: '#ccc' }}>↳</span>
                 {t.question}
               </p>
               {/* Tokens paid + timestamp */}
               <div className="flex items-center justify-between mt-2 pl-[42px]">
                 <div className="flex items-center gap-1">
                   <span style={{ fontWeight: 700, color: '#111', fontSize: 11, lineHeight: 1 }}>$?</span>
-                  <span className="font-mono text-[10px]" style={{ color: '#bbb' }}>
+                  <span className="text-[10px]" style={{ color: '#bbb' }}>
                     ${t.price.toFixed(2)}
                   </span>
                 </div>
-                <span className="font-mono text-[10px]" style={{ color: '#bbb' }}>
+                <span className="text-[10px]" style={{ color: '#bbb' }}>
                   {purchasedAgo(t.purchased_at)}
                 </span>
               </div>
@@ -1334,10 +1334,10 @@ export default function SettingsPage() {
           )}
           <div className="flex-1 min-w-0 text-left">
             <p className="text-[15px] font-semibold text-[#111] truncate">{profile.display_name}</p>
-            <p className="font-mono text-[11px]" style={{ color: '#aaa' }}>@{username}</p>
+            <p className="text-[11px]" style={{ color: '#aaa' }}>@{username}</p>
           </div>
           <div className="flex items-center gap-1">
-            <span className="font-mono text-[11px]" style={{ color: '#aaa' }}>Edit profile</span>
+            <span className="text-[11px]" style={{ color: '#aaa' }}>Edit profile</span>
             <ChevronRight style={{ width: 14, height: 14, color: '#ccc' }} strokeWidth={1.75} />
           </div>
         </button>
@@ -1359,7 +1359,7 @@ export default function SettingsPage() {
             </div>
           </div>
           {/* Placement 1 — below balance */}
-          <p className="font-mono text-center mb-3" style={{ fontSize: 11, color: '#bbb' }}>
+          <p className="text-center mb-3" style={{ fontSize: 11, color: '#bbb' }}>
             Get more credits for your money at oodle.com
           </p>
           <button
@@ -1396,7 +1396,7 @@ export default function SettingsPage() {
                 ].map((s, i) => (
                   <div key={i} className="flex-1 rounded-[12px] px-3 py-2.5 text-center" style={{ background: '#f5f5f7' }}>
                     <p className="text-[14px] font-bold text-[#111]">{showEarnings ? s.value : '••••'}</p>
-                    <p className="font-mono text-[9px] uppercase tracking-[0.05em] mt-[1px]" style={{ color: '#bbb' }}>
+                    <p className="text-[9px] uppercase tracking-[0.05em] mt-[1px]" style={{ color: '#bbb' }}>
                       {s.label}
                     </p>
                   </div>
@@ -1550,7 +1550,7 @@ export default function SettingsPage() {
         />
       </Section>
 
-      <p className="text-center font-mono text-[10px] pb-4" style={{ color: '#d0d0d0' }}>oodle · v1.0.0</p>
+      <p className="text-center text-[10px] pb-4" style={{ color: '#d0d0d0' }}>oodle · v1.0.0</p>
 
       {/* ── Sheets ── */}
       <BuyTokensSheet

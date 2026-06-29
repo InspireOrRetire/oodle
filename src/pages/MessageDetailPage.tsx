@@ -71,7 +71,7 @@ function ThreadNote({ id, content, time, avatarUrl, username, isSelf, isFlagged,
         {isFlagged && (
           <div className="flex items-center gap-1 mb-0.5">
             <span className="text-[9px]">📌</span>
-            <span className="font-mono text-[9px] text-black">Key question</span>
+            <span className="text-[9px] text-black">Key question</span>
           </div>
         )}
 
@@ -143,7 +143,7 @@ function ThreadNote({ id, content, time, avatarUrl, username, isSelf, isFlagged,
               }}
             >
               <div className="px-4 py-3 border-b border-gray-100">
-                <p className="text-[12px] text-gray-400 font-mono truncate max-w-[180px]">"{content.slice(0, 60)}{content.length > 60 ? '…' : ''}"</p>
+                <p className="text-[12px] text-gray-400 truncate max-w-[180px]">"{content.slice(0, 60)}{content.length > 60 ? '…' : ''}"</p>
               </div>
               <button
                 onClick={() => {
@@ -997,7 +997,7 @@ export default function MessageDetailPage() {
                           <path d="M1.5 3.5V2.5A2 2 0 0 1 5.5 2.5V3.5" stroke="#888" strokeWidth="1" fill="none"/>
                         </svg>
                       </div>
-                      <span className="text-[10px] font-mono" style={{ color: '#bbb' }}>unlock to read full answer</span>
+                      <span className="text-[10px]" style={{ color: '#bbb' }}>unlock to read full answer</span>
                     </div>
                   </div>
                 )}
@@ -1229,7 +1229,7 @@ export default function MessageDetailPage() {
                       <img src={aThumbnail.preview} alt="" className="w-full h-full object-cover" />
                       <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 50%)' }} />
                       <div className="absolute bottom-2 left-3">
-                        <span className="font-mono text-[10px] text-white/80 uppercase tracking-widest">Cover thumbnail</span>
+                        <span className="text-[10px] text-white/80 uppercase tracking-widest">Cover thumbnail</span>
                       </div>
                       <button
                         onClick={() => { URL.revokeObjectURL(aThumbnail.preview); setAThumbnail(null) }}
@@ -1469,7 +1469,7 @@ export default function MessageDetailPage() {
                               />
                             ) : (
                               <>
-                                <span className="text-[#ccc] text-[11px] font-mono flex-shrink-0 w-4 text-right select-none">
+                                <span className="text-[#ccc] text-[11px] flex-shrink-0 w-4 text-right select-none">
                                   {aListItems.slice(0, i).filter(r => r.type === 'line').length + 1}.
                                 </span>
                                 <input
@@ -1524,7 +1524,7 @@ export default function MessageDetailPage() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -4 }}
                             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                            className="font-mono text-[10px]"
+                            className="text-[10px]"
                             style={{ color: '#10b981' }}
                           >
                             you keep ~$?{(answerPrice * 0.07).toFixed(2)}
@@ -1535,7 +1535,7 @@ export default function MessageDetailPage() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="font-mono text-[10px]"
+                            className="text-[10px]"
                             style={{ color: '#bbb' }}
                           >
                             you keep $?0.00

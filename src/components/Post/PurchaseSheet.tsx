@@ -128,7 +128,7 @@ export default function PurchaseSheet({ question, post, balance, onClose, onPurc
                       Manage your wallet at{' '}
                       <span className="font-semibold text-[#111]">oodle.com</span>
                     </p>
-                    <p className="mt-2 font-mono text-[11px]" style={{ color: '#bbb' }}>
+                    <p className="mt-2 text-[11px]" style={{ color: '#bbb' }}>
                       Add funds via your account settings at oodle.com
                     </p>
                   </div>

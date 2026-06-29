@@ -97,7 +97,7 @@ export default function ImageLightbox({ images, initialIndex = 0, onClose }: Pro
               style={{ paddingTop: 'calc(env(safe-area-inset-top) + 12px)' }}
             >
               {images.length > 1 ? (
-                <span className="font-mono text-[13px]" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                <span className="text-[13px]" style={{ color: 'rgba(255,255,255,0.75)' }}>
                   {index + 1} / {images.length}
                 </span>
               ) : <span />}

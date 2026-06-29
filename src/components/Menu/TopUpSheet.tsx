@@ -137,7 +137,7 @@ export default function TopUpSheet({ onClose }: Props) {
               >
                 <div className="px-5 pt-4 pb-2">
                   <p style={{ fontSize: 18, fontWeight: 700, color: '#111', marginBottom: 3 }}>Add balance</p>
-                  <p className="font-mono" style={{ fontSize: 11, color: '#aaa' }}>
+                  <p className="" style={{ fontSize: 11, color: '#aaa' }}>
                     Use your balance to unlock answers from any creator
                   </p>
                 </div>
@@ -164,7 +164,7 @@ export default function TopUpSheet({ onClose }: Props) {
                               {oo(p.tokens)} balance
                             </span>
                             {p.tag && (
-                              <span className="font-mono rounded-[4px] px-[5px] py-[2px]"
+                              <span className="rounded-[4px] px-[5px] py-[2px]"
                                 style={{
                                   fontSize:   9,
                                   background: sel ? 'rgba(255,255,255,0.15)' : '#f0f0f0',
@@ -174,7 +174,7 @@ export default function TopUpSheet({ onClose }: Props) {
                               </span>
                             )}
                           </div>
-                          <p className="font-mono mt-[1px]"
+                          <p className="mt-[1px]"
                             style={{ fontSize: 10, color: sel ? 'rgba(255,255,255,0.5)' : '#bbb' }}>
                             1:1 with USD — no fees
                           </p>
@@ -189,12 +189,12 @@ export default function TopUpSheet({ onClose }: Props) {
 
                 {error && (
                   <div className="px-5 pb-2">
-                    <p className="text-center font-mono" style={{ fontSize: 11, color: '#e53e3e' }}>{error}</p>
+                    <p className="text-center" style={{ fontSize: 11, color: '#e53e3e' }}>{error}</p>
                   </div>
                 )}
 
                 <div className="px-5 pb-2">
-                  <p className="text-center font-mono" style={{ fontSize: 11, color: '#bbb', lineHeight: 1.5 }}>
+                  <p className="text-center" style={{ fontSize: 11, color: '#bbb', lineHeight: 1.5 }}>
                     {NUDGE_SELECTION}
                   </p>
                 </div>
@@ -239,7 +239,7 @@ export default function TopUpSheet({ onClose }: Props) {
                   transition={{ delay: 0.42 }}
                   className="w-full rounded-[12px] px-4 py-3 mb-6 text-center"
                   style={{ background: '#f9f9f9', border: '0.5px solid #ebebeb' }}>
-                  <p className="font-mono" style={{ fontSize: 11, color: '#aaa', lineHeight: 1.55 }}>
+                  <p className="" style={{ fontSize: 11, color: '#aaa', lineHeight: 1.55 }}>
                     {NUDGE_SUCCESS}
                   </p>
                 </motion.div>

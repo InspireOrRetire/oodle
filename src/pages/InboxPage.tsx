@@ -40,19 +40,19 @@ function ChatRow({
           className="flex-1 h-[52px] rounded-[14px] flex flex-col items-center justify-center gap-1"
           style={{ background: isPinned ? '#555' : '#111' }}>
           <Pin style={{ width: 16, height: 16, color: 'white' }} strokeWidth={2} fill={isPinned ? 'white' : 'none'} />
-          <span className="font-mono text-[9px] text-white">{isPinned ? 'Unpin' : 'Pin'}</span>
+          <span className="text-[9px] text-white">{isPinned ? 'Unpin' : 'Pin'}</span>
         </button>
         <button onClick={() => { snap(0); setTimeout(() => onFlag(id), 160) }}
           className="flex-1 h-[52px] rounded-[14px] flex flex-col items-center justify-center gap-1"
           style={{ background: isFlagged ? '#333' : '#111' }}>
           <Flag style={{ width: 16, height: 16, color: 'white' }} strokeWidth={2} fill={isFlagged ? 'white' : 'none'} />
-          <span className="font-mono text-[9px] text-white">{isFlagged ? 'Unflag' : 'Flag'}</span>
+          <span className="text-[9px] text-white">{isFlagged ? 'Unflag' : 'Flag'}</span>
         </button>
         <button onClick={() => { snap(0); setTimeout(() => onDelete(id), 160) }}
           className="flex-1 h-[52px] rounded-[14px] flex flex-col items-center justify-center gap-1"
           style={{ background: '#e53e3e' }}>
           <Trash2 style={{ width: 16, height: 16, color: 'white' }} strokeWidth={2} />
-          <span className="font-mono text-[9px] text-white">Delete</span>
+          <span className="text-[9px] text-white">Delete</span>
         </button>
       </div>
       <motion.div drag="x" dragConstraints={{ left: -REVEAL_W, right: 0 }}
@@ -74,18 +74,18 @@ function ChatRow({
             <div className="flex items-center gap-1.5 min-w-0">
               <p className={`text-[15px] leading-tight truncate ${unread ? 'font-bold' : 'font-semibold'} text-gray-900`}>{name}</p>
               {source === 'dm' && (
-                <span className="flex-shrink-0 font-mono text-[9px] px-1.5 py-0.5 rounded-full"
+                <span className="flex-shrink-0 text-[9px] px-1.5 py-0.5 rounded-full"
                   style={{ background: '#eff0ff', color: '#7b83ff' }}>DM</span>
               )}
             </div>
             <div className="flex items-center gap-1.5 flex-shrink-0">
               {isPinned && <Pin style={{ width: 11, height: 11, color: '#bbb' }} strokeWidth={2} />}
-              <p className="font-mono text-[12px] text-gray-400">{time}</p>
+              <p className="text-[12px] text-gray-400">{time}</p>
             </div>
           </div>
           <p className={`text-[13px] leading-snug truncate ${unread ? 'font-medium text-gray-900' : 'text-gray-400'}`}>{preview}</p>
           {price != null && price > 0 && (
-            <span className="font-mono text-[10px] text-gray-300 mt-[5px] block">⚡{price}</span>
+            <span className="text-[10px] text-gray-300 mt-[5px] block">⚡{price}</span>
           )}
         </div>
 
@@ -110,13 +110,13 @@ function ChatRow({
           {isFlagged && <Flag style={{ width: 13, height: 13, color: '#111' }} strokeWidth={2} fill="#111" />}
           {showUnread && unread && <div className="w-[9px] h-[9px] rounded-full bg-gray-900" />}
           {badge === 'action' && (
-            <span className="font-mono text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: '#fff3e0', color: '#e65100' }}>reply</span>
+            <span className="text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: '#fff3e0', color: '#e65100' }}>reply</span>
           )}
           {badge === 'waiting' && (
-            <span className="font-mono text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: '#f5f5f7', color: '#aaa' }}>waiting</span>
+            <span className="text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: '#f5f5f7', color: '#aaa' }}>waiting</span>
           )}
           {badge === 'answered' && (
-            <span className="font-mono text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: '#e8f5e9', color: '#2e7d32' }}>answered</span>
+            <span className="text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: '#e8f5e9', color: '#2e7d32' }}>answered</span>
           )}
         </div>
       </motion.div>
@@ -127,8 +127,8 @@ function ChatRow({
 function SectionLabel({ label, count }: { label: string; count?: number }) {
   return (
     <div className="flex items-center gap-2 px-4 py-2" style={{ borderBottom: '0.5px solid #f5f5f7' }}>
-      <span className="font-mono text-[10px] uppercase tracking-[0.08em]" style={{ color: '#aaa' }}>{label}</span>
-      {count !== undefined && count > 0 && <span className="font-mono text-[10px]" style={{ color: '#ccc' }}>{count}</span>}
+      <span className="text-[10px] uppercase tracking-[0.08em]" style={{ color: '#aaa' }}>{label}</span>
+      {count !== undefined && count > 0 && <span className="text-[10px]" style={{ color: '#ccc' }}>{count}</span>}
     </div>
   )
 }
@@ -140,7 +140,7 @@ function Toast({ message }: { message: string | null }) {
         <motion.div key={message} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 14 }}
           className="fixed bottom-28 left-0 right-0 flex justify-center z-50 pointer-events-none">
           <div className="rounded-[14px] px-4 py-2.5 shadow-xl" style={{ background: '#111' }}>
-            <span className="font-mono text-[12px] text-white">{message}</span>
+            <span className="text-[12px] text-white">{message}</span>
           </div>
         </motion.div>
       )}
@@ -408,7 +408,7 @@ function AnswerComposeSheet({
             <div className="flex items-start gap-3 px-4 pb-3 flex-shrink-0"
               style={{ borderBottom: '0.5px solid #f2f2f2' }}>
               <div className="flex-1 min-w-0">
-                <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-[#aaa] mb-1">Answering</p>
+                <p className="text-[10px] uppercase tracking-[0.08em] text-[#aaa] mb-1">Answering</p>
                 <p className="text-[13px] text-[#666] leading-snug line-clamp-2">
                   <span className="font-semibold text-[#111]">{target?.askerName}</span>
                   {target?.question ? `: ${target.question}` : ''}
@@ -416,7 +416,7 @@ function AnswerComposeSheet({
               </div>
               <button
                 onClick={() => { onClose(); navigate(`/inbox/${target?.id}`) }}
-                className="font-mono text-[11px] text-[#888] flex-shrink-0 mt-1"
+                className="text-[11px] text-[#888] flex-shrink-0 mt-1"
               >
                 View thread →
               </button>
@@ -468,12 +468,12 @@ function AnswerComposeSheet({
                   {/* Price block */}
                   <div className="mx-4 mb-3 rounded-[14px] px-4 py-3 flex items-center gap-3"
                     style={{ border: '1.5px solid #E8B800' }}>
-                    <span className="font-mono text-[13px] text-[#E8B800] font-semibold">Price</span>
-                    <span className="font-mono text-[18px] font-bold text-[#111] flex-shrink-0">$</span>
+                    <span className="text-[13px] text-[#E8B800] font-semibold">Price</span>
+                    <span className="text-[18px] font-bold text-[#111] flex-shrink-0">$</span>
                     <input type="number" inputMode="decimal" min={1} value={price}
                       onChange={e => setPrice(e.target.value)}
-                      className="flex-1 font-mono text-[18px] font-bold text-[#111] bg-transparent outline-none min-w-0" />
-                    <span className="font-mono text-[11px] text-[#bbb]">USD</span>
+                      className="flex-1 text-[18px] font-bold text-[#111] bg-transparent outline-none min-w-0" />
+                    <span className="text-[11px] text-[#bbb]">USD</span>
                   </div>
 
                   {/* Tile row */}
@@ -486,7 +486,7 @@ function AnswerComposeSheet({
                             border: tile.active ? '1.5px solid #111' : '1.5px solid #e5e5ea',
                             background: tile.active ? '#fafafa' : 'white' }}>
                           {tile.icon}
-                          <span className="font-mono text-[9px] text-center leading-tight"
+                          <span className="text-[9px] text-center leading-tight"
                             style={{ color: tile.active ? '#111' : '#aaa' }}>{tile.label}</span>
                         </button>
                       ))}
@@ -590,8 +590,8 @@ function AnswerComposeSheet({
                               <div key={i} className="flex items-center gap-2 px-3 py-2"
                                 style={{ borderBottom: i < listItems.length - 1 ? '0.5px solid #f2f2f2' : 'none' }}>
                                 {row.type === 'title'
-                                  ? <span className="font-mono text-[9px] uppercase tracking-widest text-[#bbb] w-5 text-center flex-shrink-0">T</span>
-                                  : <span className="font-mono text-[11px] text-[#bbb] w-5 text-right flex-shrink-0">{lineNum}.</span>}
+                                  ? <span className="text-[9px] uppercase tracking-widest text-[#bbb] w-5 text-center flex-shrink-0">T</span>
+                                  : <span className="text-[11px] text-[#bbb] w-5 text-right flex-shrink-0">{lineNum}.</span>}
                                 <input type="text" value={row.text}
                                   onChange={e => setListItems(p => p.map((r, j) => j === i ? { ...r, text: e.target.value } : r))}
                                   placeholder={row.type === 'title' ? 'Section title…' : 'List item…'}
@@ -641,10 +641,10 @@ function AnswerComposeSheet({
             <div className="flex-shrink-0 px-4 pt-2 pb-3 flex flex-col gap-2"
               style={{ borderTop: '0.5px solid #f2f2f2', paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
               {submitError && (
-                <p className="text-center font-mono text-[11px] text-red-500">{submitError}</p>
+                <p className="text-center text-[11px] text-red-500">{submitError}</p>
               )}
               <div className="flex items-center justify-between">
-                <button onClick={close} disabled={submitting} className="font-mono text-[12px] text-[#aaa] disabled:opacity-40">Cancel</button>
+                <button onClick={close} disabled={submitting} className="text-[12px] text-[#aaa] disabled:opacity-40">Cancel</button>
                 <button
                   onClick={handleSubmit}
                   disabled={submitting || (!body.trim() && images.length === 0 && !location)}
@@ -897,7 +897,7 @@ function NewMessageCompose({
                     {u.display_name ?? u.username ?? 'Unknown'}
                   </p>
                   {u.username && (
-                    <p className="font-mono text-[12px] text-[#aaa] truncate">@{u.username}</p>
+                    <p className="text-[12px] text-[#aaa] truncate">@{u.username}</p>
                   )}
                 </div>
                 <ChevronRight className="w-4 h-4 text-[#ddd] flex-shrink-0" strokeWidth={2} />

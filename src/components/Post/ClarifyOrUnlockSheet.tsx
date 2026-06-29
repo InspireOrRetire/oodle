@@ -125,7 +125,7 @@ export default function ClarifyOrUnlockSheet({ target, onClose, onUnlock }: Prop
                   <SmallAv url={target.creator.avatar_url} color={target.creator.color} initials={target.creator.initials} />
                   <div>
                     <p className="text-[14px] font-semibold text-[#111]">{target.creator.display_name}</p>
-                    <p className="font-mono text-[10px]" style={{ color: '#aaa' }}>@{target.creator.username}</p>
+                    <p className="text-[10px]" style={{ color: '#aaa' }}>@{target.creator.username}</p>
                   </div>
                 </div>
                 <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full" style={{ background: '#f2f2f2' }}>

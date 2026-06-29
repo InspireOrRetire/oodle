@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import UnlockSheet, { type UnlockTarget } from '../components/Post/UnlockSheet'
+import CardOptionsSheet from '../components/Post/PostOptionsSheet'
 import ClarifyOrUnlockSheet, { type ClarifyTarget } from '../components/Post/ClarifyOrUnlockSheet'
 import { cartCountText, cartService } from '../services/cartService'
 import { oo } from '../lib/oo'
@@ -7,10 +8,10 @@ import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import {
   Search, X, Heart, MessageCircle, Share2, Zap,
-  Check, Plus, Minus, Bookmark, Eye, ArrowLeft, CreditCard, Shield,
+  Check, Plus, Minus, Bookmark, ArrowLeft, CreditCard, Shield,
   Image as ImageIcon, AlignLeft, Quote, Camera, MapPin, BarChart2,
   ChevronDown, FileText, SlidersHorizontal, Mail, Type, Bell, Video, Flag,
-  ShoppingCart, Lock,
+  ShoppingCart, Lock, MoreHorizontal,
 } from 'lucide-react'
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion'
 import PostMediaCarousel from '../components/Post/PostMediaCarousel'
@@ -116,6 +117,7 @@ function FeedCard({
   onAsk,
   onTap,
   onReplyTap,
+  onOptions,
 }: {
   item: FeedItem
   liked: boolean
@@ -130,6 +132,7 @@ function FeedCard({
   onAsk?: () => void
   onTap?: () => void
   onReplyTap?: (replyIndex: number) => void
+  onOptions?: () => void
 }) {
   const x = useMotionValue(0)
   const heartScale = useMotionValue(1)
@@ -220,26 +223,15 @@ function FeedCard({
                   {item.creator.display_name}
                 </button>
                 {item.creator.verified && <VerifiedBadge />}
-                <span className="font-mono text-[11px] flex-shrink-0" style={{ color: '#bbb' }}>
+                <span className="text-[11px] flex-shrink-0" style={{ color: '#bbb' }}>
                   · {item.time_ago}
                 </span>
-                <div className="ml-auto flex items-center gap-2 flex-shrink-0">
-                  {item.price && item.price > 0 ? (
-                    <button
-                      onClick={e => { e.stopPropagation(); onUnlock(item) }}
-                      className="inline-flex items-center gap-1 rounded-full px-3 py-1 active:opacity-75 transition-opacity"
-                      style={{ background: '#111' }}
-                    >
-                      <Lock style={{ width: 9, height: 9, color: 'white' }} strokeWidth={2.5} />
-                      <span className="text-[11px] font-semibold text-white tracking-tight">{cp(item.price!)}</span>
-                    </button>
-                  ) : (
-                    <>
-                      <Eye style={{ width: 11, height: 11, color: '#ccc' }} strokeWidth={1.75} />
-                      <span className="font-mono text-[10px]" style={{ color: '#ccc' }}>{fmtCount(item.views)}</span>
-                    </>
-                  )}
-                </div>
+                <button
+                  onClick={e => { e.stopPropagation(); onOptions?.() }}
+                  className="ml-auto flex-shrink-0 active:opacity-50 transition-opacity"
+                >
+                  <MoreHorizontal style={{ width: 16, height: 16, color: '#bbb' }} strokeWidth={2} />
+                </button>
               </div>
               {/* Text */}
               {item.text && (
@@ -259,47 +251,38 @@ function FeedCard({
                 </div>
               )}
               {/* ── Action row ── */}
-              <div className="flex items-center justify-between py-2.5" style={{ borderTop: '0.5px solid #f5f5f7' }}>
-                {item.price && item.price > 0 ? (
-                  /* Priced post: prominent unlock CTA + save */
-                  <>
+              <div className="relative py-2.5" style={{ borderTop: '0.5px solid #f5f5f7', minHeight: 40 }}>
+                {/* Ask pinned dead-center — never moves */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <button
+                    onClick={e => { e.stopPropagation(); onAsk?.() }}
+                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity pointer-events-auto"
+                  >
+                    <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
+                    <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
+                  </button>
+                </div>
+                {/* Save anchored just right of Ask */}
+                <div className="absolute inset-y-0 flex items-center pointer-events-none" style={{ left: 'calc(50% + 38px)' }}>
+                  <button
+                    onClick={e => { e.stopPropagation(); onSaveToggle() }}
+                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity pointer-events-auto"
+                  >
+                    <Bookmark style={{ width: 12, height: 12, color: saved ? '#111' : '#555' }} strokeWidth={2} fill={saved ? '#111' : 'none'} />
+                    <span className="text-[12px] font-medium" style={{ color: saved ? '#111' : '#555' }}>{saved ? 'Saved' : 'Save'}</span>
+                  </button>
+                </div>
+                {/* Price on far right when present */}
+                {item.price && item.price > 0 && (
+                  <div className="absolute inset-y-0 right-0 flex items-center pointer-events-none">
                     <button
                       onClick={e => { e.stopPropagation(); onUnlock(item) }}
-                      className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 active:opacity-75 transition-opacity"
-                      style={{ background: '#111' }}
+                      className="inline-flex items-center gap-1 active:opacity-75 transition-opacity pointer-events-auto"
                     >
-                      <Lock style={{ width: 13, height: 13, color: 'white' }} strokeWidth={1.75} />
-                      <span className="text-[12px] font-semibold text-white">Unlock · {cp(item.price!)}</span>
+                      <Lock style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
+                      <span className="text-[12px] font-semibold text-[#111] tracking-tight">{cp(item.price!)}</span>
                     </button>
-                    <button
-                      onClick={e => { e.stopPropagation(); onSaveToggle() }}
-                      className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 active:opacity-70 transition-opacity"
-                      style={{ background: saved ? '#111' : '#f5f5f7' }}
-                    >
-                      <Bookmark style={{ width: 13, height: 13, color: saved ? 'white' : '#555' }} strokeWidth={1.75} fill={saved ? 'white' : 'none'} />
-                      <span className="text-[12px] font-medium" style={{ color: saved ? 'white' : '#555' }}>{saved ? 'Saved' : 'Save'}</span>
-                    </button>
-                  </>
-                ) : (
-                  /* Free post: Ask + Save */
-                  <>
-                    <button
-                      onClick={e => { e.stopPropagation(); onAsk?.() }}
-                      className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 active:opacity-70 transition-opacity"
-                      style={{ background: '#f5f5f7' }}
-                    >
-                      <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
-                      <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
-                    </button>
-                    <button
-                      onClick={e => { e.stopPropagation(); onSaveToggle() }}
-                      className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 active:opacity-70 transition-opacity"
-                      style={{ background: saved ? '#111' : '#f5f5f7' }}
-                    >
-                      <Bookmark style={{ width: 13, height: 13, color: saved ? 'white' : '#555' }} strokeWidth={1.75} fill={saved ? 'white' : 'none'} />
-                      <span className="text-[12px] font-medium" style={{ color: saved ? 'white' : '#555' }}>{saved ? 'Saved' : 'Save'}</span>
-                    </button>
-                  </>
+                  </div>
                 )}
               </div>
             </div>
@@ -339,13 +322,15 @@ function FeedCard({
                       {item.creator.display_name}
                     </button>
                     {item.creator.verified && <VerifiedBadge />}
-                    <span className="font-mono text-[11px] flex-shrink-0" style={{ color: '#bbb' }}>
+                    <span className="text-[11px] flex-shrink-0" style={{ color: '#bbb' }}>
                       · {item.time_ago}
                     </span>
-                    <div className="ml-auto flex items-center gap-1 flex-shrink-0">
-                      <Eye style={{ width: 11, height: 11, color: '#ccc' }} strokeWidth={1.75} />
-                      <span className="font-mono text-[10px]" style={{ color: '#ccc' }}>{fmtCount(item.views)}</span>
-                    </div>
+                    <button
+                      onClick={e => { e.stopPropagation(); onOptions?.() }}
+                      className="ml-auto flex-shrink-0 active:opacity-50 transition-opacity"
+                    >
+                      <MoreHorizontal style={{ width: 16, height: 16, color: '#bbb' }} strokeWidth={2} />
+                    </button>
                   </div>
                   {/* Social proof — response rate badge */}
                   {item.creator.response_rate !== null && item.creator.response_rate !== undefined && (
@@ -412,7 +397,7 @@ function FeedCard({
                       {/* Username + time */}
                       <div className="flex items-center gap-1.5 mb-1">
                         <span className="text-[13px] font-normal text-[#111]">@{reply.username}</span>
-                        <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>· {reply.time_ago}</span>
+                        <span className="text-[11px]" style={{ color: '#bbb' }}>· {reply.time_ago}</span>
                         </div>
                       {/* Question + ⚡ price */}
                       <div className="flex items-start gap-2 mb-1">
@@ -490,7 +475,7 @@ function FeedCard({
                       <div className="flex-1 min-w-0 pb-3">
                         <div className="flex items-center gap-1.5 mb-1">
                           <span className="text-[13px] font-normal text-[#111]">@{reply.username}</span>
-                          <span className="font-mono text-[11px]" style={{ color: '#bbb' }}>· {reply.time_ago}</span>
+                          <span className="text-[11px]" style={{ color: '#bbb' }}>· {reply.time_ago}</span>
                             </div>
                         <div className="flex items-start gap-2 mb-2">
                           <p className="flex-1 text-[13px] text-[#222] leading-[1.55]">{reply.question}</p>
@@ -499,7 +484,7 @@ function FeedCard({
                             className="flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-75 transition-opacity"
                             style={{ background: '#000', marginTop: 1 }}
                           >
-                            <span className="font-mono text-[11px] font-semibold text-white">{cp(reply.price)}</span>
+                            <span className="text-[11px] font-semibold text-white">{cp(reply.price)}</span>
                           </button>
                         </div>
                       </div>
@@ -518,15 +503,19 @@ function FeedCard({
               )}
 
               {/* ── Action row ── */}
-              <div className="flex items-center justify-between py-2.5" style={{ borderTop: item.comments > 0 ? 'none' : undefined }}>
-                <button
-                  onClick={e => { e.stopPropagation(); onAsk?.() }}
-                  className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 active:opacity-70 transition-opacity"
-                  style={{ background: '#f5f5f7' }}
-                >
-                  <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
-                  <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
-                </button>
+              <div className="relative flex items-center py-2.5" style={{ borderTop: item.comments > 0 ? 'none' : undefined, minHeight: 40 }}>
+                {/* Ask always dead-center */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <button
+                    onClick={e => { e.stopPropagation(); onAsk?.() }}
+                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity pointer-events-auto"
+                  >
+                    <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
+                    <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
+                  </button>
+                </div>
+                {/* Save floats right */}
+                <span style={{ flex: 1 }} />
                 <button
                   onClick={e => { e.stopPropagation(); onSaveToggle() }}
                   className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 active:opacity-70 transition-opacity"
@@ -577,7 +566,7 @@ function ActionBtn({
     <button onClick={onTap} className="flex items-center gap-1 active:opacity-60 transition-opacity">
       {icon}
       {count !== undefined && (
-        <span className="font-mono text-[11px]"
+        <span className="text-[11px]"
           style={{ color: active && activeColor ? activeColor : '#aaa' }}>
           {fmtCount(count)}
         </span>
@@ -617,8 +606,7 @@ function HomeAskSheet({
   const [, setPrevId] = prevId
   if (item && item.id !== prevId[0]) {
     setPrevId(item.id)
-    const hasAny = !!item.asker || extraQuestions.length > 0
-    setView(hasAny ? 'list' : 'compose')
+    setView('compose')
     setText('')
     setSent(false)
     setSending(false)
@@ -719,7 +707,7 @@ function HomeAskSheet({
                       style={{ borderBottom: '0.5px solid #f2f2f2' }}>
                       <div>
                         <span className="text-[17px] font-bold text-[#111]">Questions</span>
-                        <span className="font-mono text-[11px] text-[#bbb] ml-2">@{item.creator.username}</span>
+                        <span className="text-[11px] text-[#bbb] ml-2">@{item.creator.username}</span>
                       </div>
                       <button onClick={handleClose} className="text-[15px] font-semibold" style={{ color: '#111' }}>
                         Done
@@ -730,7 +718,7 @@ function HomeAskSheet({
                       <Av creator={item.creator} size={36} />
                       <div>
                         <p className="text-[13px] font-semibold text-[#111]">{item.creator.display_name}</p>
-                        <p className="font-mono text-[10px] text-[#aaa]">@{item.creator.username}</p>
+                        <p className="text-[10px] text-[#aaa]">@{item.creator.username}</p>
                       </div>
                     </div>
 
@@ -740,10 +728,10 @@ function HomeAskSheet({
                           <div key={i} className="px-4 py-3"
                             style={{ borderBottom: i < allQuestions.length - 1 ? '0.5px solid #f5f5f7' : 'none' }}>
                             <p className="text-[13px] text-[#222] leading-[1.55]">
-                              <span className="font-mono text-[11px] text-[#bbb] mr-1">↳</span>
+                              <span className="text-[11px] text-[#bbb] mr-1">↳</span>
                               {q.text}
                             </p>
-                            <p className="font-mono text-[10px] mt-1"
+                            <p className="text-[10px] mt-1"
                               style={{ color: q.status === 'answered' ? '#16a34a' : '#bbb' }}>
                               {q.status === 'answered' ? '✓ answered' : '· pending reply'}
                             </p>
@@ -757,9 +745,9 @@ function HomeAskSheet({
                         style={{ background: '#111' }}
                       >
                         <MessageCircle style={{ width: 15, height: 15, color: 'white' }} strokeWidth={1.75} />
-                        <span style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>Ask another question</span>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>Ask</span>
                       </button>
-                      <p className="text-center font-mono text-[10px] mt-2" style={{ color: '#d0d0d0' }}>
+                      <p className="text-center text-[10px] mt-2" style={{ color: '#d0d0d0' }}>
                         Each question is a private direct message
                       </p>
                     </div>
@@ -798,11 +786,11 @@ function HomeAskSheet({
                               <Check style={{ width: 26, height: 26, color: 'white' }} strokeWidth={2.5} />
                             </div>
                             <p className="text-[16px] font-bold text-[#111] mb-1">Question sent</p>
-                            <p className="font-mono text-[11px] text-[#aaa] text-center">
+                            <p className="text-[11px] text-[#aaa] text-center">
                               @{item.creator.username} will be notified
                             </p>
                             {threadId && (
-                              <p className="font-mono text-[10px] text-[#ccc] text-center mt-1">
+                              <p className="text-[10px] text-[#ccc] text-center mt-1">
                                 Opening thread…
                               </p>
                             )}
@@ -813,7 +801,7 @@ function HomeAskSheet({
                               <Av creator={item.creator} size={36} />
                               <div>
                                 <p className="text-[13px] font-semibold text-[#111]">{item.creator.display_name}</p>
-                                <p className="font-mono text-[10px] text-[#aaa]">@{item.creator.username}</p>
+                                <p className="text-[10px] text-[#aaa]">@{item.creator.username}</p>
                               </div>
                             </div>
 
@@ -842,7 +830,7 @@ function HomeAskSheet({
                                     >
                                       <span>{before}{before ? ' ' : ''}</span>
                                       <span
-                                        className="inline-flex items-center font-mono"
+                                        className="inline-flex items-center"
                                         style={{
                                           fontSize: 12,
                                           color: '#444',
@@ -872,7 +860,7 @@ function HomeAskSheet({
                                         boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.08)',
                                       }}
                                     >
-                                      <span className="font-mono text-[12px]" style={{ color: '#555' }}>$?</span>
+                                      <span className="text-[12px]" style={{ color: '#555' }}>$?</span>
                                     </button>
                                   )}
                                 </div>
@@ -887,7 +875,7 @@ function HomeAskSheet({
                                 style={{ background: '#f0f0f5', border: '0.5px solid #e0e0e8' }}
                               >
                                 <Camera style={{ width: 13, height: 13, color: '#666' }} strokeWidth={1.75} />
-                                <span className="font-mono text-[11px]" style={{ color: '#666' }}>
+                                <span className="text-[11px]" style={{ color: '#666' }}>
                                   {mediaFiles.filter(f => f.type.startsWith('image')).length > 0
                                     ? `${mediaFiles.filter(f => f.type.startsWith('image')).length} photo${mediaFiles.filter(f => f.type.startsWith('image')).length > 1 ? 's' : ''}`
                                     : 'Photo'}
@@ -899,7 +887,7 @@ function HomeAskSheet({
                                 style={{ background: '#f0f0f5', border: '0.5px solid #e0e0e8' }}
                               >
                                 <Video style={{ width: 13, height: 13, color: '#666' }} strokeWidth={1.75} />
-                                <span className="font-mono text-[11px]" style={{ color: '#666' }}>
+                                <span className="text-[11px]" style={{ color: '#666' }}>
                                   {mediaFiles.some(f => f.type.startsWith('video')) ? 'Video ✓' : 'Video'}
                                 </span>
                               </button>
@@ -910,7 +898,7 @@ function HomeAskSheet({
                                   style={{ background: '#ffeded', border: '0.5px solid #ffcaca' }}
                                 >
                                   <X style={{ width: 11, height: 11, color: '#c00' }} strokeWidth={2.5} />
-                                  <span className="font-mono text-[11px]" style={{ color: '#c00' }}>Clear</span>
+                                  <span className="text-[11px]" style={{ color: '#c00' }}>Clear</span>
                                 </button>
                               )}
                             </div>
@@ -929,7 +917,7 @@ function HomeAskSheet({
                                     ) : (
                                       <div className="w-16 h-16 rounded-[10px] bg-gray-100 flex flex-col items-center justify-center gap-1">
                                         <Video style={{ width: 18, height: 18, color: '#888' }} strokeWidth={1.5} />
-                                        <span className="font-mono text-[8px] text-gray-400">video</span>
+                                        <span className="text-[8px] text-gray-400">video</span>
                                       </div>
                                     )}
                                     <button
@@ -956,7 +944,7 @@ function HomeAskSheet({
                               const canSend = locked && bodyLen >= 5
                               return (
                                 <>
-                                  <p className="font-mono text-[10px] mt-2 mb-5" style={{ color: '#bbb' }}>
+                                  <p className="text-[10px] mt-2 mb-5" style={{ color: '#bbb' }}>
                                     {!locked
                                       ? 'end with $? to send · price set per answer'
                                       : canSend
@@ -1042,7 +1030,7 @@ function FollowToast({ username, onDismiss }: { username: string | null; onDismi
             <div className="w-[18px] h-[18px] rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
               <Check style={{ width: 10, height: 10, color: 'white' }} strokeWidth={2.5} />
             </div>
-            <span className="font-mono text-[12px]" style={{ color: '#1c1c1e' }}>Following @{username}</span>
+            <span className="text-[12px]" style={{ color: '#1c1c1e' }}>Following @{username}</span>
           </motion.div>
         </div>
       )}
@@ -1797,7 +1785,7 @@ function NewPostSheet({
                                     className="flex-1 py-3 bg-transparent text-[14px] text-[#111] placeholder-[#c0c0c0] outline-none" />
                                   {gatedLink && <button onClick={() => setGatedLink('')} className="active:opacity-50"><X style={{ width: 13, height: 13, color: '#c0c0c0', strokeWidth: 2 }} /></button>}
                                 </div>
-                                <p className="px-4 py-2 text-[11px] font-mono" style={{ color: '#c0c0c0' }}>Link hidden until fan completes purchase</p>
+                                <p className="px-4 py-2 text-[11px]" style={{ color: '#c0c0c0' }}>Link hidden until fan completes purchase</p>
                               </motion.div>
                             )}
                           </AnimatePresence>
@@ -1849,7 +1837,7 @@ function NewPostSheet({
                                         className="flex-1 bg-transparent outline-none text-[15px] font-bold text-[#111] placeholder-[#c0c0c0] py-2.5 uppercase tracking-wide" />
                                     ) : (
                                       <>
-                                        <span className="text-[#c0c0c0] text-[13px] font-mono flex-shrink-0 w-5 text-right select-none">
+                                        <span className="text-[#c0c0c0] text-[13px] flex-shrink-0 w-5 text-right select-none">
                                           {listItems.slice(0, i).filter(r => r.type === 'line').length + 1}.
                                         </span>
                                         <input value={row.text} onChange={e => updateListItem(i, e.target.value)}
@@ -2008,6 +1996,7 @@ export default function HomePage() {
   const [followToast,   setFollowToast]   = useState<string | null>(null)
   const [unlockTarget,  setUnlockTarget]  = useState<UnlockTarget | null>(null)
   const [askItem,       setAskItem]       = useState<FeedItem | null>(null)
+  const [cardOptionsOpen, setCardOptionsOpen] = useState(false)
   const [homeQuestions, setHomeQuestions] = useState<Record<string, LocalQuestion[]>>({})
 
   // Hide nav bar whenever any bottom sheet is open; restore when all close
@@ -3162,10 +3151,11 @@ export default function HomePage() {
                   }
                   navigate(`/post/${item.id}`, { state: { item, focusedReplyIndex: replyIndex } })
                 }}
+                onOptions={() => setCardOptionsOpen(true)}
               />
             ))}
             <div className="py-10 flex justify-center">
-              <p className="font-mono text-[10px] uppercase tracking-[0.1em]" style={{ color: '#999' }}>
+              <p className="text-[10px] uppercase tracking-[0.1em]" style={{ color: '#999' }}>
                 you're all caught up
               </p>
             </div>
@@ -3178,6 +3168,9 @@ export default function HomePage() {
 
       {/* ── Unlock sheet ── */}
       <UnlockSheet target={unlockTarget} onClose={() => setUnlockTarget(null)} />
+
+      {/* ── Card options sheet ── */}
+      <CardOptionsSheet open={cardOptionsOpen} onClose={() => setCardOptionsOpen(false)} />
 
       {/* ── Ask sheet ── */}
       <HomeAskSheet
