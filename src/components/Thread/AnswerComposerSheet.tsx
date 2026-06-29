@@ -445,14 +445,14 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
                 <div className="flex items-center justify-between px-4 py-3"
                   style={{ borderBottom: '0.5px solid #f0f0f0' }}>
                   <div>
-                    <p className="font-mono text-[12px] font-semibold" style={{ color: '#111' }}>
+                    <p className="text-[12px] font-semibold" style={{ color: '#111' }}>
                       you keep{' '}
                       <span style={{ color: price > 0 ? '#059669' : '#aaa' }}>
                         {price > 0 ? `$?${(price * 0.8).toFixed(2)}` : '$?0.00'}
                       </span>
                     </p>
                     {price > 0 && (
-                      <p className="font-mono text-[10px]" style={{ color: '#bbb' }}>after 20% platform fee</p>
+                      <p className="text-[10px]" style={{ color: '#bbb' }}>after 20% platform fee</p>
                     )}
                   </div>
                   <button
@@ -461,7 +461,7 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
                     style={{ background: '#111' }}
                   >
                     {price > 0 && <Zap style={{ width: 12, height: 12, color: '#fff' }} strokeWidth={2.5} fill="#fff" />}
-                    <span className="font-mono text-[13px] font-semibold text-white">
+                    <span className="text-[13px] font-semibold text-white">
                       {price === 0 ? 'Free' : `$${price}`}
                     </span>
                     <ChevronUp style={{ width: 13, height: 13, color: '#aaa', transform: 'rotate(180deg)' }} strokeWidth={2} />
@@ -699,7 +699,7 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
                         <div className="space-y-1.5">
                           {listItems.map((item, i) => (
                             <div key={i} className="flex items-center gap-2">
-                              <span className="text-[11px] font-mono text-gray-400 w-4 text-right flex-shrink-0">
+                              <span className="text-[11px] text-gray-400 w-4 text-right flex-shrink-0">
                                 {i + 1}.
                               </span>
                               <input

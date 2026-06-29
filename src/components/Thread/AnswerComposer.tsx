@@ -191,7 +191,7 @@ function AudioRecorder({ onDone }: { onDone: (block: AudioBlock) => void }) {
             <Square className="w-3 h-3 text-white" fill="white" />
           </button>
           <Waveform data={waveRef.current} color="bg-gray-500" animate />
-          <span className="text-[12px] text-red-400 font-mono flex-shrink-0">{elapsed}s</span>
+          <span className="text-[12px] text-red-400 flex-shrink-0">{elapsed}s</span>
         </>
       )}
       {phase === 'done' && (
@@ -421,7 +421,7 @@ export default function AnswerComposer({ question, price, postImageUrl, postCapt
           )}
           {/* Question row */}
           <div className="px-3 pb-3 pt-1 border-t border-[#ececec]">
-            <p className="font-mono text-[10px] text-[#aaa] uppercase tracking-wider mb-1">
+            <p className="text-[10px] text-[#aaa] uppercase tracking-wider mb-1">
               {askerUsername ? `from @${askerUsername} · $${price.toFixed(2)} unlocked` : '↳ question'}
             </p>
             <p className="text-[13px] text-[#222] leading-snug">{question}</p>

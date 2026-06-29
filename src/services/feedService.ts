@@ -101,7 +101,7 @@ export function composedPostToFeedItem(cp: ComposedPost): FeedItem {
       response_rate: cp.creator_response_rate ?? null,
     },
     time_ago:         formatDistanceToNow(cp.created_at),
-    views:            0,
+    views:            cp.views ?? 0,
     type:             'post' as const,
     post_type:        postType,
     text:             cp.caption        ?? undefined,
@@ -118,6 +118,13 @@ export function composedPostToFeedItem(cp: ComposedPost): FeedItem {
   }
 }
 
+// ── incrementPostView ─────────────────────────────────────────────────────────
+// Fire-and-forget: called once per post page load. Errors are silently ignored.
+
+export async function incrementPostView(postId: string): Promise<void> {
+  await (supabase as any).rpc('increment_post_view', { p_post_id: postId })
+}
+
 // ── fetchExploreFeed ──────────────────────────────────────────────────────────
 // Used in explore/guest mode — no user ID needed, queries posts directly.
 // Returns recent discovery posts sorted by recency.
@@ -128,7 +135,7 @@ type PostRow013 = {
   id: string; creator_id: string; caption: string | null; image_urls: string[] | null
   price: number | null; post_type: string | null; fixed_price: number | null
   location_address: string | null; question_count: number; answer_count: number
-  created_at: string
+  views: number; created_at: string
   creator: { username: string|null; display_name: string|null; avatar_url: string|null; categories: string[]|null; response_rate: number|null } | null
 }
 
@@ -138,7 +145,7 @@ export async function fetchExploreFeed(): Promise<ComposedPost[]> {
     .from('posts')
     .select(`
       id, creator_id, caption, image_urls, price,
-      post_type, fixed_price,
+      post_type, fixed_price, views,
       location_address, question_count, answer_count, created_at,
       creator:users!creator_id (
         username, display_name, avatar_url, categories, response_rate
@@ -170,6 +177,7 @@ export async function fetchExploreFeed(): Promise<ComposedPost[]> {
       location_address:      post.location_address ?? null,
       question_count:        post.question_count,
       answer_count:          post.answer_count,
+      views:                 post.views ?? 0,
       is_purchased:          false,
       _slot:                 'discovery' as const,
     }
@@ -216,7 +224,7 @@ export async function fetchComposedFeed(userId: string): Promise<ComposedPost[]>
       const { data: posts } = await supabase
         .from('posts')
         .select(`
-          id, creator_id, caption, image_urls, price,
+          id, creator_id, caption, image_urls, price, views,
           location_address, question_count, answer_count, created_at,
           users!creator_id (
             id, username, display_name, avatar_url, categories, response_rate
@@ -240,6 +248,7 @@ export async function fetchComposedFeed(userId: string): Promise<ComposedPost[]>
           image_urls:         p.image_urls ?? [],
           question_count:     p.question_count ?? 0,
           answer_count:       p.answer_count ?? 0,
+          views:              p.views ?? 0,
           price:              p.price ?? 0,
           location_address:   p.location_address ?? null,
           is_purchased:       false,
@@ -258,7 +267,7 @@ export async function fetchPostById(postId: string, currentUserId: string) {
   const { data, error } = await supabase
     .from('posts')
     .select(`
-      id, creator_id, caption, image_urls, price,
+      id, creator_id, caption, image_urls, price, views,
       location_address, location_lat, location_lng,
       question_count, answer_count, created_at,
       creator:users!creator_id (

@@ -104,7 +104,7 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                         <p className="text-[18px] font-bold text-[#111]">Order summary</p>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: '#f5f5f7' }}>
                           <span style={{ fontWeight: 700, color: '#111', fontSize: 11, lineHeight: 1 }}>$?</span>
-                          <span className="font-mono text-[12px] font-semibold text-[#111]">{count} answer{count !== 1 ? 's' : ''}</span>
+                          <span className="text-[12px] font-semibold text-[#111]">{count} answer{count !== 1 ? 's' : ''}</span>
                         </div>
                       </div>
 
@@ -117,7 +117,7 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                               <p className="text-[11px] font-medium mb-0.5" style={{ color: '#aaa' }}>@{it.creatorUsername}</p>
                               <p className="text-[13px] leading-snug line-clamp-2 text-[#111]">{it.question}</p>
                             </div>
-                            <span className="flex items-center gap-1 rounded-full px-2.5 py-1.5 flex-shrink-0 font-mono text-[11px] font-semibold"
+                            <span className="flex items-center gap-1 rounded-full px-2.5 py-1.5 flex-shrink-0 text-[11px] font-semibold"
                               style={{ background: '#f5f5f5', color: '#111' }}>
                               <span style={{ fontWeight: 700, color: '#111', fontSize: 11, lineHeight: 1 }}>$?</span>
                               {it.price}
@@ -130,21 +130,21 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                       <div className="rounded-[16px] px-4 py-3 mb-5" style={{ background: '#f9f9f9', border: '1px solid #f0f0f0' }}>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-[13px]" style={{ color: '#888' }}>Total</span>
-                          <span className="flex items-center gap-1 font-mono text-[15px] font-bold text-[#111]">
+                          <span className="flex items-center gap-1 text-[15px] font-bold text-[#111]">
                             <span style={{ fontWeight: 700, color: '#111', fontSize: 11, lineHeight: 1 }}>$?</span>
                             {total}
                           </span>
                         </div>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-[13px]" style={{ color: '#888' }}>Your balance</span>
-                          <span className="font-mono text-[13px]" style={{ color: hasBalance ? '#111' : '#ef4444' }}>$?{balance}</span>
+                          <span className="text-[13px]" style={{ color: hasBalance ? '#111' : '#ef4444' }}>$?{balance}</span>
                         </div>
                         <div style={{ borderTop: '0.5px solid #eee', paddingTop: 8, marginTop: 4 }}>
                           <div className="flex items-center justify-between">
                             <span className="text-[13px] font-semibold" style={{ color: '#111' }}>
                               {hasBalance ? 'Balance after' : 'Balance needed'}
                             </span>
-                            <span className="font-mono text-[14px] font-bold" style={{ color: hasBalance ? '#111' : '#ef4444' }}>
+                            <span className="text-[14px] font-bold" style={{ color: hasBalance ? '#111' : '#ef4444' }}>
                               {hasBalance ? `$${remaining.toFixed(2)}` : `$${(total - balance).toFixed(2)} more`}
                             </span>
                           </div>
@@ -170,7 +170,7 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                         <div className="flex flex-col gap-2.5">
                           <div className="rounded-[14px] px-5 py-3 text-center" style={{ background: '#f9f9f9', border: '0.5px solid #ebebeb' }}>
                             <p className="text-[13px] font-semibold text-[#333] mb-0.5">Not enough balance</p>
-                            <p className="font-mono text-[11px]" style={{ color: '#bbb' }}>
+                            <p className="text-[11px]" style={{ color: '#bbb' }}>
                               Add balance to unlock {count === 1 ? 'this answer' : 'these answers'}
                             </p>
                           </div>
@@ -216,7 +216,7 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                       {count === 1 ? 'Answer unlocked!' : `${count} answers unlocked!`}
                     </motion.p>
                     <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
-                      className="font-mono text-[12px] text-center mb-8" style={{ color: '#aaa' }}>
+                      className="text-[12px] text-center mb-8" style={{ color: '#aaa' }}>
                       Replies are waiting in your inbox
                     </motion.p>
                     <motion.div

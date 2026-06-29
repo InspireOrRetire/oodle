@@ -62,7 +62,7 @@ export default function CartPage() {
 
           <h1 className="text-[17px] font-bold text-[#111]">
             Cart{items.length > 0 && (
-              <span className="ml-2 font-mono text-[13px] font-normal" style={{ color: '#aaa' }}>
+              <span className="ml-2 text-[13px] font-normal" style={{ color: '#aaa' }}>
                 {items.length}
               </span>
             )}
@@ -140,7 +140,7 @@ export default function CartPage() {
                     {/* Price chip + remove */}
                     <div className="flex items-center gap-2 flex-shrink-0" onClick={e => e.stopPropagation()}>
                       <span
-                        className="flex items-center gap-1 rounded-full px-2.5 py-1.5 font-mono text-[12px] font-semibold transition-all"
+                        className="flex items-center gap-1 rounded-full px-2.5 py-1.5 text-[12px] font-semibold transition-all"
                         style={{
                           background: checked ? '#111' : '#f5f5f5',
                           color:      checked ? '#fff' : '#bbb',

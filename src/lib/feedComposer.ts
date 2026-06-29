@@ -44,6 +44,7 @@ export interface RawPost {
   location_address?:      string | null
   post_type?:             'type1' | 'type2'
   fixed_price?:           number | null
+  views?:                 number
 }
 
 /** A RawPost annotated with which feed slot it was placed in */

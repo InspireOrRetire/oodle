@@ -49,7 +49,7 @@ export default function LockSlider({ price, onUnlock }: Props) {
     >
       {/* ··· text — fades in first, then fades out */}
       <motion.span
-        className="absolute font-mono text-white/70 select-none"
+        className="absolute text-white/70 select-none"
         style={{
           opacity:  dotsOpacity,
           left:     10,
@@ -63,7 +63,7 @@ export default function LockSlider({ price, onUnlock }: Props) {
 
       {/* Price number — fades in at the end */}
       <motion.span
-        className="absolute font-mono font-semibold text-white select-none"
+        className="absolute font-semibold text-white select-none"
         style={{
           opacity:  priceOpacity,
           left:     10,

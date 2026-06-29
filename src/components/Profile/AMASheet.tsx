@@ -150,7 +150,7 @@ export default function AMASheet({
                   style={{ background: '#f5f5f7', minHeight: 100 }}
                 />
                 <span
-                  className="absolute bottom-3 right-3 text-[11px] font-mono"
+                  className="absolute bottom-3 right-3 text-[11px]"
                   style={{ color: text.length >= MAX_CHARS ? '#111' : '#ccc' }}
                 >
                   {text.length}/{MAX_CHARS}
@@ -159,7 +159,7 @@ export default function AMASheet({
 
               {/* Error */}
               {sendError && (
-                <p className="mt-3 text-[12px] text-center font-mono" style={{ color: '#e53e3e' }}>
+                <p className="mt-3 text-[12px] text-center" style={{ color: '#e53e3e' }}>
                   {sendError}
                 </p>
               )}
