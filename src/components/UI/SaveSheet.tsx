@@ -10,53 +10,30 @@ export interface SaveCollection {
   id: string
   name: string
   count: number
-  cover: string
+  cover?: string
 }
-
-export const BASE_COLLECTIONS: SaveCollection[] = [
-  {
-    id: 'training',
-    name: 'Training',
-    count: 12,
-    cover: 'https://picsum.photos/seed/lift702/200/200',
-  },
-  {
-    id: 'nutrition',
-    name: 'Nutrition',
-    count: 8,
-    cover: 'https://picsum.photos/seed/greens1101/200/200',
-  },
-  {
-    id: 'morning',
-    name: 'Morning routines',
-    count: 5,
-    cover: 'https://picsum.photos/seed/morning901/200/200',
-  },
-  {
-    id: 'mindset',
-    name: 'Mindset',
-    count: 9,
-    cover: 'https://picsum.photos/seed/mindset501/200/200',
-  },
-]
 
 // ─── SaveSheet ────────────────────────────────────────────────────────────────
 
 export default function SaveSheet({
   open,
   initialSaved = new Set<string>(),
+  collections: propCollections = [],
   onClose,
   onDone,
+  onCreateCollection,
 }: {
   open: boolean
   initialSaved?: Set<string>
+  collections?: SaveCollection[]
   onClose: () => void
   onDone: (selectedIds: Set<string>) => void
+  onCreateCollection?: (name: string) => Promise<SaveCollection>
 }) {
-  const [view,        setView]        = useState<'grid' | 'new'>('grid')
-  const [collections, setCollections] = useState<SaveCollection[]>(BASE_COLLECTIONS)
-  const [selected,    setSelected]    = useState<Set<string>>(new Set(initialSaved))
-  const [newName,     setNewName]     = useState('')
+  const [view,     setView]     = useState<'grid' | 'new'>('grid')
+  const [selected, setSelected] = useState<Set<string>>(new Set(initialSaved))
+  const [newName,  setNewName]  = useState('')
+  const [creating, setCreating] = useState(false)
 
   // Sync selection state whenever the sheet opens (or re-opens on an already-saved item)
   // Auto-select "general" when opening on an item that isn't saved anywhere yet
@@ -77,11 +54,17 @@ export default function SaveSheet({
 
   function handleDone() { onDone(new Set(selected)) }
 
-  function handleCreate() {
-    if (!newName.trim()) return
-    const id = `c_${Date.now()}`
-    setCollections(prev => [...prev, { id, name: newName.trim(), count: 0, cover: BASE_COLLECTIONS[0].cover }])
-    setSelected(prev => new Set(prev).add(id))
+  async function handleCreate() {
+    if (!newName.trim() || creating) return
+    if (onCreateCollection) {
+      setCreating(true)
+      try {
+        const col = await onCreateCollection(newName.trim())
+        setSelected(prev => new Set(prev).add(col.id))
+      } finally {
+        setCreating(false)
+      }
+    }
     setNewName('')
     setView('grid')
   }
@@ -198,19 +181,22 @@ export default function SaveSheet({
                       </button>
 
                       {/* ── Category rows ── */}
-                      {collections.map((col, i) => {
+                      {propCollections.map((col, i) => {
                         const sel = selected.has(col.id)
                         return (
                           <button
                             key={col.id}
                             onClick={() => toggle(col.id)}
                             className="w-full flex items-center gap-3 px-4 py-3 active:opacity-60 transition-opacity"
-                            style={{ borderBottom: i < collections.length - 1 ? '0.5px solid #f5f5f7' : 'none' }}
+                            style={{ borderBottom: i < propCollections.length - 1 ? '0.5px solid #f5f5f7' : 'none' }}
                           >
-                            {/* Thumbnail */}
-                            <div className="flex-shrink-0 w-[52px] h-[52px] rounded-[8px] overflow-hidden">
-                              <img src={col.cover} alt={col.name}
-                                className="w-full h-full object-cover" />
+                            {/* Thumbnail or placeholder */}
+                            <div className="flex-shrink-0 w-[52px] h-[52px] rounded-[8px] overflow-hidden flex items-center justify-center"
+                              style={{ background: col.cover ? undefined : '#f0f0f2' }}>
+                              {col.cover
+                                ? <img src={col.cover} alt={col.name} className="w-full h-full object-cover" />
+                                : <Bookmark style={{ width: 20, height: 20, color: '#bbb' }} strokeWidth={1.75} />
+                              }
                             </div>
 
                             {/* Name + count */}
@@ -259,10 +245,10 @@ export default function SaveSheet({
                         style={{ background: '#f5f5f7' }}
                       />
 
-                      <button onClick={handleCreate} disabled={!newName.trim()}
+                      <button onClick={handleCreate} disabled={!newName.trim() || creating}
                         className="w-full rounded-[12px] py-[14px] mt-5 active:opacity-80 transition-opacity disabled:opacity-30"
                         style={{ background: '#111' }}>
-                        <span className="text-[13px] text-white tracking-[0.03em]">create</span>
+                        <span className="text-[13px] text-white tracking-[0.03em]">{creating ? 'creating…' : 'create'}</span>
                       </button>
                     </div>
                   </motion.div>
