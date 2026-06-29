@@ -16,7 +16,7 @@ import {
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion'
 import PostMediaCarousel from '../components/Post/PostMediaCarousel'
 import TokenKeypad from '../components/Post/TokenKeypad'
-import SaveSheet from '../components/UI/SaveSheet'
+import SaveSheet, { type SaveCollection } from '../components/UI/SaveSheet'
 import { useLayout } from '../contexts/LayoutContext'
 import { useAuth } from '../contexts/AuthContext'
 import { fetchComposedFeed, composedPostToFeedItem, searchCreators as searchCreatorsDB, type FeedItem, type FeedCreator } from '../services/feedService'
@@ -1992,6 +1992,7 @@ export default function HomePage() {
   const [liked,         setLiked]         = useState<Set<string>>(new Set())
   const [savedItems,    setSavedItems]    = useState<Record<string, Set<string>>>({})
   const [saveTarget,    setSaveTarget]    = useState<string | null>(null)
+  const [collections,   setCollections]   = useState<SaveCollection[]>([])
   const [followedUsers, setFollowedUsers] = useState<Set<string>>(new Set())
   const [followToast,   setFollowToast]   = useState<string | null>(null)
   const [unlockTarget,  setUnlockTarget]  = useState<UnlockTarget | null>(null)
@@ -2077,6 +2078,29 @@ export default function HomePage() {
       .finally(() => { if (!cancelled) setFeedLoading(false) })
     return () => { cancelled = true; clearTimeout(timeout) }
   }, [user?.id, authLoading, isExploreMode, feedVersion])
+
+  // ── Load saved collections + saved items from Supabase ─────────────────
+  useEffect(() => {
+    if (!user?.id || isExploreMode) return
+    async function loadSaved() {
+      const [colRes, itemRes] = await Promise.all([
+        (supabase as any).from('saved_collections').select('collection_id, name').eq('user_id', user!.id).order('created_at'),
+        (supabase as any).from('saved_items').select('post_id, collection_id').eq('user_id', user!.id),
+      ])
+      if (colRes.data) {
+        setCollections(colRes.data.map((r: any) => ({ id: r.collection_id, name: r.name, count: 0 })))
+      }
+      if (itemRes.data) {
+        const map: Record<string, Set<string>> = {}
+        for (const row of itemRes.data as any[]) {
+          if (!map[row.post_id]) map[row.post_id] = new Set()
+          map[row.post_id].add(row.collection_id ?? 'general')
+        }
+        setSavedItems(map)
+      }
+    }
+    loadSaved()
+  }, [user?.id, isExploreMode])
 
   // ── Restore scroll position when returning from post detail ────────────
   useEffect(() => {
@@ -3187,10 +3211,33 @@ export default function HomePage() {
       <SaveSheet
         open={saveTarget !== null}
         initialSaved={saveTarget ? (savedItems[saveTarget] ?? new Set()) : new Set()}
+        collections={collections}
         onClose={() => setSaveTarget(null)}
-        onDone={selected => {
-          if (saveTarget) setSavedItems(prev => ({ ...prev, [saveTarget]: selected }))
+        onDone={async selected => {
+          const postId = saveTarget
+          if (!postId || !user?.id) { setSaveTarget(null); return }
+          setSavedItems(prev => ({ ...prev, [postId]: selected }))
           setSaveTarget(null)
+          if (selected.size === 0) {
+            await (supabase as any).from('saved_items').delete().eq('user_id', user.id).eq('post_id', postId)
+          } else {
+            const collectionId = [...selected].find(id => id !== 'general') ?? null
+            await (supabase as any).from('saved_items').upsert(
+              { user_id: user.id, post_id: postId, collection_id: collectionId },
+              { onConflict: 'user_id,post_id' }
+            )
+          }
+        }}
+        onCreateCollection={async name => {
+          const { data, error } = await (supabase as any)
+            .from('saved_collections')
+            .insert({ user_id: user!.id, name })
+            .select('collection_id, name')
+            .single()
+          if (error || !data) throw error
+          const col: SaveCollection = { id: (data as any).collection_id, name: (data as any).name, count: 0 }
+          setCollections(prev => [...prev, col])
+          return col
         }}
       />
 
