@@ -3233,33 +3233,11 @@ export default function HomePage() {
         onPosted={refreshFeed}
       />
 
-      {/* ── Floating compose FAB ── */}
-      <AnimatePresence mode="wait">
-        {showFab && navVisible && (
-          <motion.button
-            key="fab-docked"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ type: 'spring', stiffness: 440, damping: 30 }}
-            onClick={() => { iosKbRef.current?.focus(); setNewPostOpen(true) }}
-            className="fixed z-40 flex items-center justify-center active:opacity-70 transition-opacity"
-            style={{
-              bottom: NAV_H + 10,
-              right: 16,
-              width: 56,
-              height: 44,
-              borderRadius: 14,
-              background: 'white',
-              boxShadow: '0 2px 12px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.08)',
-            }}
-          >
-            <Plus style={{ width: 20, height: 20, color: '#222' }} strokeWidth={2} />
-          </motion.button>
-        )}
+      {/* ── Floating compose FAB — centered, genie from below ── */}
+      <AnimatePresence>
         {showFab && !navVisible && (
           <motion.button
-            key="fab-floating"
+            key="fab"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 40 }}
