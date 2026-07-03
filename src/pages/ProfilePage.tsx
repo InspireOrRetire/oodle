@@ -469,6 +469,13 @@ function ThreadItem({
     avatar_url:   undefined,
   }
 
+  function handleShare(e: React.MouseEvent) {
+    e.stopPropagation()
+    const url = `${window.location.origin}/post/${thread.id}`
+    if (navigator.share) { navigator.share({ url }).catch(() => {}) }
+    else { navigator.clipboard.writeText(url).catch(() => {}) }
+  }
+
   function snap(to: number) {
     animate(x, to, { type: 'spring', stiffness: 420, damping: 34 })
   }
@@ -541,56 +548,63 @@ function ThreadItem({
         className="relative px-4 pt-3"
       >
 
-        {/* ── Unsolicited post: caption ABOVE media ── */}
+        {/* ── Unsolicited post: matches home feed layout ── */}
         {isPost ? (
-          <div className="flex gap-3 pb-3">
+          <div className="flex gap-3">
             <div className="flex flex-col items-center flex-shrink-0 w-10">
               <CreatorAvatar size={40} initials={creator.initials} avatarUrl={creator.avatar_url} />
             </div>
             <div className="flex-1 min-w-0">
+              {/* Name row */}
               <div className="flex items-center gap-1.5 mb-1.5">
-                <span className="text-[14px] font-semibold text-[#111] truncate">
+                <span className="text-[14px] font-medium text-[#111] truncate leading-tight">
                   {creator.display_name}
                 </span>
-                <span className="text-[11px] text-[#bbb] flex-shrink-0">{thread.time_ago}</span>
-                <div className="ml-auto flex items-center gap-2 flex-shrink-0">
-                  {thread.price > 0 && (
-                    isOwner ? (
-                      <button
-                        onClick={e => { e.stopPropagation(); onEditPrice?.() }}
-                        className="inline-flex items-center justify-center rounded-full px-3 py-1 active:opacity-70 transition-opacity"
-                        style={{ background: '#f0f0f2' }}
-                      >
-                        <span className="text-[11px] font-semibold text-[#555] tracking-tight">{cp(thread.price)}</span>
-                      </button>
-                    ) : (
-                      <button
-                        onClick={e => { e.stopPropagation(); onUnlock(thread) }}
-                        className="inline-flex items-center justify-center rounded-full px-3 py-1 active:opacity-75 transition-opacity"
-                        style={{ background: '#111' }}
-                      >
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight">
-                          <Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{cp(thread.price)}
-                        </span>
-                      </button>
-                    )
-                  )}
-                  {isOwner && onOptions && (
-                    <button
-                      onClick={e => { e.stopPropagation(); onOptions() }}
-                      className="active:opacity-50 transition-opacity"
-                    >
-                      <MoreHorizontal style={{ width: 18, height: 18, color: '#bbb' }} strokeWidth={1.75} />
-                    </button>
-                  )}
-                </div>
+                <span className="text-[11px] flex-shrink-0" style={{ color: '#bbb' }}>
+                  · {thread.time_ago}
+                </span>
+                <button
+                  onClick={e => { e.stopPropagation(); onOptions?.() }}
+                  className="ml-auto flex-shrink-0 active:opacity-50 transition-opacity"
+                >
+                  <MoreHorizontal style={{ width: 16, height: 16, color: '#bbb' }} strokeWidth={2} />
+                </button>
               </div>
+              {/* Text */}
               {thread.caption && (
-                <p className="text-[13px] text-[#222] leading-[1.55] mb-2">{thread.caption}</p>
+                <p className="text-[14px] text-[#111] leading-[1.55] mb-2.5">{thread.caption}</p>
               )}
+              {/* Media */}
               {thread.images && thread.images.length > 0 && (
-                <PostMediaCarousel images={thread.images} aspectRatio="vertical" />
+                <div className="mb-2.5">
+                  <PostMediaCarousel images={thread.images} aspectRatio="vertical" />
+                </div>
               )}
+              {/* Action row — matches home feed */}
+              <div className="relative flex items-center py-2.5" style={{ borderTop: '0.5px solid #f5f5f7', minHeight: 40 }}>
+                <div className="flex items-center gap-5">
+                  <button onClick={handleShare} className="flex items-center gap-1.5 active:opacity-70 transition-opacity">
+                    <Share2 style={{ width: 12, height: 12, color: '#555' }} strokeWidth={1.75} />
+                    <span className="text-[12px] font-medium" style={{ color: '#555' }}>Share</span>
+                  </button>
+                  <button onClick={e => { e.stopPropagation(); onAsk?.() }} className="flex items-center gap-1.5 active:opacity-70 transition-opacity">
+                    <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
+                    <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
+                  </button>
+                  <button onClick={e => { e.stopPropagation(); onSave() }} className="flex items-center gap-1.5 active:opacity-70 transition-opacity">
+                    <Bookmark style={{ width: 12, height: 12, color: isSaved ? '#111' : '#555' }} strokeWidth={2} fill={isSaved ? '#111' : 'none'} />
+                    <span className="text-[12px] font-medium" style={{ color: isSaved ? '#111' : '#555' }}>{isSaved ? 'Saved' : 'Save'}</span>
+                  </button>
+                </div>
+                {thread.price > 0 && !isOwner && (
+                  <div className="absolute inset-y-0 right-0 flex items-center">
+                    <button onClick={e => { e.stopPropagation(); onUnlock(thread) }} className="inline-flex items-center gap-1 active:opacity-75 transition-opacity">
+                      <Lock style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
+                      <span className="text-[12px] font-semibold text-[#111] tracking-tight">{cp(thread.price)}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         ) : (
@@ -817,22 +831,25 @@ function ThreadItem({
         })()
         )}
 
-        {/* ── Action row — always shown on every post/thread ── */}
-        <div className="flex items-center gap-3 py-2.5 pl-[52px] pr-2">
-          <button onClick={onAsk} className="flex items-center gap-1 active:opacity-60 transition-opacity">
-            <MessageCircle style={{ width: 16, height: 16, color: '#c0c0c8', flexShrink: 0 }} strokeWidth={1.75} />
-          </button>
-          <button onClick={onSave} className="flex items-center gap-1 active:opacity-60 transition-opacity">
-            <Bookmark
-              style={{ width: 16, height: 16, color: isSaved ? '#111' : '#c0c0c8', flexShrink: 0 }}
-              strokeWidth={1.75}
-              fill={isSaved ? '#111' : 'none'}
-            />
-          </button>
-          <button className="flex items-center gap-1 active:opacity-60 transition-opacity">
-            <Share2 style={{ width: 16, height: 16, color: '#c0c0c8', flexShrink: 0 }} strokeWidth={1.75} />
-          </button>
-        </div>
+        {/* ── Action row for Q&A threads — matches home feed ── */}
+        {!isPost && (
+          <div className="relative flex items-center py-2.5 pl-[52px] pr-4" style={{ borderTop: '0.5px solid #f5f5f7', minHeight: 40 }}>
+            <div className="flex items-center gap-5">
+              <button onClick={handleShare} className="flex items-center gap-1.5 active:opacity-70 transition-opacity">
+                <Share2 style={{ width: 12, height: 12, color: '#555' }} strokeWidth={1.75} />
+                <span className="text-[12px] font-medium" style={{ color: '#555' }}>Share</span>
+              </button>
+              <button onClick={e => { e.stopPropagation(); onAsk?.() }} className="flex items-center gap-1.5 active:opacity-70 transition-opacity">
+                <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
+                <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
+              </button>
+              <button onClick={e => { e.stopPropagation(); onSave() }} className="flex items-center gap-1.5 active:opacity-70 transition-opacity">
+                <Bookmark style={{ width: 12, height: 12, color: isSaved ? '#111' : '#555' }} strokeWidth={2} fill={isSaved ? '#111' : 'none'} />
+                <span className="text-[12px] font-medium" style={{ color: isSaved ? '#111' : '#555' }}>{isSaved ? 'Saved' : 'Save'}</span>
+              </button>
+            </div>
+          </div>
+        )}
 
       </motion.div>
     </div>
