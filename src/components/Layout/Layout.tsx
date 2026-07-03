@@ -1,8 +1,14 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useRef } from 'react'
 import { motion } from 'framer-motion'
+import { Home, Search, Bookmark } from 'lucide-react'
 import { useLayout } from '../../contexts/LayoutContext'
 
+const TABS = [
+  { id: 'home',   path: '/',       label: 'Home',   Icon: Home     },
+  { id: 'search', path: '/search', label: 'Search', Icon: Search   },
+  { id: 'saved',  path: '/saved',  label: 'Saved',  Icon: Bookmark },
+] as const
 
 export default function Layout() {
   const loc = useLocation()
@@ -14,10 +20,9 @@ export default function Layout() {
 
   const hideNav = loc.pathname.startsWith('/inbox/') || loc.pathname.startsWith('/post/')
 
-  // Active-tab matching — /u/:username is part of the home search context
   function isActive(path: string) {
     if (path === '/') return loc.pathname === '/' || loc.pathname.startsWith('/u/')
-    return loc.pathname === path
+    return loc.pathname.startsWith(path)
   }
 
   function handleScroll(e: React.UIEvent<HTMLDivElement>) {
@@ -27,11 +32,6 @@ export default function Layout() {
     else if (delta < -6) setNavVisible(true)
     lastScrollY.current = current
   }
-
-  const tabs = [
-    { id: 'home',  path: '/',      label: 'home'  },
-    { id: 'inbox', path: '/inbox', label: 'inbox' },
-  ] as const
 
   return (
     <div className="fixed inset-0 flex flex-col bg-white">
@@ -44,63 +44,63 @@ export default function Layout() {
         <motion.div
           animate={{ y: navVisible ? 0 : '100%' }}
           transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-          className="fixed bottom-0 left-0 right-0 z-30"
-          style={{
-            paddingBottom: 'env(safe-area-inset-bottom)',
-            willChange: 'transform',
-          }}
+          className="fixed bottom-0 left-0 right-0 z-30 pointer-events-none"
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)', willChange: 'transform' }}
         >
-          <div className="px-3 py-2">
-            <div
-              className="flex items-center justify-around px-1 py-1.5 rounded-[30px]"
-              style={{
-                background: 'rgba(235,235,235,0.72)',
-                border: '0.5px solid rgba(255,255,255,0.6)',
-                backdropFilter: 'blur(24px) saturate(1.8)',
-                WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
-                boxShadow: '0 2px 16px rgba(0,0,0,0.08)',
-              }}
-            >
-              {tabs.map(tab => {
-                const active = isActive(tab.path)
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => {
-                      if (isActive(tab.path)) {
-                        const el = scrollRef.current
-                        if (!el) return
-                        const start = el.scrollTop
-                        const duration = 180
-                        const startTime = performance.now()
-                        const animate = (now: number) => {
-                          const p = Math.min((now - startTime) / duration, 1)
-                          el.scrollTop = start * (1 - (1 - Math.pow(1 - p, 3)))
-                          if (p < 1) requestAnimationFrame(animate)
-                        }
-                        requestAnimationFrame(animate)
-                      } else {
-                        nav(tab.path)
+          <div className="flex items-end justify-around px-6 pb-1 pointer-events-none">
+            {TABS.map(({ id, path, label, Icon }) => {
+              const active = isActive(path)
+              return (
+                <button
+                  key={id}
+                  pointer-events-auto
+                  onClick={() => {
+                    if (path === '/' && isActive(path)) {
+                      const el = scrollRef.current
+                      if (!el) return
+                      const start = el.scrollTop
+                      const duration = 180
+                      const startTime = performance.now()
+                      const tick = (now: number) => {
+                        const p = Math.min((now - startTime) / duration, 1)
+                        el.scrollTop = start * (1 - (1 - Math.pow(1 - p, 3)))
+                        if (p < 1) requestAnimationFrame(tick)
                       }
-                    }}
-                    className="flex flex-col items-center gap-[3px] rounded-[24px] px-[22px] py-[5px] transition-all"
-                    style={active
-                      ? { background: 'rgba(255,255,255,0.9)', border: '0.5px solid rgba(255,255,255,0.7)', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }
-                      : { background: 'transparent', border: '0.5px solid transparent' }
+                      requestAnimationFrame(tick)
+                    } else {
+                      nav(path)
                     }
+                  }}
+                  className="flex flex-col items-center gap-[6px] pointer-events-auto active:scale-95 transition-transform"
+                  style={{
+                    background: 'white',
+                    borderRadius: 20,
+                    width: 80,
+                    paddingTop: 14,
+                    paddingBottom: 12,
+                    boxShadow: active
+                      ? '0 4px 20px rgba(0,0,0,0.14)'
+                      : '0 2px 12px rgba(0,0,0,0.08)',
+                  }}
+                >
+                  <Icon
+                    style={{
+                      width: 24,
+                      height: 24,
+                      color: active ? '#111' : '#bbb',
+                    }}
+                    strokeWidth={active ? 2.2 : 1.75}
+                    fill={active && id === 'saved' ? '#111' : 'none'}
+                  />
+                  <span
+                    className="text-[11px] font-semibold tracking-tight"
+                    style={{ color: active ? '#111' : '#bbb' }}
                   >
-                    <div className="w-[5px] h-[5px] rounded-full transition-colors"
-                      style={{ background: active ? '#111111' : '#cccccc' }} />
-                    <span
-                      className="text-[9px] uppercase tracking-[0.05em] transition-colors"
-                      style={{ color: active ? '#111111' : '#cccccc' }}
-                    >
-                      {tab.label}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
+                    {label}
+                  </span>
+                </button>
+              )
+            })}
           </div>
         </motion.div>
       )}
