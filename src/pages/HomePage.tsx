@@ -1984,13 +1984,6 @@ export default function HomePage() {
 
   // NAV_H: nav bar height (px-3 py-2 wrapper + pill content) — no safe area, that's below
   const NAV_H = 62
-  const FAB_W = 56
-  const fabBottom = useMotionValue(NAV_H + 10)
-  const fabLeft   = useMotionValue(W - FAB_W - 16)
-  useEffect(() => {
-    animate(fabBottom, navVisible ? NAV_H + 10 : 12, { type: 'spring', stiffness: 320, damping: 28 })
-    animate(fabLeft,   navVisible ? W - FAB_W - 16 : (W - FAB_W) / 2, { type: 'spring', stiffness: 320, damping: 28 })
-  }, [navVisible])
 
   const [liked,         setLiked]         = useState<Set<string>>(new Set())
   const [savedItems,    setSavedItems]    = useState<Record<string, Set<string>>>({})
@@ -3240,20 +3233,43 @@ export default function HomePage() {
         onPosted={refreshFeed}
       />
 
-      {/* ── Floating compose FAB (visible when scrolled past compose bar) ── */}
-      <AnimatePresence>
-        {showFab && (
+      {/* ── Floating compose FAB ── */}
+      <AnimatePresence mode="wait">
+        {showFab && navVisible && (
           <motion.button
-            key="fab"
-            initial={{ opacity: 0, scale: 0.75, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.75, y: 16 }}
+            key="fab-docked"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
             transition={{ type: 'spring', stiffness: 440, damping: 30 }}
             onClick={() => { iosKbRef.current?.focus(); setNewPostOpen(true) }}
             className="fixed z-40 flex items-center justify-center active:opacity-70 transition-opacity"
             style={{
-              bottom: fabBottom,
-              left: fabLeft,
+              bottom: NAV_H + 10,
+              right: 16,
+              width: 56,
+              height: 44,
+              borderRadius: 14,
+              background: 'white',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.08)',
+            }}
+          >
+            <Plus style={{ width: 20, height: 20, color: '#222' }} strokeWidth={2} />
+          </motion.button>
+        )}
+        {showFab && !navVisible && (
+          <motion.button
+            key="fab-floating"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 40 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+            onClick={() => { iosKbRef.current?.focus(); setNewPostOpen(true) }}
+            className="fixed z-40 flex items-center justify-center active:opacity-70 transition-opacity"
+            style={{
+              bottom: 14,
+              left: '50%',
+              transform: 'translateX(-50%)',
               width: 56,
               height: 44,
               borderRadius: 14,
