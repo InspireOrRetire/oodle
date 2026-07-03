@@ -261,43 +261,37 @@ function FeedCard({
                 </div>
               )}
               {/* ── Action row ── */}
-              <div className="relative py-2.5" style={{ borderTop: '0.5px solid #f5f5f7', minHeight: 40 }}>
-                {/* Share anchored just left of Ask */}
-                <div className="absolute inset-y-0 flex items-center pointer-events-none" style={{ right: 'calc(50% + 38px)' }}>
+              <div className="relative flex items-center py-2.5" style={{ borderTop: '0.5px solid #f5f5f7', minHeight: 40 }}>
+                {/* Share · Ask · Save — left-aligned group */}
+                <div className="flex items-center gap-5">
                   <button
                     onClick={handleShare}
-                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity pointer-events-auto"
+                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity"
                   >
                     <Share2 style={{ width: 12, height: 12, color: '#555' }} strokeWidth={1.75} />
                     <span className="text-[12px] font-medium" style={{ color: '#555' }}>Share</span>
                   </button>
-                </div>
-                {/* Ask pinned dead-center — never moves */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <button
                     onClick={e => { e.stopPropagation(); onAsk?.() }}
-                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity pointer-events-auto"
+                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity"
                   >
                     <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
                     <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
                   </button>
-                </div>
-                {/* Save anchored just right of Ask */}
-                <div className="absolute inset-y-0 flex items-center pointer-events-none" style={{ left: 'calc(50% + 38px)' }}>
                   <button
                     onClick={e => { e.stopPropagation(); onSaveToggle() }}
-                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity pointer-events-auto"
+                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity"
                   >
                     <Bookmark style={{ width: 12, height: 12, color: saved ? '#111' : '#555' }} strokeWidth={2} fill={saved ? '#111' : 'none'} />
                     <span className="text-[12px] font-medium" style={{ color: saved ? '#111' : '#555' }}>{saved ? 'Saved' : 'Save'}</span>
                   </button>
                 </div>
-                {/* Price on far right when present */}
+                {/* Price pinned to far right */}
                 {item.price && item.price > 0 && (
-                  <div className="absolute inset-y-0 right-0 flex items-center pointer-events-none">
+                  <div className="absolute inset-y-0 right-0 flex items-center">
                     <button
                       onClick={e => { e.stopPropagation(); onUnlock(item) }}
-                      className="inline-flex items-center gap-1 active:opacity-75 transition-opacity pointer-events-auto"
+                      className="inline-flex items-center gap-1 active:opacity-75 transition-opacity"
                     >
                       <Lock style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
                       <span className="text-[12px] font-semibold text-[#111] tracking-tight">{cp(item.price!)}</span>
@@ -524,31 +518,25 @@ function FeedCard({
 
               {/* ── Action row ── */}
               <div className="relative flex items-center py-2.5" style={{ borderTop: item.comments > 0 ? 'none' : undefined, minHeight: 40 }}>
-                {/* Share anchored just left of Ask */}
-                <div className="absolute inset-y-0 flex items-center pointer-events-none" style={{ right: 'calc(50% + 38px)' }}>
+                {/* Share · Ask · Save — left-aligned group */}
+                <div className="flex items-center gap-5">
                   <button
                     onClick={handleShare}
-                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity pointer-events-auto"
+                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity"
                   >
                     <Share2 style={{ width: 12, height: 12, color: '#555' }} strokeWidth={1.75} />
                     <span className="text-[12px] font-medium" style={{ color: '#555' }}>Share</span>
                   </button>
-                </div>
-                {/* Ask always dead-center */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <button
                     onClick={e => { e.stopPropagation(); onAsk?.() }}
-                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity pointer-events-auto"
+                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity"
                   >
                     <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
                     <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
                   </button>
-                </div>
-                {/* Save anchored just right of Ask — same position as feed cards */}
-                <div className="absolute inset-y-0 flex items-center pointer-events-none" style={{ left: 'calc(50% + 38px)' }}>
                   <button
                     onClick={e => { e.stopPropagation(); onSaveToggle() }}
-                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity pointer-events-auto"
+                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity"
                   >
                     <Bookmark
                       style={{ width: 12, height: 12, color: saved ? '#111' : '#555' }}
