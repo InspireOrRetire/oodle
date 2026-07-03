@@ -15,6 +15,8 @@ import NotificationsPage from './pages/NotificationsPage'
 import SettingsPage from './pages/SettingsPage'
 import PostDetailPage from './pages/PostDetailPage'
 import CartPage from './pages/CartPage'
+import SearchPage from './pages/SearchPage'
+import SavedPage from './pages/SavedPage'
 import OnboardingFlow from './components/Onboarding/OnboardingFlow'
 import SplashScreen from './components/UI/SplashScreen'
 
@@ -85,6 +87,8 @@ export default function App() {
           <Route path="/settings"      element={<SettingsPage />} />
           <Route path="/post/:postId"  element={<PostDetailPage />} />
           <Route path="/cart"          element={<CartPage />} />
+          <Route path="/search"        element={<SearchPage />} />
+          <Route path="/saved"         element={<SavedPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
