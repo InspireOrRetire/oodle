@@ -3739,10 +3739,18 @@ export default function ProfilePage() {
       <PostOptionsSheet
         open={postOptionsId !== null}
         onClose={() => setPostOptionsId(null)}
+        isOwn
         onCopyLink={() => {
           if (postOptionsId) navigator.clipboard.writeText(`${window.location.origin}/post/${postOptionsId}`).catch(() => {})
         }}
         onSave={() => postOptionsId && setSaveTarget(postOptionsId)}
+        onDelete={async () => {
+          if (!postOptionsId) return
+          const id = postOptionsId
+          setPostOptionsId(null)
+          setRealThreads(prev => prev.filter(t => t.id !== id))
+          await supabase.from('posts').delete().eq('id', id)
+        }}
       />
 
       {/* ── Price saved toast (portal → always viewport-centred) ── */}
