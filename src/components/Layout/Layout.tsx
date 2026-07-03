@@ -47,13 +47,12 @@ export default function Layout() {
           className="fixed bottom-0 left-0 right-0 z-30 pointer-events-none"
           style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)', willChange: 'transform' }}
         >
-          <div className="flex items-end justify-around px-6 pb-1 pointer-events-none">
+          <div className="flex items-end justify-center gap-3 pb-1 pointer-events-none">
             {TABS.map(({ id, path, label, Icon }) => {
               const active = isActive(path)
               return (
                 <button
                   key={id}
-                  pointer-events-auto
                   onClick={() => {
                     if (path === '/' && isActive(path)) {
                       const el = scrollRef.current
@@ -71,13 +70,13 @@ export default function Layout() {
                       nav(path)
                     }
                   }}
-                  className="flex flex-col items-center gap-[6px] pointer-events-auto active:scale-95 transition-transform"
+                  className="flex flex-col items-center gap-[5px] pointer-events-auto active:scale-95 transition-transform"
                   style={{
                     background: 'white',
-                    borderRadius: 20,
-                    width: 80,
-                    paddingTop: 14,
-                    paddingBottom: 12,
+                    borderRadius: 18,
+                    width: 70,
+                    paddingTop: 11,
+                    paddingBottom: 10,
                     boxShadow: active
                       ? '0 4px 20px rgba(0,0,0,0.14)'
                       : '0 2px 12px rgba(0,0,0,0.08)',
@@ -85,15 +84,15 @@ export default function Layout() {
                 >
                   <Icon
                     style={{
-                      width: 24,
-                      height: 24,
+                      width: 21,
+                      height: 21,
                       color: active ? '#111' : '#bbb',
                     }}
                     strokeWidth={active ? 2.2 : 1.75}
                     fill={active && id === 'saved' ? '#111' : 'none'}
                   />
                   <span
-                    className="text-[11px] font-semibold tracking-tight"
+                    className="text-[10px] font-semibold tracking-tight"
                     style={{ color: active ? '#111' : '#bbb' }}
                   >
                     {label}
