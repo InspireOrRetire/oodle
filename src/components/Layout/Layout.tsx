@@ -1,7 +1,6 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useRef } from 'react'
-import { motion } from 'framer-motion'
-import { Home, Search, Bookmark } from 'lucide-react'
+import { Home, Search, Bookmark, Plus } from 'lucide-react'
 import { useLayout } from '../../contexts/LayoutContext'
 
 const TABS = [
@@ -14,7 +13,7 @@ export default function Layout() {
   const loc = useLocation()
   const nav = useNavigate()
 
-  const { navVisible, setNavVisible, scrollContainerRef } = useLayout()
+  const { navVisible, setNavVisible, scrollContainerRef, fabAction } = useLayout()
   const lastScrollY = useRef(0)
   const scrollRef = scrollContainerRef
 
@@ -41,19 +40,25 @@ export default function Layout() {
       </div>
 
       {!hideNav && (
-        <motion.div
-          animate={{ y: navVisible ? 0 : '100%' }}
-          transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+        <div
           className="fixed bottom-0 left-0 right-0 z-30 pointer-events-none"
-          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)', willChange: 'transform' }}
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}
         >
           <div className="flex items-end justify-center gap-3 pb-1 pointer-events-none">
             {TABS.map(({ id, path, label, Icon }) => {
-              const active = isActive(path)
+              const active    = isActive(path)
+              const isCenter  = id === 'search'
+              const fabMode   = !navVisible && isCenter && !!fabAction
+              const hideOuter = !navVisible && !isCenter
+
               return (
                 <button
                   key={id}
                   onClick={() => {
+                    if (fabMode) {
+                      fabAction!()
+                      return
+                    }
                     if (path === '/' && isActive(path)) {
                       const el = scrollRef.current
                       if (!el) return
@@ -77,31 +82,34 @@ export default function Layout() {
                     width: 64,
                     paddingTop: 9,
                     paddingBottom: 8,
-                    boxShadow: active
+                    boxShadow: (active || fabMode)
                       ? '0 4px 20px rgba(0,0,0,0.14)'
                       : '0 2px 12px rgba(0,0,0,0.08)',
+                    opacity: hideOuter ? 0 : 1,
+                    pointerEvents: hideOuter ? 'none' : 'auto',
+                    transition: 'opacity 120ms ease',
                   }}
                 >
-                  <Icon
-                    style={{
-                      width: 19,
-                      height: 19,
-                      color: active ? '#111' : '#bbb',
-                    }}
-                    strokeWidth={active ? 2.2 : 1.75}
-                    fill={active && id === 'saved' ? '#111' : 'none'}
-                  />
+                  {fabMode ? (
+                    <Plus style={{ width: 19, height: 19, color: '#111' }} strokeWidth={2.2} />
+                  ) : (
+                    <Icon
+                      style={{ width: 19, height: 19, color: active ? '#111' : '#bbb' }}
+                      strokeWidth={active ? 2.2 : 1.75}
+                      fill={active && id === 'saved' ? '#111' : 'none'}
+                    />
+                  )}
                   <span
                     className="text-[10px] font-semibold tracking-tight"
-                    style={{ color: active ? '#111' : '#bbb' }}
+                    style={{ color: fabMode ? '#111' : active ? '#111' : '#bbb' }}
                   >
-                    {label}
+                    {fabMode ? 'New Post' : label}
                   </span>
                 </button>
               )
             })}
           </div>
-        </motion.div>
+        </div>
       )}
     </div>
   )

@@ -1962,24 +1962,18 @@ export default function HomePage() {
     username:     realProfile?.username     ?? '',
   }
 
-  const { navVisible, setNavVisible, scrollContainerRef } = useLayout()
+  const { navVisible, setNavVisible, scrollContainerRef, setFabAction } = useLayout()
 
-  const [showFab,     setShowFab]     = useState(false)
   const [newPostOpen, setNewPostOpen] = useState(false)
   const composeRef  = useRef<HTMLDivElement>(null)
   // iOS keyboard ghost input — focused synchronously on any sheet-open tap
   const iosKbRef    = useRef<HTMLInputElement>(null)
 
-  // Show FAB when compose bar scrolls out of view, hide when it comes back
+  // Register FAB action so center nav button becomes + when nav hides
   useEffect(() => {
-    const el = composeRef.current
-    if (!el) return
-    const obs = new IntersectionObserver(
-      ([entry]) => setShowFab(!entry.isIntersecting),
-      { threshold: 0 }
-    )
-    obs.observe(el)
-    return () => obs.disconnect()
+    setFabAction(() => () => { iosKbRef.current?.focus(); setNewPostOpen(true) })
+    return () => setFabAction(null)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // NAV_H: nav bar height (px-3 py-2 wrapper + pill content) — no safe area, that's below
@@ -3232,33 +3226,6 @@ export default function HomePage() {
         onClose={() => setNewPostOpen(false)}
         onPosted={refreshFeed}
       />
-
-      {/* ── Floating compose FAB — centered, genie from below ── */}
-      <AnimatePresence>
-        {showFab && !navVisible && (
-          <motion.button
-            key="fab"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 40 }}
-            transition={{ type: 'spring', stiffness: 380, damping: 28 }}
-            onClick={() => { iosKbRef.current?.focus(); setNewPostOpen(true) }}
-            className="fixed z-40 flex items-center justify-center active:opacity-70 transition-opacity"
-            style={{
-              bottom: 14,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 56,
-              height: 44,
-              borderRadius: 14,
-              background: 'white',
-              boxShadow: '0 2px 12px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.08)',
-            }}
-          >
-            <Plus style={{ width: 20, height: 20, color: '#222' }} strokeWidth={2} />
-          </motion.button>
-        )}
-      </AnimatePresence>
 
     </motion.div>
 
