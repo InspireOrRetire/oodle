@@ -1984,9 +1984,12 @@ export default function HomePage() {
 
   // NAV_H: nav bar height (px-3 py-2 wrapper + pill content) — no safe area, that's below
   const NAV_H = 62
-  const fabBottom = useMotionValue(10)
+  const FAB_W = 56
+  const fabBottom = useMotionValue(NAV_H + 10)
+  const fabLeft   = useMotionValue(W - FAB_W - 16)
   useEffect(() => {
-    animate(fabBottom, navVisible ? NAV_H + 10 : 10, { type: 'spring', stiffness: 320, damping: 28 })
+    animate(fabBottom, navVisible ? NAV_H + 10 : 12, { type: 'spring', stiffness: 320, damping: 28 })
+    animate(fabLeft,   navVisible ? W - FAB_W - 16 : (W - FAB_W) / 2, { type: 'spring', stiffness: 320, damping: 28 })
   }, [navVisible])
 
   const [liked,         setLiked]         = useState<Set<string>>(new Set())
@@ -3250,7 +3253,7 @@ export default function HomePage() {
             className="fixed z-40 flex items-center justify-center active:opacity-70 transition-opacity"
             style={{
               bottom: fabBottom,
-              right: 16,
+              left: fabLeft,
               width: 56,
               height: 44,
               borderRadius: 14,
