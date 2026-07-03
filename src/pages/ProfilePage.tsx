@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Share2, Menu, Plus, Minus, MoreHorizontal, Link, Zap, Bookmark, Check, ArrowLeft, Mail, Heart, MessageCircle, ChevronUp, ChevronDown, Copy, AtSign, Camera, ChevronRight as ChevronRightIcon, Image, Video, MapPin, List, Type, FileText, X, Search, Lock } from 'lucide-react'
+import { Share2, Menu, Plus, Minus, MoreHorizontal, Link, Zap, Bookmark, Check, ArrowLeft, Mail, Heart, MessageCircle, ChevronUp, ChevronDown, Copy, AtSign, Camera, ChevronRight as ChevronRightIcon, Image, Video, MapPin, List, Type, FileText, X, Search, Lock, ShoppingCart } from 'lucide-react'
 import { oo } from '../lib/oo'
 // Plain number for card price pills — no $? prefix on timeline cards
 const cp = (n: number) => n % 1 === 0 ? String(n) : n.toFixed(2)
@@ -438,6 +438,7 @@ function ThreadItem({
   onEditPrice,
   onAsk,
   onOptions,
+  hidePurchaseCount = false,
 }: {
   thread: AnswerThread
   followedUsers: Set<string>
@@ -445,6 +446,7 @@ function ThreadItem({
   isOwner?: boolean
   isOwnAsker?: boolean
   isSaved?: boolean
+  hidePurchaseCount?: boolean
   extraQuestions?: LocalQuestion[]
   onFollow: (e: React.MouseEvent, username: string) => void
   onUnlock: (t: AnswerThread) => void
@@ -596,8 +598,14 @@ function ThreadItem({
                     <span className="text-[12px] font-medium" style={{ color: isSaved ? '#111' : '#555' }}>{isSaved ? 'Saved' : 'Save'}</span>
                   </button>
                 </div>
-                {thread.price > 0 && (
-                  <div className="absolute inset-y-0 right-0 flex items-center">
+                <div className="absolute inset-y-0 right-0 flex items-center gap-3">
+                  {!hidePurchaseCount && (thread.purchasers?.length ?? 0) > 0 && (
+                    <div className="flex items-center gap-1">
+                      <ShoppingCart style={{ width: 11, height: 11, color: '#888' }} strokeWidth={1.75} />
+                      <span className="text-[11px] font-medium" style={{ color: '#888' }}>{thread.purchasers!.length}</span>
+                    </div>
+                  )}
+                  {thread.price > 0 && (
                     <button
                       onClick={e => { e.stopPropagation(); isOwner ? onEditPrice?.() : onUnlock(thread) }}
                       className="inline-flex items-center gap-1 active:opacity-75 transition-opacity"
@@ -605,8 +613,8 @@ function ThreadItem({
                       <Lock style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
                       <span className="text-[12px] font-semibold text-[#111] tracking-tight">{cp(thread.price)}</span>
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -835,6 +843,12 @@ function ThreadItem({
                 <span className="text-[12px] font-medium" style={{ color: isSaved ? '#111' : '#555' }}>{isSaved ? 'Saved' : 'Save'}</span>
               </button>
             </div>
+            {!hidePurchaseCount && (thread.purchasers?.length ?? 0) > 0 && (
+              <div className="absolute inset-y-0 right-0 flex items-center gap-1">
+                <ShoppingCart style={{ width: 11, height: 11, color: '#888' }} strokeWidth={1.75} />
+                <span className="text-[11px] font-medium" style={{ color: '#888' }}>{thread.purchasers!.length}</span>
+              </div>
+            )}
           </div>
         )}
 
@@ -3339,6 +3353,7 @@ export default function ProfilePage() {
   const [createPostOpen, setCreatePostOpen] = useState(false)
   const [editProfileOpen, setEditProfileOpen] = useState(false)
   const [postOptionsId, setPostOptionsId] = useState<string | null>(null)
+  const [hidePurchaseCounts, setHidePurchaseCounts] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     if (!isOwnProfile) return
@@ -3561,6 +3576,7 @@ export default function ProfilePage() {
                 followedUsers={followedUsers}
                 isOwner
                 isSaved={isSaved}
+                hidePurchaseCount={hidePurchaseCounts[thread.id] ?? false}
                 extraQuestions={postQuestions[thread.id] ?? []}
                 onFollow={handleFollow}
                 onUnlock={setPurchaseThread}
@@ -3740,10 +3756,18 @@ export default function ProfilePage() {
         open={postOptionsId !== null}
         onClose={() => setPostOptionsId(null)}
         isOwn
+        isHidingPurchases={postOptionsId ? (hidePurchaseCounts[postOptionsId] ?? false) : false}
         onCopyLink={() => {
           if (postOptionsId) navigator.clipboard.writeText(`${window.location.origin}/post/${postOptionsId}`).catch(() => {})
         }}
         onSave={() => postOptionsId && setSaveTarget(postOptionsId)}
+        onHidePurchases={() => {
+          if (!postOptionsId) return
+          const id = postOptionsId
+          const next = !(hidePurchaseCounts[id] ?? false)
+          setHidePurchaseCounts(prev => ({ ...prev, [id]: next }))
+          supabase.from('posts').update({ hide_purchase_count: next }).eq('id', id).then(() => {})
+        }}
         onDelete={async () => {
           if (!postOptionsId) return
           const id = postOptionsId
