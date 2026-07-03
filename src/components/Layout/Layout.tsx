@@ -99,12 +99,14 @@ export default function Layout() {
                       fill={active && id === 'saved' ? '#111' : 'none'}
                     />
                   )}
-                  <span
-                    className="text-[10px] font-semibold tracking-tight"
-                    style={{ color: fabMode ? '#111' : active ? '#111' : '#bbb' }}
-                  >
-                    {fabMode ? 'New Post' : label}
-                  </span>
+                  {!fabMode && (
+                    <span
+                      className="text-[10px] font-semibold tracking-tight"
+                      style={{ color: active ? '#111' : '#bbb' }}
+                    >
+                      {label}
+                    </span>
+                  )}
                 </button>
               )
             })}
