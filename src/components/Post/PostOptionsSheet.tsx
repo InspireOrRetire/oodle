@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
+import { useState } from 'react'
 import { Link2, Bookmark, EyeOff, UserX, UserMinus, UserPlus, AlertCircle, PinOff, Archive, ShoppingCart, Trash2 } from 'lucide-react'
 
 interface Props {
@@ -71,8 +72,16 @@ export default function PostOptionsSheet({
   onFollowToggle,
   onReport,
 }: Props) {
+  const [copied, setCopied] = useState(false)
+
   function handle(fn?: () => void) {
     return () => { fn?.(); onClose() }
+  }
+
+  function handleCopyLink() {
+    onCopyLink?.()
+    setCopied(true)
+    setTimeout(() => { setCopied(false); onClose() }, 1200)
   }
 
   return (
@@ -109,10 +118,26 @@ export default function PostOptionsSheet({
               <div className="w-9 h-[4px] rounded-full" style={{ background: 'rgba(0,0,0,0.18)' }} />
             </div>
 
+            {/* Link copied toast */}
+            <AnimatePresence>
+              {copied && (
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="mx-5 mb-2 rounded-xl flex items-center justify-center py-2.5"
+                  style={{ background: '#111' }}
+                >
+                  <span className="text-[13px] font-semibold text-white">Link copied</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {isOwn ? (
               /* ── Owner options ── */
               <>
-                <Row label="Copy link"     icon={Link2}        onClick={handle(onCopyLink)} />
+                <Row label="Copy link"     icon={Link2}        onClick={handleCopyLink} />
                 <Row label={isSaved ? 'Unsave' : 'Save'} icon={Bookmark} onClick={handle(onSave)} />
                 <Row label="Unpin"         icon={PinOff}       onClick={handle(onUnpin)} />
                 <Row label="Archive"       icon={Archive}      onClick={handle(onArchive)} />
@@ -129,7 +154,7 @@ export default function PostOptionsSheet({
             ) : (
               /* ── Viewer options ── */
               <>
-                <Row label="Copy link"       icon={Link2}                                                onClick={handle(onCopyLink)} />
+                <Row label="Copy link"       icon={Link2}                                                onClick={handleCopyLink} />
                 <Row label={isSaved ? 'Unsave' : 'Save'} icon={Bookmark}                                onClick={handle(onSave)} />
                 <Row label="Not interested"  icon={EyeOff}                                               onClick={handle(onNotInterested)} />
                 <Row label="Mute"            icon={UserX}                                                onClick={handle(onMute)} />
