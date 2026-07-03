@@ -2020,7 +2020,7 @@ export default function HomePage() {
   }, [homeUser?.id])
   const [unlockTarget,  setUnlockTarget]  = useState<UnlockTarget | null>(null)
   const [askItem,       setAskItem]       = useState<FeedItem | null>(null)
-  const [cardOptionsOpen, setCardOptionsOpen] = useState(false)
+  const [cardOptionsItem, setCardOptionsItem] = useState<FeedItem | null>(null)
   const [homeQuestions, setHomeQuestions] = useState<Record<string, LocalQuestion[]>>({})
 
   // Hide nav bar whenever any bottom sheet is open; restore when all close
@@ -3198,7 +3198,7 @@ export default function HomePage() {
                   }
                   navigate(`/post/${item.id}`, { state: { item, focusedReplyIndex: replyIndex } })
                 }}
-                onOptions={() => setCardOptionsOpen(true)}
+                onOptions={() => setCardOptionsItem(item)}
               />
             ))}
             <div className="py-10 flex justify-center">
@@ -3217,7 +3217,30 @@ export default function HomePage() {
       <UnlockSheet target={unlockTarget} onClose={() => setUnlockTarget(null)} />
 
       {/* ── Card options sheet ── */}
-      <CardOptionsSheet open={cardOptionsOpen} onClose={() => setCardOptionsOpen(false)} />
+      <CardOptionsSheet
+        open={cardOptionsItem !== null}
+        onClose={() => setCardOptionsItem(null)}
+        isFollowing={cardOptionsItem ? followedUsers.has(cardOptionsItem.creator.id) : false}
+        onFollowToggle={() => {
+          if (!cardOptionsItem) return
+          const { id, username } = cardOptionsItem.creator
+          if (followedUsers.has(id)) {
+            // Unfollow
+            setFollowedUsers(prev => { const s = new Set(prev); s.delete(id); s.delete(username); return s })
+            if (homeUser?.id) {
+              ;(supabase as any).from('user_following').delete()
+                .eq('follower_id', homeUser.id).eq('creator_id', id).then(() => {})
+            }
+          } else {
+            handleFollow(id, username)
+          }
+        }}
+        onCopyLink={() => {
+          if (!cardOptionsItem) return
+          navigator.clipboard.writeText(`${window.location.origin}/post/${cardOptionsItem.id}`).catch(() => {})
+        }}
+        onSave={() => cardOptionsItem && setSaveTarget(cardOptionsItem.id)}
+      />
 
       {/* ── Ask sheet ── */}
       <HomeAskSheet
