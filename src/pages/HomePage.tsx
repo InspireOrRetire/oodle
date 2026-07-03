@@ -514,21 +514,22 @@ function FeedCard({
                     <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
                   </button>
                 </div>
-                {/* Save floats right */}
-                <span style={{ flex: 1 }} />
-                <button
-                  onClick={e => { e.stopPropagation(); onSaveToggle() }}
-                  className="flex items-center gap-1.5 active:opacity-70 transition-opacity"
-                >
-                  <Bookmark
-                    style={{ width: 12, height: 12, color: saved ? '#111' : '#555' }}
-                    strokeWidth={2}
-                    fill={saved ? '#111' : 'none'}
-                  />
-                  <span className="text-[12px] font-medium" style={{ color: saved ? '#111' : '#555' }}>
-                    {saved ? 'Saved' : 'Save'}
-                  </span>
-                </button>
+                {/* Save anchored just right of Ask — same position as feed cards */}
+                <div className="absolute inset-y-0 flex items-center pointer-events-none" style={{ left: 'calc(50% + 38px)' }}>
+                  <button
+                    onClick={e => { e.stopPropagation(); onSaveToggle() }}
+                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity pointer-events-auto"
+                  >
+                    <Bookmark
+                      style={{ width: 12, height: 12, color: saved ? '#111' : '#555' }}
+                      strokeWidth={2}
+                      fill={saved ? '#111' : 'none'}
+                    />
+                    <span className="text-[12px] font-medium" style={{ color: saved ? '#111' : '#555' }}>
+                      {saved ? 'Saved' : 'Save'}
+                    </span>
+                  </button>
+                </div>
               </div>
             </>
           )
