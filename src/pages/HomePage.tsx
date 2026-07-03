@@ -2295,12 +2295,6 @@ export default function HomePage() {
 
           {/* Right-side actions */}
           <div className="flex items-center gap-2">
-            <button onClick={openSearch}
-              className="w-[30px] h-[30px] rounded-full flex items-center justify-center"
-              style={{ background: '#f5f5f7' }}>
-              <Search style={{ width: 13, height: 13, color: '#555' }} strokeWidth={2} />
-            </button>
-
             {/* Cart button */}
             <button
               onClick={() => navigate('/cart')}
