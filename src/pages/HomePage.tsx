@@ -143,6 +143,16 @@ function FeedCard({
   const isType2  = postType === 'type2'
   const [showAllReplies, setShowAllReplies] = useState(false)
   const [clarifyTarget, setClarifyTarget] = useState<ClarifyTarget | null>(null)
+
+  function handleShare(e: React.MouseEvent) {
+    e.stopPropagation()
+    const url = `${window.location.origin}/post/${item.id}`
+    if (navigator.share) {
+      navigator.share({ url }).catch(() => {})
+    } else {
+      navigator.clipboard.writeText(url).catch(() => {})
+    }
+  }
   // Track whether a drag is/was in progress so we don't fire tap on swipe-release
   const isDragging = useRef(false)
 
@@ -252,6 +262,16 @@ function FeedCard({
               )}
               {/* ── Action row ── */}
               <div className="relative py-2.5" style={{ borderTop: '0.5px solid #f5f5f7', minHeight: 40 }}>
+                {/* Share anchored just left of Ask */}
+                <div className="absolute inset-y-0 flex items-center pointer-events-none" style={{ right: 'calc(50% + 38px)' }}>
+                  <button
+                    onClick={handleShare}
+                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity pointer-events-auto"
+                  >
+                    <Share2 style={{ width: 12, height: 12, color: '#555' }} strokeWidth={1.75} />
+                    <span className="text-[12px] font-medium" style={{ color: '#555' }}>Share</span>
+                  </button>
+                </div>
                 {/* Ask pinned dead-center — never moves */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <button
@@ -504,6 +524,16 @@ function FeedCard({
 
               {/* ── Action row ── */}
               <div className="relative flex items-center py-2.5" style={{ borderTop: item.comments > 0 ? 'none' : undefined, minHeight: 40 }}>
+                {/* Share anchored just left of Ask */}
+                <div className="absolute inset-y-0 flex items-center pointer-events-none" style={{ right: 'calc(50% + 38px)' }}>
+                  <button
+                    onClick={handleShare}
+                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity pointer-events-auto"
+                  >
+                    <Share2 style={{ width: 12, height: 12, color: '#555' }} strokeWidth={1.75} />
+                    <span className="text-[12px] font-medium" style={{ color: '#555' }}>Share</span>
+                  </button>
+                </div>
                 {/* Ask always dead-center */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <button
