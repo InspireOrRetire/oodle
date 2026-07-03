@@ -7,7 +7,7 @@ import { oo } from '../lib/oo'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import {
-  Search, X, Heart, MessageCircle, Share2, Zap,
+  Search, X, Heart, MessageCircle, MessageCircleMore, Share2, Zap,
   Check, Plus, Minus, Bookmark, ArrowLeft, CreditCard, Shield,
   Image as ImageIcon, AlignLeft, Quote, Camera, MapPin, BarChart2,
   ChevronDown, FileText, SlidersHorizontal, Mail, Type, Bell, Video, Flag,
@@ -2324,7 +2324,7 @@ export default function HomePage() {
               className="w-[30px] h-[30px] rounded-full flex items-center justify-center"
               style={{ background: '#111' }}
             >
-              <MessageCircle style={{ width: 14, height: 14, color: '#fff' }} strokeWidth={2} />
+              <MessageCircleMore style={{ width: 14, height: 14, color: '#fff' }} strokeWidth={2} />
             </button>
 
             {/* Profile avatar */}
