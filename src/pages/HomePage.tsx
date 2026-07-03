@@ -518,15 +518,14 @@ function FeedCard({
                 <span style={{ flex: 1 }} />
                 <button
                   onClick={e => { e.stopPropagation(); onSaveToggle() }}
-                  className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 active:opacity-70 transition-opacity"
-                  style={{ background: saved ? '#111' : '#f5f5f7' }}
+                  className="flex items-center gap-1.5 active:opacity-70 transition-opacity"
                 >
                   <Bookmark
-                    style={{ width: 13, height: 13, color: saved ? 'white' : '#555' }}
-                    strokeWidth={1.75}
-                    fill={saved ? 'white' : 'none'}
+                    style={{ width: 12, height: 12, color: saved ? '#111' : '#555' }}
+                    strokeWidth={2}
+                    fill={saved ? '#111' : 'none'}
                   />
-                  <span className="text-[12px] font-medium" style={{ color: saved ? 'white' : '#555' }}>
+                  <span className="text-[12px] font-medium" style={{ color: saved ? '#111' : '#555' }}>
                     {saved ? 'Saved' : 'Save'}
                   </span>
                 </button>
