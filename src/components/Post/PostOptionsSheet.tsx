@@ -1,16 +1,16 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { Link2, Bookmark, EyeOff, UserX, UserMinus, UserPlus, AlertCircle, PinOff, Archive, HeartOff, MessageSquare, Trash2, ChevronRight } from 'lucide-react'
+import { Link2, Bookmark, EyeOff, UserX, UserMinus, UserPlus, AlertCircle, PinOff, Archive, ShoppingCart, Trash2 } from 'lucide-react'
 
 interface Props {
   open: boolean
   onClose: () => void
   // Owner mode
   isOwn?: boolean
+  isHidingPurchases?: boolean
   onDelete?: () => void
   onArchive?: () => void
   onUnpin?: () => void
-  onHideCounts?: () => void
-  onReplyOptions?: () => void
+  onHidePurchases?: () => void
   // Viewer mode
   isFollowing?: boolean
   isSaved?: boolean
@@ -28,14 +28,12 @@ function Row({
   icon: Icon,
   red,
   last,
-  chevron,
   onClick,
 }: {
   label: string
   icon: React.ElementType
   red?: boolean
   last?: boolean
-  chevron?: boolean
   onClick: () => void
 }) {
   return (
@@ -50,11 +48,7 @@ function Row({
       <span className="text-[16px] font-normal" style={{ color: red ? '#e53e3e' : '#111' }}>
         {label}
       </span>
-      {chevron ? (
-        <ChevronRight style={{ width: 18, height: 18, color: '#ccc' }} strokeWidth={2} />
-      ) : (
-        <Icon style={{ width: 20, height: 20, color: red ? '#e53e3e' : '#999' }} strokeWidth={1.6} />
-      )}
+      <Icon style={{ width: 20, height: 20, color: red ? '#e53e3e' : '#999' }} strokeWidth={1.6} />
     </button>
   )
 }
@@ -63,11 +57,11 @@ export default function PostOptionsSheet({
   open,
   onClose,
   isOwn,
+  isHidingPurchases,
   onDelete,
   onArchive,
   onUnpin,
-  onHideCounts,
-  onReplyOptions,
+  onHidePurchases,
   isFollowing,
   isSaved,
   onCopyLink,
@@ -118,12 +112,16 @@ export default function PostOptionsSheet({
             {isOwn ? (
               /* ── Owner options ── */
               <>
-                <Row label="Copy link"               icon={Link2}      onClick={handle(onCopyLink)} />
+                <Row label="Copy link"     icon={Link2}        onClick={handle(onCopyLink)} />
                 <Row label={isSaved ? 'Unsave' : 'Save'} icon={Bookmark} onClick={handle(onSave)} />
-                <Row label="Unpin"                   icon={PinOff}     onClick={handle(onUnpin)} />
-                <Row label="Archive"                 icon={Archive}    onClick={handle(onArchive)} />
-                <Row label="Hide like and share counts" icon={HeartOff} onClick={handle(onHideCounts)} />
-                <Row label="Reply options"           icon={MessageSquare} chevron last onClick={handle(onReplyOptions)} />
+                <Row label="Unpin"         icon={PinOff}       onClick={handle(onUnpin)} />
+                <Row label="Archive"       icon={Archive}      onClick={handle(onArchive)} />
+                <Row
+                  label={isHidingPurchases ? 'Show number of purchases' : 'Hide number of purchases'}
+                  icon={ShoppingCart}
+                  last
+                  onClick={handle(onHidePurchases)}
+                />
                 <div style={{ borderTop: '8px solid rgba(0,0,0,0.05)', marginTop: 4 }}>
                   <Row label="Delete" icon={Trash2} red last onClick={handle(onDelete)} />
                 </div>
@@ -137,20 +135,16 @@ export default function PostOptionsSheet({
                 <Row label="Mute"            icon={UserX}                                                onClick={handle(onMute)} />
                 <Row label={isFollowing ? 'Unfollow' : 'Follow'} icon={isFollowing ? UserMinus : UserPlus} onClick={handle(onFollowToggle)} />
                 <Row label="Report"          icon={AlertCircle} red last                                 onClick={handle(onReport)} />
+                <div style={{ borderTop: '8px solid rgba(0,0,0,0.05)', marginTop: 4 }}>
+                  <button
+                    onClick={onClose}
+                    className="w-full active:bg-gray-50 transition-colors"
+                    style={{ height: 56, fontSize: 17, fontWeight: 600, color: '#111' }}
+                  >
+                    Cancel
+                  </button>
+                </div>
               </>
-            )}
-
-            {/* Cancel */}
-            {!isOwn && (
-              <div style={{ borderTop: '8px solid rgba(0,0,0,0.05)', marginTop: 4 }}>
-                <button
-                  onClick={onClose}
-                  className="w-full active:bg-gray-50 transition-colors"
-                  style={{ height: 56, fontSize: 17, fontWeight: 600, color: '#111' }}
-                >
-                  Cancel
-                </button>
-              </div>
             )}
           </motion.div>
         </>
