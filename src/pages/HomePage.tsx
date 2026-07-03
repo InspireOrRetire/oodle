@@ -2295,23 +2295,6 @@ export default function HomePage() {
 
           {/* Right-side actions */}
           <div className="flex items-center gap-2">
-            {/* Cart button */}
-            <button
-              onClick={() => navigate('/cart')}
-              className="w-[30px] h-[30px] rounded-full flex items-center justify-center relative"
-              style={{ background: '#f5f5f7' }}
-            >
-              <ShoppingCart style={{ width: 13, height: 13, color: '#555' }} strokeWidth={2} />
-              {cartCount > 0 && (
-                <span
-                  className="absolute -top-0.5 -right-0.5 w-[14px] h-[14px] rounded-full flex items-center justify-center text-white font-semibold"
-                  style={{ background: '#111', fontSize: 8 }}
-                >
-                  {cartCount > 9 ? '9+' : cartCount}
-                </span>
-              )}
-            </button>
-
             {/* Inbox button */}
             <button
               onClick={() => navigate('/inbox')}
@@ -2441,6 +2424,7 @@ export default function HomePage() {
                       {/* Other library items */}
                       {[
                         { icon: <Zap style={{ width: 17, height: 17 }} strokeWidth={1.75} />, label: 'Purchases', path: '/profile?tab=purchases' },
+                        { icon: <ShoppingCart style={{ width: 17, height: 17 }} strokeWidth={1.75} />, label: `Cart${cartCount > 0 ? ` (${cartCount})` : ''}`, path: '/cart' },
                       ].map(item => (
                         <button
                           key={item.label}
