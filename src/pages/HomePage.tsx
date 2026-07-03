@@ -126,7 +126,7 @@ function FeedCard({
   extraQuestions?: LocalQuestion[]
   onLike: () => void
   onSaveToggle: () => void
-  onFollow: (username: string) => void
+  onFollow: (id: string, username: string) => void
   onUnlock: (item: FeedItem) => void
   onProfile: (username: string) => void
   onAsk?: () => void
@@ -216,7 +216,7 @@ function FeedCard({
                 {/* Threads-style follow + badge */}
                 {!followedUsers.has(item.creator.id) && (
                   <button
-                    onClick={e => { e.stopPropagation(); onFollow(item.creator.username) }}
+                    onClick={e => { e.stopPropagation(); onFollow(item.creator.id, item.creator.username) }}
                     className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-[18px] h-[18px] rounded-full flex items-center justify-center"
                     style={{ background: '#111', border: '2px solid white' }}
                   >
@@ -396,7 +396,7 @@ function FeedCard({
                           className="w-10 h-10 rounded-full object-cover" />
                         {!followedUsers.has(reply.username) && (
                           <button
-                            onClick={() => onFollow(reply.username)}
+                            onClick={() => onFollow('', reply.username)}
                             className="absolute -bottom-0.5 -right-0.5 w-[18px] h-[18px] rounded-full flex items-center justify-center ring-2 ring-white bg-green-500"
                           >
                             <Plus className="w-2.5 h-2.5 text-white" strokeWidth={3} />
@@ -478,7 +478,7 @@ function FeedCard({
                             className="w-10 h-10 rounded-full object-cover" />
                           {!followedUsers.has(reply.username) && (
                             <button
-                              onClick={() => onFollow(reply.username)}
+                              onClick={() => onFollow('', reply.username)}
                               className="absolute -bottom-0.5 -right-0.5 w-[18px] h-[18px] rounded-full flex items-center justify-center ring-2 ring-white bg-green-500"
                             >
                               <Plus className="w-2.5 h-2.5 text-white" strokeWidth={3} />
@@ -2003,6 +2003,19 @@ export default function HomePage() {
   const [collections,   setCollections]   = useState<SaveCollection[]>([])
   const [followedUsers, setFollowedUsers] = useState<Set<string>>(new Set())
   const [followToast,   setFollowToast]   = useState<string | null>(null)
+
+  // Load already-followed creator IDs from DB so + badges stay hidden after refresh
+  const { user: homeUser } = useAuth()
+  useEffect(() => {
+    if (!homeUser?.id) return
+    ;(supabase as any)
+      .from('user_following')
+      .select('creator_id')
+      .eq('follower_id', homeUser.id)
+      .then(({ data }: { data: { creator_id: string }[] | null }) => {
+        if (data?.length) setFollowedUsers(new Set(data.map(r => r.creator_id)))
+      })
+  }, [homeUser?.id])
   const [unlockTarget,  setUnlockTarget]  = useState<UnlockTarget | null>(null)
   const [askItem,       setAskItem]       = useState<FeedItem | null>(null)
   const [cardOptionsOpen, setCardOptionsOpen] = useState(false)
@@ -2046,10 +2059,23 @@ export default function HomePage() {
   const toggleLike = useCallback((id: string) =>
     setLiked(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s }), [])
 
-  const handleFollow = useCallback((username: string) => {
-    setFollowedUsers(prev => new Set(prev).add(username))
+  const handleFollow = useCallback((creatorId: string, username: string) => {
+    // Optimistic update — add both ID (for avatar badge) and username (for reply badges)
+    setFollowedUsers(prev => {
+      const next = new Set(prev)
+      if (creatorId) next.add(creatorId)
+      next.add(username)
+      return next
+    })
     setFollowToast(username)
-  }, [])
+    // Persist to DB when we have the creator's ID
+    if (creatorId && homeUser?.id) {
+      ;(supabase as any)
+        .from('user_following')
+        .upsert({ follower_id: homeUser.id, creator_id: creatorId }, { onConflict: 'follower_id,creator_id' })
+        .then(() => {})
+    }
+  }, [homeUser?.id])
 
   // ── Real feed from Supabase ─────────────────────────────────────────────────
   const { user, profile: myProfile, loading: authLoading, isExploreMode } = useAuth()
