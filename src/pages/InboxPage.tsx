@@ -1069,7 +1069,16 @@ export default function InboxPage() {
   const pinnedItems = allItems.filter(i => pinned.has(i.id))
 
   return (
-    <div className="min-h-screen bg-white pb-24">
+    <motion.div
+      className="min-h-screen bg-white pb-24"
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={{ left: 0, right: 0.18 }}
+      dragDirectionLock
+      onDragEnd={(_, info) => {
+        if (info.offset.x > 80 || info.velocity.x > 400) navigate('/')
+      }}
+    >
       <div className="px-4 pt-14 pb-2">
         <div className="flex items-center justify-between mb-1">
           <h1 className="text-[28px] font-extrabold text-gray-900 tracking-tight">Messages</h1>
@@ -1239,6 +1248,6 @@ export default function InboxPage() {
         profile={profile}
         userId={user?.id ?? ''}
       />
-    </div>
+    </motion.div>
   )
 }
