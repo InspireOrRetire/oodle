@@ -2295,7 +2295,7 @@ export default function HomePage() {
 
             {/* Profile avatar */}
             <button
-              onClick={() => navigate('/profile')}
+              onClick={() => { if (scrollContainerRef.current) scrollContainerRef.current.scrollTop = 0; navigate('/profile') }}
               className="w-[30px] h-[30px] rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center"
               style={{ background: myProfile?.avatar_url ? 'transparent' : '#111' }}
             >
