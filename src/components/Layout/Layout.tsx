@@ -73,10 +73,10 @@ export default function Layout() {
                   className="flex flex-col items-center gap-[5px] pointer-events-auto active:scale-95 transition-transform"
                   style={{
                     background: 'white',
-                    borderRadius: 18,
-                    width: 70,
-                    paddingTop: 11,
-                    paddingBottom: 10,
+                    borderRadius: 16,
+                    width: 64,
+                    paddingTop: 9,
+                    paddingBottom: 8,
                     boxShadow: active
                       ? '0 4px 20px rgba(0,0,0,0.14)'
                       : '0 2px 12px rgba(0,0,0,0.08)',
@@ -84,8 +84,8 @@ export default function Layout() {
                 >
                   <Icon
                     style={{
-                      width: 21,
-                      height: 21,
+                      width: 19,
+                      height: 19,
                       color: active ? '#111' : '#bbb',
                     }}
                     strokeWidth={active ? 2.2 : 1.75}
