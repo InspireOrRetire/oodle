@@ -596,9 +596,12 @@ function ThreadItem({
                     <span className="text-[12px] font-medium" style={{ color: isSaved ? '#111' : '#555' }}>{isSaved ? 'Saved' : 'Save'}</span>
                   </button>
                 </div>
-                {thread.price > 0 && !isOwner && (
+                {thread.price > 0 && (
                   <div className="absolute inset-y-0 right-0 flex items-center">
-                    <button onClick={e => { e.stopPropagation(); onUnlock(thread) }} className="inline-flex items-center gap-1 active:opacity-75 transition-opacity">
+                    <button
+                      onClick={e => { e.stopPropagation(); isOwner ? onEditPrice?.() : onUnlock(thread) }}
+                      className="inline-flex items-center gap-1 active:opacity-75 transition-opacity"
+                    >
                       <Lock style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
                       <span className="text-[12px] font-semibold text-[#111] tracking-tight">{cp(thread.price)}</span>
                     </button>
@@ -679,23 +682,15 @@ function ThreadItem({
                       <div className="flex items-start gap-2 mb-2">
                         <p className="flex-1 text-[13px] text-[#222] leading-[1.55]">{reply.question}</p>
                         {!isPurchased && thread.price > 0 && (
-                          isOwner ? (
-                            <button
-                              onClick={e => { e.stopPropagation(); onEditPrice?.() }}
-                              className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-70 transition-opacity"
-                              style={{ background: '#f0f0f2', marginTop: 1 }}
-                            >
-                              <span className="text-[11px] font-semibold text-[#555] tracking-tight">{cp(thread.price)}</span>
-                            </button>
-                          ) : (
-                            <button
-                              onClick={e => { e.stopPropagation(); onUnlock(thread) }}
-                              className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-75 transition-opacity"
-                              style={{ background: '#000', marginTop: 1 }}
-                            >
-                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight"><Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{cp(thread.price)}</span>
-                            </button>
-                          )
+                          <button
+                            onClick={e => { e.stopPropagation(); isOwner ? onEditPrice?.() : onUnlock(thread) }}
+                            className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-75 transition-opacity"
+                            style={{ background: '#000', marginTop: 1 }}
+                          >
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight">
+                              <Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{cp(thread.price)}
+                            </span>
+                          </button>
                         )}
                       </div>
                       {/* Purchased badge on first reply */}
@@ -773,23 +768,15 @@ function ThreadItem({
                         <div className="flex items-start gap-2 mb-2">
                           <p className="flex-1 text-[13px] text-[#222] leading-[1.55]">{reply.question}</p>
                           {!isPurchased && thread.price > 0 && (
-                            isOwner ? (
-                              <button
-                                onClick={e => { e.stopPropagation(); onEditPrice?.() }}
-                                className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-70 transition-opacity"
-                                style={{ background: '#f0f0f2', marginTop: 1 }}
-                              >
-                                <span className="text-[11px] font-semibold text-[#555] tracking-tight">{cp(thread.price)}</span>
-                              </button>
-                            ) : (
-                              <button
-                                onClick={e => { e.stopPropagation(); onUnlock(thread) }}
-                                className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-75 transition-opacity"
-                                style={{ background: '#000', marginTop: 1 }}
-                              >
-                                <span className="text-[11px] font-semibold text-white tracking-tight">{cp(thread.price)}</span>
-                              </button>
-                            )
+                            <button
+                              onClick={e => { e.stopPropagation(); isOwner ? onEditPrice?.() : onUnlock(thread) }}
+                              className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-75 transition-opacity"
+                              style={{ background: '#000', marginTop: 1 }}
+                            >
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight">
+                                <Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{cp(thread.price)}
+                              </span>
+                            </button>
                           )}
                         </div>
                       </div>
@@ -3578,7 +3565,7 @@ export default function ProfilePage() {
                 onFollow={handleFollow}
                 onUnlock={setPurchaseThread}
                 onSave={() => setSaveTarget(thread.id)}
-                onEditPrice={thread.type !== 'post' ? () => setEditPriceId(thread.id) : undefined}
+                onEditPrice={() => setEditPriceId(thread.id)}
                 onAsk={() => setAskThread(thread)}
                 onOptions={thread.type === 'post' ? () => setPostOptionsId(thread.id) : undefined}
               />
@@ -3701,9 +3688,15 @@ export default function ProfilePage() {
         open={editPriceId !== null}
         currentPrice={editPriceId ? (localPrices[editPriceId] ?? (realThreads.find(t => t.id === editPriceId)?.price ?? 0)) : 0}
         onClose={() => setEditPriceId(null)}
-        onSave={price => {
+        onSave={async price => {
           if (!editPriceId) return
           setLocalPrices(prev => ({ ...prev, [editPriceId]: price }))
+          const thread = realThreads.find(t => t.id === editPriceId)
+          if (thread?.type === 'post') {
+            await supabase.from('posts').update({ price }).eq('id', editPriceId)
+          } else {
+            await supabase.from('threads').update({ price }).eq('id', editPriceId)
+          }
           const earnings = parseFloat((price * 0.85).toFixed(2))
           setSavedPriceEarnings(earnings)
           setTimeout(() => setSavedPriceEarnings(null), 3000)
