@@ -108,6 +108,7 @@ function FeedCard({
   liked,
   saved,
   followedUsers,
+  myUserId,
   extraQuestions = [],
   onLike,
   onSaveToggle,
@@ -123,6 +124,7 @@ function FeedCard({
   liked: boolean
   saved: boolean
   followedUsers: Set<string>
+  myUserId?: string
   extraQuestions?: LocalQuestion[]
   onLike: () => void
   onSaveToggle: () => void
@@ -214,7 +216,7 @@ function FeedCard({
                   <Av creator={item.creator} size={40} />
                 </button>
                 {/* Threads-style follow + badge */}
-                {!followedUsers.has(item.creator.id) && (
+                {!followedUsers.has(item.creator.id) && item.creator.id !== myUserId && (
                   <button
                     onClick={e => { e.stopPropagation(); onFollow(item.creator.id, item.creator.username) }}
                     className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-[18px] h-[18px] rounded-full flex items-center justify-center"
@@ -3181,6 +3183,7 @@ export default function HomePage() {
                 liked={liked.has(item.id)}
                 saved={(savedItems[item.id]?.size ?? 0) > 0}
                 followedUsers={followedUsers}
+                myUserId={user?.id}
                 extraQuestions={homeQuestions[item.id] ?? []}
                 onLike={() => toggleLike(item.id)}
                 onSaveToggle={() => setSaveTarget(item.id)}
