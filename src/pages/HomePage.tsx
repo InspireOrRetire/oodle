@@ -2298,10 +2298,9 @@ export default function HomePage() {
             {/* Inbox button */}
             <button
               onClick={() => navigate('/inbox')}
-              className="w-[30px] h-[30px] rounded-full flex items-center justify-center"
-              style={{ background: '#f5f5f7' }}
+              className="w-[30px] h-[30px] flex items-center justify-center"
             >
-              <MessageCircleMore style={{ width: 14, height: 14, color: '#111' }} strokeWidth={2} />
+              <MessageCircleMore style={{ width: 22, height: 22, color: '#111' }} strokeWidth={1.75} />
             </button>
 
             {/* Profile avatar */}
