@@ -3133,7 +3133,7 @@ export default function ProfilePage() {
   const loc = useLocation()
   const navigate = useNavigate()
   const { signOut, profile: realProfile, user, loading: authLoading } = useAuth()
-  const { scrollContainerRef } = useLayout()
+  const { scrollContainerRef, setFabAction } = useLayout()
   const isOwnProfile = loc.pathname === '/profile'
 
   // Live counts fetched from DB (AuthContext profile is only loaded once at startup and goes stale)
@@ -3323,6 +3323,13 @@ export default function ProfilePage() {
   const [postQuestions, setPostQuestions] = useState<Record<string, LocalQuestion[]>>({})
   const [createPostOpen, setCreatePostOpen] = useState(false)
   const [editProfileOpen, setEditProfileOpen] = useState(false)
+
+  useEffect(() => {
+    if (!isOwnProfile) return
+    setFabAction(() => () => { iosKbRef.current?.focus(); setCreatePostOpen(true) })
+    return () => setFabAction(null)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOwnProfile])
 
   function handleAskSubmit(threadId: string, text: string, price: number) {
     const q: LocalQuestion = {
@@ -3675,23 +3682,6 @@ export default function ProfilePage() {
         }}
       />
 
-      {/* ── Create post FAB (own profile only) ── */}
-      {isOwnProfile && (
-        <button
-          onClick={() => { iosKbRef.current?.focus(); setCreatePostOpen(true) }}
-          className="fixed z-30 flex items-center justify-center shadow-lg active:scale-95 transition-transform"
-          style={{
-            bottom: 84,
-            right: 20,
-            width: 52,
-            height: 52,
-            borderRadius: 16,
-            background: '#111',
-          }}
-        >
-          <Plus style={{ width: 22, height: 22, color: 'white', strokeWidth: 2.5 }} />
-        </button>
-      )}
 
       {/* ── Edit profile page (full-screen right→left slide) ── */}
       <ProfileEditPage
