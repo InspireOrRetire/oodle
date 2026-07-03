@@ -10,6 +10,7 @@ import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import FollowToast from '../components/UI/FollowToast'
+import PostOptionsSheet from '../components/Post/PostOptionsSheet'
 import SaveSheet from '../components/UI/SaveSheet'
 import PostMediaCarousel from '../components/Post/PostMediaCarousel'
 import TokenKeypad from '../components/Post/TokenKeypad'
@@ -436,6 +437,7 @@ function ThreadItem({
   onSave,
   onEditPrice,
   onAsk,
+  onOptions,
 }: {
   thread: AnswerThread
   followedUsers: Set<string>
@@ -449,6 +451,7 @@ function ThreadItem({
   onSave: () => void
   onEditPrice?: () => void
   onAsk?: () => void
+  onOptions?: () => void
 }) {
   const x = useMotionValue(0)
   // Owner or purchased: ··· (48) + bookmark (48) + gap (8) + pad (24) = 128
@@ -571,6 +574,14 @@ function ThreadItem({
                         </span>
                       </button>
                     )
+                  )}
+                  {isOwner && onOptions && (
+                    <button
+                      onClick={e => { e.stopPropagation(); onOptions() }}
+                      className="active:opacity-50 transition-opacity"
+                    >
+                      <MoreHorizontal style={{ width: 18, height: 18, color: '#bbb' }} strokeWidth={1.75} />
+                    </button>
                   )}
                 </div>
               </div>
@@ -3262,7 +3273,7 @@ export default function ProfilePage() {
       }
     })
     return () => { cancelled = true; clearTimeout(timeout) }
-  }, [user?.id, authLoading])
+  }, [user?.id, authLoading, realProfile?.display_name, realProfile?.avatar_url])
 
   const answeredCount = liveCounts?.answers_count ?? realThreads.filter(t => t.type !== 'post').length
 
@@ -3323,6 +3334,7 @@ export default function ProfilePage() {
   const [postQuestions, setPostQuestions] = useState<Record<string, LocalQuestion[]>>({})
   const [createPostOpen, setCreatePostOpen] = useState(false)
   const [editProfileOpen, setEditProfileOpen] = useState(false)
+  const [postOptionsId, setPostOptionsId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!isOwnProfile) return
@@ -3551,6 +3563,7 @@ export default function ProfilePage() {
                 onSave={() => setSaveTarget(thread.id)}
                 onEditPrice={thread.type !== 'post' ? () => setEditPriceId(thread.id) : undefined}
                 onAsk={() => setAskThread(thread)}
+                onOptions={thread.type === 'post' ? () => setPostOptionsId(thread.id) : undefined}
               />
             )
           })
@@ -3710,6 +3723,16 @@ export default function ProfilePage() {
             if (scrollContainerRef.current) scrollContainerRef.current.scrollTop = 0
           }, 50)
         }}
+      />
+
+      {/* ── Post options sheet (own posts) ── */}
+      <PostOptionsSheet
+        open={postOptionsId !== null}
+        onClose={() => setPostOptionsId(null)}
+        onCopyLink={() => {
+          if (postOptionsId) navigator.clipboard.writeText(`${window.location.origin}/post/${postOptionsId}`).catch(() => {})
+        }}
+        onSave={() => postOptionsId && setSaveTarget(postOptionsId)}
       />
 
       {/* ── Price saved toast (portal → always viewport-centred) ── */}
