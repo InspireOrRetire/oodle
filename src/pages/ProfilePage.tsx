@@ -220,12 +220,14 @@ function ActionRow({
   return (
     <div className="flex items-center gap-3 py-2.5 pl-[52px] pr-2">
       {/* Question */}
-      <button onClick={onAsk} className="flex items-center gap-1 active:opacity-60 transition-opacity">
-        <MessageCircle style={{ width: 16, height: 16, color: '#c0c0c8', flexShrink: 0 }} strokeWidth={1.75} />
-        {questionCount > 0 && (
-          <span className="text-[11px]" style={{ color: '#bbb' }}>{fmtN(questionCount)}</span>
-        )}
-      </button>
+      {onAsk && (
+        <button onClick={onAsk} className="flex items-center gap-1 active:opacity-60 transition-opacity">
+          <MessageCircle style={{ width: 16, height: 16, color: '#c0c0c8', flexShrink: 0 }} strokeWidth={1.75} />
+          {questionCount > 0 && (
+            <span className="text-[11px]" style={{ color: '#bbb' }}>{fmtN(questionCount)}</span>
+          )}
+        </button>
+      )}
 
       {/* Save / Bookmark — always opens the save sheet (even when already saved) */}
       <button
@@ -416,10 +418,12 @@ function ThreadItem({
                     <Share2 style={{ width: 12, height: 12, color: '#555' }} strokeWidth={1.75} />
                     <span className="text-[12px] font-medium" style={{ color: '#555' }}>Share</span>
                   </button>
-                  <button onClick={e => { e.stopPropagation(); onAsk?.() }} className="flex items-center gap-1.5 active:opacity-70 transition-opacity">
-                    <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
-                    <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
-                  </button>
+                  {!isOwner && (
+                    <button onClick={e => { e.stopPropagation(); onAsk?.() }} className="flex items-center gap-1.5 active:opacity-70 transition-opacity">
+                      <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
+                      <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
+                    </button>
+                  )}
                   <button onClick={e => { e.stopPropagation(); onSave() }} className="flex items-center gap-1.5 active:opacity-70 transition-opacity">
                     <Bookmark style={{ width: 12, height: 12, color: isSaved ? '#111' : '#555' }} strokeWidth={2} fill={isSaved ? '#111' : 'none'} />
                     <span className="text-[12px] font-medium" style={{ color: isSaved ? '#111' : '#555' }}>{isSaved ? 'Saved' : 'Save'}</span>
@@ -661,10 +665,12 @@ function ThreadItem({
                 <Share2 style={{ width: 12, height: 12, color: '#555' }} strokeWidth={1.75} />
                 <span className="text-[12px] font-medium" style={{ color: '#555' }}>Share</span>
               </button>
-              <button onClick={e => { e.stopPropagation(); onAsk?.() }} className="flex items-center gap-1.5 active:opacity-70 transition-opacity">
-                <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
-                <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
-              </button>
+              {!isOwner && (
+                <button onClick={e => { e.stopPropagation(); onAsk?.() }} className="flex items-center gap-1.5 active:opacity-70 transition-opacity">
+                  <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
+                  <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
+                </button>
+              )}
               <button onClick={e => { e.stopPropagation(); onSave() }} className="flex items-center gap-1.5 active:opacity-70 transition-opacity">
                 <Bookmark style={{ width: 12, height: 12, color: isSaved ? '#111' : '#555' }} strokeWidth={2} fill={isSaved ? '#111' : 'none'} />
                 <span className="text-[12px] font-medium" style={{ color: isSaved ? '#111' : '#555' }}>{isSaved ? 'Saved' : 'Save'}</span>
