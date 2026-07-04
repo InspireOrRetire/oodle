@@ -273,13 +273,15 @@ function FeedCard({
                     <Share2 style={{ width: 12, height: 12, color: '#555' }} strokeWidth={1.75} />
                     <span className="text-[12px] font-medium" style={{ color: '#555' }}>Share</span>
                   </button>
-                  <button
-                    onClick={e => { e.stopPropagation(); onAsk?.() }}
-                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity"
-                  >
-                    <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
-                    <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
-                  </button>
+                  {item.creator.id !== myUserId && (
+                    <button
+                      onClick={e => { e.stopPropagation(); onAsk?.() }}
+                      className="flex items-center gap-1.5 active:opacity-70 transition-opacity"
+                    >
+                      <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
+                      <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
+                    </button>
+                  )}
                   <button
                     onClick={e => { e.stopPropagation(); onSaveToggle() }}
                     className="flex items-center gap-1.5 active:opacity-70 transition-opacity"
@@ -529,13 +531,15 @@ function FeedCard({
                     <Share2 style={{ width: 12, height: 12, color: '#555' }} strokeWidth={1.75} />
                     <span className="text-[12px] font-medium" style={{ color: '#555' }}>Share</span>
                   </button>
-                  <button
-                    onClick={e => { e.stopPropagation(); onAsk?.() }}
-                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity"
-                  >
-                    <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
-                    <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
-                  </button>
+                  {item.creator.id !== myUserId && (
+                    <button
+                      onClick={e => { e.stopPropagation(); onAsk?.() }}
+                      className="flex items-center gap-1.5 active:opacity-70 transition-opacity"
+                    >
+                      <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
+                      <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
+                    </button>
+                  )}
                   <button
                     onClick={e => { e.stopPropagation(); onSaveToggle() }}
                     className="flex items-center gap-1.5 active:opacity-70 transition-opacity"
