@@ -156,8 +156,6 @@ export default function PostOptionsSheet({
               <>
                 <Row label="Copy link"       icon={Link2}                                                onClick={handleCopyLink} />
                 <Row label={isSaved ? 'Unsave' : 'Save'} icon={Bookmark}                                onClick={handle(onSave)} />
-                <Row label="Not interested"  icon={EyeOff}                                               onClick={handle(onNotInterested)} />
-                <Row label="Mute"            icon={UserX}                                                onClick={handle(onMute)} />
                 <Row label={isFollowing ? 'Unfollow' : 'Follow'} icon={isFollowing ? UserMinus : UserPlus} onClick={handle(onFollowToggle)} />
                 <Row label="Report"          icon={AlertCircle} red last                                 onClick={handle(onReport)} />
                 <div style={{ borderTop: '8px solid rgba(0,0,0,0.05)', marginTop: 4 }}>
