@@ -30,8 +30,10 @@ export async function signIn(email: string, password: string) {
 }
 
 // ── Sign out ──────────────────────────────────────────────────────────────────
+// scope:'local' clears the token from localStorage immediately without a network
+// call, so sign-out works even offline or when the server rejects the request.
 export async function signOut() {
-  const { error } = await supabase.auth.signOut()
+  const { error } = await supabase.auth.signOut({ scope: 'local' })
   if (error) throw error
 }
 
