@@ -1888,7 +1888,7 @@ function ProfileEditPage({ open, onClose, onSaved }: { open: boolean; onClose: (
   async function handleDeleteAccount() {
     setDeleteLoading(true); setDeleteError(null)
     try {
-      const { error } = await (supabase as any).rpc('delete_own_account')
+      const { error } = await supabase.functions.invoke('delete-account')
       if (error) throw error
       await signOut()
     } catch (e: unknown) {
