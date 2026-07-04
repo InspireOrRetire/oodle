@@ -1,7 +1,9 @@
 // Supabase Edge Function — delete-account
-// Fully deletes the calling user's account from both public.users and auth.users.
-// Must run server-side with the service role key because auth.users cannot be
-// deleted from client-side SQL, even with SECURITY DEFINER functions.
+// Fully deletes the calling user's account:
+// 1. Clears storage files (avatars + post-images) — storage.objects.owner
+//    references auth.users with no CASCADE, so these must go first.
+// 2. Deletes public.users (cascades to all child tables).
+// 3. Calls auth.admin.deleteUser() to wipe the auth identity.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -20,7 +22,7 @@ Deno.serve(async (req) => {
     })
   }
 
-  // Verify the caller's identity using their JWT
+  // Verify caller identity
   const userClient = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_ANON_KEY')!,
@@ -33,16 +35,24 @@ Deno.serve(async (req) => {
     })
   }
 
-  // Use the service role to perform the actual deletion
   const admin = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   )
 
-  // Delete public profile first (FK cascades handle children)
+  // 1. Delete storage files — user's folder is their UUID in each bucket
+  for (const bucket of ['avatars', 'post-images']) {
+    const { data: files } = await admin.storage.from(bucket).list(user.id)
+    if (files && files.length > 0) {
+      const paths = files.map(f => `${user.id}/${f.name}`)
+      await admin.storage.from(bucket).remove(paths)
+    }
+  }
+
+  // 2. Delete public profile (cascades to posts, threads, messages, follows, etc.)
   await admin.from('users').delete().eq('id', user.id)
 
-  // Delete the auth identity — this is what the SQL function couldn't do
+  // 3. Delete the auth identity
   const { error } = await admin.auth.admin.deleteUser(user.id)
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {
