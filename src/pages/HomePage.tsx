@@ -7,7 +7,7 @@ import { oo } from '../lib/oo'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import {
-  Search, X, Heart, MessageCircle, MessageCircleMore, Share2, Zap,
+  Search, X, Heart, MessageCircle, MessageCircleMore, Share2, Zap, Link2,
   Check, Plus, Minus, Bookmark, ArrowLeft, CreditCard, Shield,
   Image as ImageIcon, AlignLeft, Quote, Camera, MapPin, BarChart2,
   ChevronDown, FileText, SlidersHorizontal, Mail, Type, Bell, Video, Flag,
@@ -119,6 +119,7 @@ function FeedCard({
   onTap,
   onReplyTap,
   onOptions,
+  onShare,
 }: {
   item: FeedItem
   liked: boolean
@@ -135,6 +136,7 @@ function FeedCard({
   onTap?: () => void
   onReplyTap?: (replyIndex: number) => void
   onOptions?: () => void
+  onShare?: () => void
 }) {
   const x = useMotionValue(0)
   const heartScale = useMotionValue(1)
@@ -150,7 +152,7 @@ function FeedCard({
     e.stopPropagation()
     const url = `${window.location.origin}/post/${item.id}`
     if (navigator.share) {
-      navigator.share({ url }).catch(() => {})
+      navigator.share({ url, title: item.question ?? '' }).catch(() => {})
     } else {
       navigator.clipboard.writeText(url).catch(() => {})
     }
@@ -597,15 +599,229 @@ function ActionBtn({
 
 // (UnlockSheet moved to src/components/Post/UnlockSheet.tsx)
 
+// ─── Share sheet ─────────────────────────────────────────────────────────────
+
+function HomeShareSheet({
+  item,
+  onClose,
+}: {
+  item: FeedItem | null
+  onClose: () => void
+}) {
+  const [copied, setCopied] = useState(false)
+  const [search, setSearch] = useState('')
+
+  const url = item ? `${window.location.origin}/post/${item.id}` : ''
+
+  function handleCopyLink() {
+    navigator.clipboard.writeText(url).catch(() => {})
+    setCopied(true)
+    setTimeout(() => { setCopied(false); onClose() }, 1400)
+  }
+
+  function handleNativeShare() {
+    if (navigator.share) {
+      navigator.share({ url, title: item?.question ?? '' }).catch(() => {})
+    } else {
+      handleCopyLink()
+    }
+    onClose()
+  }
+
+  return (
+    <AnimatePresence>
+      {item && (
+        <>
+          <motion.div
+            className="fixed inset-0 z-50"
+            style={{ backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', background: 'rgba(0,0,0,0.22)' }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            onClick={onClose}
+          />
+          <motion.div
+            className="fixed bottom-0 left-0 right-0 z-50"
+            style={{
+              background: 'rgba(255,255,255,0.97)',
+              borderRadius: '24px 24px 0 0',
+              paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)',
+              boxShadow: '0 -2px 32px rgba(0,0,0,0.10)',
+            }}
+            initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 32, stiffness: 340, mass: 0.9 }}
+          >
+            {/* Handle */}
+            <div className="flex justify-center pt-3 pb-4">
+              <div className="w-9 h-[4px] rounded-full" style={{ background: 'rgba(0,0,0,0.15)' }} />
+            </div>
+
+            <div className="px-5">
+              {/* Search bar */}
+              <div className="flex items-center gap-2 rounded-[12px] px-3 mb-5"
+                style={{ background: '#f5f5f7', height: 40 }}>
+                <Search style={{ width: 14, height: 14, color: '#aaa', flexShrink: 0 }} strokeWidth={2} />
+                <input
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Search people..."
+                  className="flex-1 bg-transparent outline-none text-[14px] text-[#111] placeholder-[#bbb]"
+                />
+              </div>
+
+              {/* Action rows */}
+              <div className="rounded-[16px] overflow-hidden mb-3" style={{ border: '0.5px solid #ebebeb' }}>
+                {/* Copy link */}
+                <button
+                  onClick={handleCopyLink}
+                  className="w-full flex items-center gap-3.5 px-4 active:bg-gray-50 transition-colors"
+                  style={{ height: 54, borderBottom: '0.5px solid #f2f2f2' }}
+                >
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{ background: copied ? '#111' : '#f0f0f3' }}>
+                    {copied
+                      ? <Check style={{ width: 16, height: 16, color: 'white' }} strokeWidth={2.5} />
+                      : <Link2 style={{ width: 16, height: 16, color: '#444' }} strokeWidth={1.75} />
+                    }
+                  </div>
+                  <span className="text-[15px] font-medium text-[#111]">
+                    {copied ? 'Link copied!' : 'Copy link'}
+                  </span>
+                </button>
+
+                {/* Share via... */}
+                <button
+                  onClick={handleNativeShare}
+                  className="w-full flex items-center gap-3.5 px-4 active:bg-gray-50 transition-colors"
+                  style={{ height: 54 }}
+                >
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{ background: '#f0f0f3' }}>
+                    <Share2 style={{ width: 16, height: 16, color: '#444' }} strokeWidth={1.75} />
+                  </div>
+                  <span className="text-[15px] font-medium text-[#111]">Share via…</span>
+                </button>
+              </div>
+
+              {/* Cancel */}
+              <button
+                onClick={onClose}
+                className="w-full rounded-[16px] active:bg-gray-50 transition-colors flex items-center justify-center"
+                style={{ height: 50, background: '#f5f5f7', fontSize: 16, fontWeight: 600, color: '#111' }}
+              >
+                Cancel
+              </button>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  )
+}
+
+// ─── Ask type picker ─────────────────────────────────────────────────────────
+
+function AskTypePicker({
+  item,
+  onClarify,
+  onNewQuestion,
+  onClose,
+}: {
+  item: FeedItem | null
+  onClarify: () => void
+  onNewQuestion: () => void
+  onClose: () => void
+}) {
+  return (
+    <AnimatePresence>
+      {item && (
+        <>
+          <motion.div
+            className="fixed inset-0 z-50"
+            style={{ backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', background: 'rgba(0,0,0,0.25)' }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            onClick={onClose}
+          />
+          <motion.div
+            className="fixed bottom-0 left-0 right-0 z-50"
+            style={{
+              background: 'rgba(255,255,255,0.98)',
+              borderRadius: '24px 24px 0 0',
+              paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)',
+              boxShadow: '0 -2px 32px rgba(0,0,0,0.12)',
+            }}
+            initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 32, stiffness: 340, mass: 0.9 }}
+          >
+            {/* Handle */}
+            <div className="flex justify-center pt-3 pb-4">
+              <div className="w-9 h-[4px] rounded-full" style={{ background: 'rgba(0,0,0,0.15)' }} />
+            </div>
+
+            <div className="px-5 pb-2">
+              <p className="text-[18px] font-bold text-[#111] mb-1">What do you want to ask?</p>
+              <p className="text-[13px] mb-5" style={{ color: '#999' }}>
+                This post already has a paid answer attached.
+              </p>
+
+              {/* Clarify option */}
+              <button
+                onClick={onClarify}
+                className="w-full text-left rounded-[16px] p-4 mb-3 active:opacity-80 transition-opacity"
+                style={{ background: '#f5f5f7', border: '1.5px solid transparent' }}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+                    style={{ background: '#e8e8ec' }}>
+                    <MessageCircle style={{ width: 17, height: 17, color: '#444' }} strokeWidth={1.75} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[15px] font-semibold text-[#111] mb-0.5">Clarify</p>
+                    <p className="text-[12px] leading-snug" style={{ color: '#888' }}>
+                      Ask about this specific answer — stays threaded here, not a new product.
+                    </p>
+                  </div>
+                </div>
+              </button>
+
+              {/* New question option */}
+              <button
+                onClick={onNewQuestion}
+                className="w-full text-left rounded-[16px] p-4 active:opacity-80 transition-opacity"
+                style={{ background: '#111', border: '1.5px solid transparent' }}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+                    style={{ background: 'rgba(255,255,255,0.15)' }}>
+                    <span className="text-[13px] font-bold text-white">$?</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[15px] font-semibold text-white mb-0.5">Ask something new</p>
+                    <p className="text-[12px] leading-snug" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                      A different question — creates a new answer product on their timeline.
+                    </p>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  )
+}
+
 // ─── Ask sheet (home feed) ────────────────────────────────────────────────────
 
 function HomeAskSheet({
   item,
+  isClarify = false,
   extraQuestions,
   onSubmit,
   onClose,
 }: {
   item: FeedItem | null
+  isClarify?: boolean
   extraQuestions: LocalQuestion[]
   onSubmit: (itemId: string, text: string, meta?: { threadId: string; creatorUsername: string; creatorName: string; creatorAvatar: string | null; postId: string; price: number }) => void
   onClose: () => void
@@ -787,7 +1003,7 @@ function HomeAskSheet({
                           <ArrowLeft style={{ width: 20, height: 20, color: '#111' }} strokeWidth={2} />
                         </button>
                       )}
-                      <span className="text-[17px] font-bold text-[#111]">Ask a question</span>
+                      <span className="text-[17px] font-bold text-[#111]">{isClarify ? 'Clarify' : 'Ask a question'}</span>
                       {allQuestions.length === 0 && (
                         <button onClick={handleClose} className="ml-auto text-[15px]" style={{ color: '#aaa' }}>
                           Cancel
@@ -817,13 +1033,23 @@ function HomeAskSheet({
                           </motion.div>
                         ) : (
                           <motion.div key="form" initial={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                            <div className="flex items-center gap-2.5 mb-4">
+                            <div className="flex items-center gap-2.5 mb-3">
                               <Av creator={item.creator} size={36} />
                               <div>
                                 <p className="text-[13px] font-semibold text-[#111]">{item.creator.display_name}</p>
                                 <p className="text-[10px] text-[#aaa]">@{item.creator.username}</p>
                               </div>
                             </div>
+
+                            {isClarify && (
+                              <div className="flex items-center gap-2 rounded-[10px] px-3 py-2.5 mb-4"
+                                style={{ background: '#f5f5f7' }}>
+                                <MessageCircle style={{ width: 13, height: 13, color: '#888', flexShrink: 0 }} strokeWidth={1.75} />
+                                <p className="text-[12px] leading-snug" style={{ color: '#555' }}>
+                                  This is a <span className="font-semibold text-[#111]">clarification</span> — your question will be tied to this answer, not create a new one.
+                                </p>
+                              </div>
+                            )}
 
                             {(() => {
                               const locked = text.trimEnd().endsWith('$?')
@@ -1945,6 +2171,7 @@ export default function HomePage() {
   const [notifs,            setNotifs]            = useState<AppNotification[]>([])
   const [notifsLoading,     setNotifsLoading]     = useState(false)
   const [unreadCount,       setUnreadCount]       = useState(0)
+  const [dmUnreadCount,     setDmUnreadCount]     = useState(0)
   const [savedCollections,  setSavedCollections]  = useState<SavedCollection[]>([])
   const [savedPanelItems,   setSavedPanelItems]   = useState<SavedItem[]>([])
   const [savedLoading,      setSavedLoading]      = useState(false)
@@ -2018,8 +2245,11 @@ export default function HomePage() {
         if (data?.length) setFollowedUsers(new Set(data.map(r => r.creator_id)))
       })
   }, [homeUser?.id])
-  const [unlockTarget,  setUnlockTarget]  = useState<UnlockTarget | null>(null)
-  const [askItem,       setAskItem]       = useState<FeedItem | null>(null)
+  const [unlockTarget,    setUnlockTarget]    = useState<UnlockTarget | null>(null)
+  const [askItem,         setAskItem]         = useState<FeedItem | null>(null)
+  const [askSheetKey,     setAskSheetKey]     = useState(0)
+  const [askClarify,      setAskClarify]      = useState(false)
+  const [askPickerItem,   setAskPickerItem]   = useState<FeedItem | null>(null)
   const [cardOptionsItem, setCardOptionsItem] = useState<FeedItem | null>(null)
   const [homeQuestions, setHomeQuestions] = useState<Record<string, LocalQuestion[]>>({})
 
@@ -2217,6 +2447,28 @@ export default function HomePage() {
     }
   }
 
+  // ── DM unread count ─────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!user) return
+    async function fetchDmUnread() {
+      // Fan: answered threads the asker hasn't viewed yet
+      const { count: fanCount } = await (supabase as any)
+        .from('threads').select('id', { count: 'exact', head: true })
+        .eq('fan_id', user!.id).eq('asker_has_viewed', false).not('answered_at', 'is', null)
+      // Creator: pending questions waiting for a reply
+      const { count: creatorCount } = await (supabase as any)
+        .from('threads').select('id', { count: 'exact', head: true })
+        .eq('creator_id', user!.id).eq('status', 'pending')
+      setDmUnreadCount((fanCount ?? 0) + (creatorCount ?? 0))
+    }
+    fetchDmUnread()
+    const sub = (supabase as any)
+      .channel('dm-badge')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'threads' }, fetchDmUnread)
+      .subscribe()
+    return () => { (supabase as any).removeChannel(sub) }
+  }, [user?.id])
+
   // Bootstrap unread count + subscribe to live inserts
   useEffect(() => {
     if (!user) return
@@ -2333,27 +2585,33 @@ export default function HomePage() {
           <div className="flex items-center gap-2">
             {/* Inbox button */}
             <button
-              onClick={() => navigate('/inbox')}
-              className="w-[30px] h-[30px] flex items-center justify-center"
+              onClick={() => { setDmUnreadCount(0); navigate('/inbox') }}
+              className="w-[30px] h-[30px] flex items-center justify-center relative"
             >
               <MessageCircleMore style={{ width: 22, height: 22, color: '#111' }} strokeWidth={1.75} />
-            </button>
-
-            {/* Profile avatar */}
-            <button
-              onClick={() => { if (scrollContainerRef.current) scrollContainerRef.current.scrollTop = 0; navigate('/profile') }}
-              className="w-[30px] h-[30px] rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center"
-              style={{ background: myProfile?.avatar_url ? 'transparent' : '#111' }}
-            >
-              {myProfile?.avatar_url ? (
-                <img src={myProfile.avatar_url} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-white font-semibold" style={{ fontSize: 11 }}>
-                  {(myProfile?.display_name ?? myProfile?.username ?? '?')
-                    .split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()}
+              {dmUnreadCount > 0 && (
+                <span
+                  className="absolute flex items-center justify-center"
+                  style={{
+                    top: -2, right: -3,
+                    minWidth: dmUnreadCount > 9 ? 16 : 14,
+                    height: dmUnreadCount > 9 ? 16 : 14,
+                    borderRadius: 9999,
+                    background: '#e53e3e',
+                    fontSize: 9,
+                    fontWeight: 700,
+                    color: 'white',
+                    paddingLeft: dmUnreadCount > 9 ? 3 : 0,
+                    paddingRight: dmUnreadCount > 9 ? 3 : 0,
+                    lineHeight: 1,
+                    border: '1.5px solid white',
+                  }}
+                >
+                  {dmUnreadCount > 99 ? '99+' : dmUnreadCount}
                 </span>
               )}
             </button>
+
           </div>
         </div>
       </div>
@@ -3190,7 +3448,11 @@ export default function HomePage() {
                 onFollow={handleFollow}
                 onUnlock={feedItem => setUnlockTarget({ creator: feedItem.creator, question: feedItem.question, price: feedItem.price ?? 0, postId: feedItem.id })}
                 onProfile={username => navigate(`/u/${username}`)}
-                onAsk={() => { iosKbRef.current?.focus(); setAskItem(item) }}
+                onAsk={() => {
+                  iosKbRef.current?.focus()
+                  if ((item.price ?? 0) > 0) { setAskPickerItem(item) }
+                  else { setAskClarify(false); setAskItem(item); setAskSheetKey(k => k + 1) }
+                }}
                 onTap={() => handleCardTap(item)}
                 onReplyTap={(replyIndex) => {
                   if (scrollContainerRef.current) {
@@ -3242,12 +3504,32 @@ export default function HomePage() {
         onSave={() => cardOptionsItem && setSaveTarget(cardOptionsItem.id)}
       />
 
+      {/* ── Ask type picker (shown for priced posts) ── */}
+      <AskTypePicker
+        item={askPickerItem}
+        onClarify={() => {
+          setAskClarify(true)
+          setAskItem(askPickerItem)
+          setAskPickerItem(null)
+          setAskSheetKey(k => k + 1)
+        }}
+        onNewQuestion={() => {
+          setAskClarify(false)
+          setAskItem(askPickerItem)
+          setAskPickerItem(null)
+          setAskSheetKey(k => k + 1)
+        }}
+        onClose={() => setAskPickerItem(null)}
+      />
+
       {/* ── Ask sheet ── */}
       <HomeAskSheet
+        key={askSheetKey}
         item={askItem}
+        isClarify={askClarify}
         extraQuestions={askItem ? (homeQuestions[askItem.id] ?? []) : []}
         onSubmit={handleAskSubmit}
-        onClose={() => setAskItem(null)}
+        onClose={() => { setAskItem(null); setAskClarify(false) }}
       />
 
       {/* ── Follow toast ── */}
