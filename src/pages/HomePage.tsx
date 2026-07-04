@@ -739,9 +739,8 @@ function HomeAskSheet({
   ]
 
   async function handleSend() {
-    const bodyLen = text.trimEnd().slice(0, -2).trim().length
-    if (!item || !text.trimEnd().endsWith('$?') || bodyLen < 5 || sending) return
-    const question = text.trim().replace(/\$\?$/, '').trim() + '?'
+    const question = text.trim()
+    if (!item || question.length < 5 || sending) return
 
     if (!isExploreMode && user && item.creator.id) {
       setSending(true)
@@ -934,72 +933,15 @@ function HomeAskSheet({
                               </div>
                             )}
 
-                            {(() => {
-                              const locked = text.trimEnd().endsWith('$?')
-                              const before = locked ? text.trimEnd().slice(0, -2).trimEnd() : text
-                              return (
-                                <div className="relative">
-                                  <textarea
-                                    autoFocus
-                                    value={text}
-                                    onChange={e => setText(e.target.value)}
-                                    placeholder="Type your question and end with $?"
-                                    rows={4}
-                                    className="w-full rounded-[12px] px-4 py-3 text-[14px] placeholder-[#ccc] resize-none outline-none leading-[1.5]"
-                                    style={{
-                                      background: '#f5f5f7',
-                                      color: locked ? 'transparent' : '#111',
-                                      caretColor: '#111',
-                                    }}
-                                  />
-                                  {locked && (
-                                    <div
-                                      className="absolute inset-0 px-4 py-3 pointer-events-none rounded-[12px] overflow-hidden"
-                                      style={{ fontSize: 14, lineHeight: 1.5, color: '#111', wordBreak: 'break-word' }}
-                                    >
-                                      <span>{before}{before ? ' ' : ''}</span>
-                                      <span
-                                        className="inline-flex items-center"
-                                        style={{
-                                          fontSize: 12,
-                                          color: '#444',
-                                          background: '#e5e5ea',
-                                          borderRadius: 5,
-                                          padding: '2px 7px',
-                                          verticalAlign: 'middle',
-                                          lineHeight: '1.6',
-                                          boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.08)',
-                                        }}
-                                      >$?</span>
-                                    </div>
-                                  )}
-                                  {!locked && (
-                                    <button
-                                      onMouseDown={e => {
-                                        e.preventDefault()
-                                        if (!text.trimEnd().endsWith('$?')) {
-                                          setText(t => t.trimEnd() + (t.trim() ? ' $?' : '$?'))
-                                        }
-                                      }}
-                                      className="absolute bottom-3 right-3 flex items-center justify-center active:opacity-70 transition-opacity"
-                                      style={{
-                                        borderRadius: 8,
-                                        padding: '5px 10px',
-                                        background: 'white',
-                                        boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.08)',
-                                      }}
-                                    >
-                                      <span className="text-[12px]" style={{ color: '#555' }}>$?</span>
-                                    </button>
-                                  )}
-                                </div>
-                              )
-                            })()}
-
-                            {/* $? hint */}
-                            <p className="text-[11px] mt-2 mb-1" style={{ color: '#bbb' }}>
-                              Type your question and tap <span className="font-semibold" style={{ color: '#888' }}>$?</span> to send — or use the button in the box.
-                            </p>
+                            <textarea
+                              autoFocus
+                              value={text}
+                              onChange={e => setText(e.target.value)}
+                              placeholder="Type your question here…"
+                              rows={4}
+                              className="w-full rounded-[12px] px-4 py-3 text-[14px] text-[#111] placeholder-[#ccc] resize-none outline-none leading-[1.5]"
+                              style={{ background: '#f5f5f7' }}
+                            />
 
                             {/* Media attachment row */}
                             <div className="flex gap-2 mt-3 mb-1">
@@ -1073,27 +1015,17 @@ function HomeAskSheet({
                               onChange={e => { const f = e.target.files?.[0]; if (f) setMediaFiles(p => [...p, f]); e.target.value = '' }} />
 
                             {(() => {
-                              const locked = text.trimEnd().endsWith('$?')
-                              const bodyLen = text.trimEnd().slice(0, locked ? -2 : undefined).trim().length
-                              const canSend = locked && bodyLen >= 5
+                              const canSend = text.trim().length >= 5
                               return (
                                 <>
                                   <p className="text-[10px] mt-2 mb-5" style={{ color: '#bbb' }}>
-                                    {!locked
-                                      ? 'end with $? to send · price set per answer'
-                                      : canSend
-                                        ? 'question locked in · price set per answer'
-                                        : `${5 - bodyLen} more chars needed · price set per answer`}
+                                    price set per answer
                                   </p>
-
-                                  {/* Send — only active when locked + enough text */}
-                                  <motion.button
+                                  <button
                                     onClick={handleSend}
                                     disabled={!canSend || sending}
-                                    animate={{ opacity: canSend ? 1 : 0, y: canSend ? 0 : 6 }}
-                                    transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-                                    className="w-full rounded-[14px] py-[14px] flex items-center justify-center gap-2 active:opacity-80 transition-opacity"
-                                    style={{ background: '#111', pointerEvents: canSend && !sending ? 'auto' : 'none' }}
+                                    className="w-full rounded-[14px] py-[14px] flex items-center justify-center gap-2 active:opacity-80 disabled:opacity-30 transition-opacity"
+                                    style={{ background: '#111' }}
                                   >
                                     {sending
                                       ? <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
@@ -1102,7 +1034,7 @@ function HomeAskSheet({
                                     <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
                                       {sending ? 'Sending…' : 'Send question'}
                                     </span>
-                                  </motion.button>
+                                  </button>
                                 </>
                               )
                             })()}
