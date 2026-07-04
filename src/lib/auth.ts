@@ -64,6 +64,14 @@ export async function getMyProfile() {
   return data
 }
 
+// ── Delete own account ────────────────────────────────────────────────────────
+// Calls a SECURITY DEFINER Postgres function that removes the public.users row
+// and the auth.users identity. Client must sign out immediately after.
+export async function deleteOwnAccount() {
+  const { error } = await supabase.rpc('delete_own_account')
+  if (error) throw error
+}
+
 // ── Update profile ────────────────────────────────────────────────────────────
 // Upserts the users row. Using upsert (not update) so it works even when
 // the handle_new_user trigger hasn't created the row yet, and so that a

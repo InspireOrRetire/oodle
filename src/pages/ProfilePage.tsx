@@ -1809,7 +1809,7 @@ const CATEGORY_OPTIONS = [
 ]
 
 function ProfileEditPage({ open, onClose, onSaved }: { open: boolean; onClose: () => void; onSaved: () => void }) {
-  const { updateProfile, profile, user } = useAuth()
+  const { updateProfile, profile, user, signOut } = useAuth()
 
   const [name,         setName]         = useState('')
   const [username,     setUsername]     = useState('')
@@ -1820,6 +1820,9 @@ function ProfileEditPage({ open, onClose, onSaved }: { open: boolean; onClose: (
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [avatarFile,   setAvatarFile]   = useState<File | null>(null)
   const [saved,        setSaved]        = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [deleteError,   setDeleteError]   = useState<string | null>(null)
   const avatarInputRef = useRef<HTMLInputElement>(null)
 
   // Sync form whenever page opens
@@ -1873,6 +1876,18 @@ function ProfileEditPage({ open, onClose, onSaved }: { open: boolean; onClose: (
       setError(msg)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleDeleteAccount() {
+    setDeleteLoading(true); setDeleteError(null)
+    try {
+      const { error } = await (supabase as any).rpc('delete_own_account')
+      if (error) throw error
+      await signOut()
+    } catch (e: unknown) {
+      setDeleteError((e as { message?: string })?.message || 'Failed to delete account')
+      setDeleteLoading(false)
     }
   }
 
@@ -2034,9 +2049,73 @@ function ProfileEditPage({ open, onClose, onSaved }: { open: boolean; onClose: (
               </div>
             </div>
 
+            {/* Danger zone */}
+            <div className="px-5 pt-2 pb-2">
+              <button
+                onClick={() => { setDeleteConfirm(true); setDeleteError(null) }}
+                className="w-full py-3 text-center text-[14px] active:opacity-60 transition-opacity"
+                style={{ color: '#e53e3e' }}
+              >
+                Delete account
+              </button>
+            </div>
+
             {/* Bottom safe area spacer */}
             <div className="h-10" />
           </div>
+
+          {/* Delete confirmation sheet */}
+          <AnimatePresence>
+            {deleteConfirm && (
+              <>
+                <motion.div
+                  className="absolute inset-0 z-10"
+                  style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  onClick={() => { if (!deleteLoading) { setDeleteConfirm(false); setDeleteError(null) } }}
+                />
+                <motion.div
+                  className="absolute bottom-0 left-0 right-0 z-20 bg-white rounded-t-[24px] px-5"
+                  style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 20px)' }}
+                  initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+                  transition={{ type: 'spring', damping: 32, stiffness: 340 }}
+                >
+                  <div className="flex justify-center pt-3 pb-5">
+                    <div className="w-9 h-[4px] rounded-full bg-[#e0e0e0]" />
+                  </div>
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"
+                    style={{ background: '#fff1f0' }}>
+                    <X className="w-6 h-6 text-red-500" strokeWidth={2} />
+                  </div>
+                  <p className="text-[18px] font-bold text-[#111] text-center mb-2">Delete account?</p>
+                  <p className="text-[14px] text-center mb-6" style={{ color: '#888' }}>
+                    This permanently deletes your profile, posts, and messages. It cannot be undone.
+                  </p>
+                  {deleteError && (
+                    <p className="text-[13px] text-red-500 text-center mb-4">{deleteError}</p>
+                  )}
+                  <button
+                    onClick={handleDeleteAccount}
+                    disabled={deleteLoading}
+                    className="w-full py-[14px] rounded-[14px] flex items-center justify-center mb-3 active:opacity-80 transition-opacity"
+                    style={{ background: '#e53e3e' }}
+                  >
+                    <span className="text-[15px] font-semibold text-white">
+                      {deleteLoading ? 'Deleting…' : 'Yes, delete my account'}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => { setDeleteConfirm(false); setDeleteError(null) }}
+                    disabled={deleteLoading}
+                    className="w-full py-[14px] rounded-[14px] flex items-center justify-center active:opacity-80 transition-opacity"
+                    style={{ background: '#f5f5f7' }}
+                  >
+                    <span className="text-[15px] font-semibold text-[#111]">Cancel</span>
+                  </button>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </motion.div>
       )}
     </AnimatePresence>
