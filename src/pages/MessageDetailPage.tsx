@@ -13,7 +13,6 @@ import {
 } from '../services/threadService'
 import type { ThreadWithParticipants, MessageRow, AnswerBlock } from '../lib/database.types'
 import type { Json } from '../lib/database.types'
-import { MOCK_THREADS } from '../lib/mockFeed'
 import MapTileCard from '../components/UI/MapTileCard'
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -348,14 +347,6 @@ export default function MessageDetailPage() {
   useEffect(() => {
     if (!id || !user) return
     let cancelled = false
-
-    // Check mock threads first (explore mode / empty DB)
-    const mockThread = MOCK_THREADS.find(t => t.id === id)
-    if (mockThread) {
-      setThread(mockThread)
-      setLoading(false)
-      return
-    }
 
     getThread(id)
       .then(data => {

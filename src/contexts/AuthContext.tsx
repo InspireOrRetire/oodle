@@ -69,9 +69,11 @@ async function loadProfile(userId: string): Promise<Profile | null> {
     .from('users')
     .select(`
       id, role, username, display_name, avatar_url, bio,
-      categories, default_answer_price, stripe_onboarded,
+      categories, default_answer_price, stripe_account_id, stripe_onboarded,
       followers_count, following_count, onboarding_completed,
-      response_rate, created_at, updated_at
+      response_rate, token_balance, public_profile,
+      email_notifications, push_notifications, show_answer_price,
+      created_at, updated_at
     `)
     .eq('id', userId)
     .maybeSingle()   // returns null (not an error) when row is missing

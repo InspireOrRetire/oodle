@@ -119,7 +119,6 @@ function FeedCard({
   onTap,
   onReplyTap,
   onOptions,
-  onShare,
 }: {
   item: FeedItem
   liked: boolean
@@ -136,7 +135,6 @@ function FeedCard({
   onTap?: () => void
   onReplyTap?: (replyIndex: number) => void
   onOptions?: () => void
-  onShare?: () => void
 }) {
   const x = useMotionValue(0)
   const heartScale = useMotionValue(1)
@@ -599,125 +597,6 @@ function ActionBtn({
 
 // (UnlockSheet moved to src/components/Post/UnlockSheet.tsx)
 
-// ─── Share sheet ─────────────────────────────────────────────────────────────
-
-function HomeShareSheet({
-  item,
-  onClose,
-}: {
-  item: FeedItem | null
-  onClose: () => void
-}) {
-  const [copied, setCopied] = useState(false)
-  const [search, setSearch] = useState('')
-
-  const url = item ? `${window.location.origin}/post/${item.id}` : ''
-
-  function handleCopyLink() {
-    navigator.clipboard.writeText(url).catch(() => {})
-    setCopied(true)
-    setTimeout(() => { setCopied(false); onClose() }, 1400)
-  }
-
-  function handleNativeShare() {
-    if (navigator.share) {
-      navigator.share({ url, title: item?.question ?? '' }).catch(() => {})
-    } else {
-      handleCopyLink()
-    }
-    onClose()
-  }
-
-  return (
-    <AnimatePresence>
-      {item && (
-        <>
-          <motion.div
-            className="fixed inset-0 z-50"
-            style={{ backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', background: 'rgba(0,0,0,0.22)' }}
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
-            onClick={onClose}
-          />
-          <motion.div
-            className="fixed bottom-0 left-0 right-0 z-50"
-            style={{
-              background: 'rgba(255,255,255,0.97)',
-              borderRadius: '24px 24px 0 0',
-              paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)',
-              boxShadow: '0 -2px 32px rgba(0,0,0,0.10)',
-            }}
-            initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 32, stiffness: 340, mass: 0.9 }}
-          >
-            {/* Handle */}
-            <div className="flex justify-center pt-3 pb-4">
-              <div className="w-9 h-[4px] rounded-full" style={{ background: 'rgba(0,0,0,0.15)' }} />
-            </div>
-
-            <div className="px-5">
-              {/* Search bar */}
-              <div className="flex items-center gap-2 rounded-[12px] px-3 mb-5"
-                style={{ background: '#f5f5f7', height: 40 }}>
-                <Search style={{ width: 14, height: 14, color: '#aaa', flexShrink: 0 }} strokeWidth={2} />
-                <input
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  placeholder="Search people..."
-                  className="flex-1 bg-transparent outline-none text-[14px] text-[#111] placeholder-[#bbb]"
-                />
-              </div>
-
-              {/* Action rows */}
-              <div className="rounded-[16px] overflow-hidden mb-3" style={{ border: '0.5px solid #ebebeb' }}>
-                {/* Copy link */}
-                <button
-                  onClick={handleCopyLink}
-                  className="w-full flex items-center gap-3.5 px-4 active:bg-gray-50 transition-colors"
-                  style={{ height: 54, borderBottom: '0.5px solid #f2f2f2' }}
-                >
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{ background: copied ? '#111' : '#f0f0f3' }}>
-                    {copied
-                      ? <Check style={{ width: 16, height: 16, color: 'white' }} strokeWidth={2.5} />
-                      : <Link2 style={{ width: 16, height: 16, color: '#444' }} strokeWidth={1.75} />
-                    }
-                  </div>
-                  <span className="text-[15px] font-medium text-[#111]">
-                    {copied ? 'Link copied!' : 'Copy link'}
-                  </span>
-                </button>
-
-                {/* Share via... */}
-                <button
-                  onClick={handleNativeShare}
-                  className="w-full flex items-center gap-3.5 px-4 active:bg-gray-50 transition-colors"
-                  style={{ height: 54 }}
-                >
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{ background: '#f0f0f3' }}>
-                    <Share2 style={{ width: 16, height: 16, color: '#444' }} strokeWidth={1.75} />
-                  </div>
-                  <span className="text-[15px] font-medium text-[#111]">Share via…</span>
-                </button>
-              </div>
-
-              {/* Cancel */}
-              <button
-                onClick={onClose}
-                className="w-full rounded-[16px] active:bg-gray-50 transition-colors flex items-center justify-center"
-                style={{ height: 50, background: '#f5f5f7', fontSize: 16, fontWeight: 600, color: '#111' }}
-              >
-                Cancel
-              </button>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
-  )
-}
-
 // ─── Ask type picker ─────────────────────────────────────────────────────────
 
 function AskTypePicker({
@@ -1112,6 +991,11 @@ function HomeAskSheet({
                                 </div>
                               )
                             })()}
+
+                            {/* $? hint */}
+                            <p className="text-[11px] mt-2 mb-1" style={{ color: '#bbb' }}>
+                              Type your question and tap <span className="font-semibold" style={{ color: '#888' }}>$?</span> to send — or use the button in the box.
+                            </p>
 
                             {/* Media attachment row */}
                             <div className="flex gap-2 mt-3 mb-1">
@@ -3502,6 +3386,11 @@ export default function HomePage() {
           navigator.clipboard.writeText(`${window.location.origin}/post/${cardOptionsItem.id}`).catch(() => {})
         }}
         onSave={() => cardOptionsItem && setSaveTarget(cardOptionsItem.id)}
+        onReport={() => {
+          if (!cardOptionsItem) return
+          const url = `${window.location.origin}/post/${cardOptionsItem.id}`
+          window.open(`mailto:report@oodle.app?subject=Report post&body=Post URL: ${encodeURIComponent(url)}`, '_blank')
+        }}
       />
 
       {/* ── Ask type picker (shown for priced posts) ── */}

@@ -4,7 +4,6 @@ import { ArrowLeft, MoreHorizontal, MapPin, Zap, Check, MessageCircle, X as XIco
 import { motion, AnimatePresence } from 'framer-motion'
 import type { FeedItem } from '../services/feedService'
 import { fetchPostById, composedPostToFeedItem, incrementPostView } from '../services/feedService'
-import { MOCK_FEED_ITEMS } from '../lib/mockFeed'
 import VerifiedBadge from '../components/prsnc/VerifiedBadge'
 import PostMediaCarousel from '../components/Post/PostMediaCarousel'
 import UnlockSheet, { type UnlockTarget } from '../components/Post/UnlockSheet'
@@ -69,7 +68,6 @@ export default function PostDetailPage() {
   const item: FeedItem | null =
     navState?.item ??
     fetchedItem ??
-    MOCK_FEED_ITEMS.find(i => i.id === postId) ??
     null
 
   // Increment view count once per post load

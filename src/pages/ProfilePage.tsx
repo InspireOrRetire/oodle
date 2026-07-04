@@ -150,26 +150,7 @@ function FollowersSheetProfile({
   )
 }
 
-// Placeholder profiles kept only for legacy mock data objects defined below.
-const CREATOR_PROFILE = { display_name: '', username: '', avatar_url: '' }
-const ASKER_PROFILE   = { display_name: '', username: '', avatar_url: '' }
-
-// ─── Mock profile ──────────────────────────────────────────────────────────────
-
-const MOCK_CREATOR = {
-  display_name: 'Coach Dre',
-  username: 'coach_dre',
-  pin: '4821',
-  bio: "Performance coach. I answer what DMs can't.",
-  link: 'coach-dre.com',
-  answer_price: 20,
-  answers_count: 47,
-  questions_count: 312,
-  response_rate: 98,
-  is_active: true,
-}
-
-// ─── Mock answer timeline ──────────────────────────────────────────────────────
+// ─── Answer thread types ──────────────────────────────────────────────────────
 
 interface QAReply {
   username: string
@@ -191,7 +172,7 @@ interface AnswerThread {
   price: number
   images?: string[]
   replies?: QAReply[]    // stacked Q&A replies — shown Threads-style
-  creator?: {            // overrides MOCK_CREATOR when set (used on fan profile)
+  creator?: {            // set from DB; fallback is generic placeholder
     display_name: string
     username: string
     initials: string
@@ -204,159 +185,6 @@ interface AnswerThread {
     purchasers: { username: string; avatar_url: string }[]
   }
 }
-
-const MOCK_THREADS: AnswerThread[] = [
-  {
-    id: 'p0',
-    type: 'post',
-    time_ago: '45m',
-    views: 620,
-    likes: 84,
-    saves: 12,
-    caption: "new training block starts monday. here's what the first week looks like.",
-    question: '',
-    price: 0,
-    images: [
-      'https://picsum.photos/seed/gym101/600/750',
-      'https://picsum.photos/seed/gym102/600/750',
-      'https://picsum.photos/seed/gym103/600/750',
-      'https://picsum.photos/seed/gym104/600/750',
-    ],
-  },
-  {
-    id: 't1',
-    time_ago: '2h',
-    views: 1840,
-    likes: 312,
-    saves: 47,
-    question: "how do you cut weight without losing muscle? i've been trying for months and keep losing strength.",
-    price: 12,
-    images: [
-      'https://picsum.photos/seed/lift701/600/750',
-      'https://picsum.photos/seed/lift702/600/750',
-      'https://picsum.photos/seed/lift703/600/750',
-    ],
-    asker: {
-      username: 'alex_fit',
-      avatar_url: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?auto=format&fit=crop&w=96&h=96',
-      purchase_count: 14,
-      purchasers: [
-        { username: 'user1', avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user2', avatar_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user3', avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user4', avatar_url: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&w=48&h=48' },
-      ],
-    },
-    replies: [
-      { username: 'alex_fit',     avatar_url: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?auto=format&fit=crop&w=96&h=96', question: "how do you cut weight without losing muscle? i've been trying for months and keep losing strength.",  price: 12, time_ago: '2h' },
-      { username: 'morning_grind', avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&h=96', question: "what's your protein target during a cut? i keep losing strength every time i go into a deficit.",         price: 8,  time_ago: '1h' },
-      { username: 'physio_kai',    avatar_url: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&w=96&h=96', question: "do you track macros through the whole cut or just keep it simple with whole foods?",                   price: 6,  time_ago: '45m' },
-    ],
-  },
-  {
-    id: 't2',
-    time_ago: '1d',
-    views: 3100,
-    likes: 528,
-    saves: 91,
-    question: "what's your actual morning routine? not the polished version, the real one.",
-    price: 8,
-    images: [
-      'https://picsum.photos/seed/morning901/600/750',
-    ],
-    asker: {
-      username: 'morning_grind',
-      avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&h=96',
-      purchase_count: 22,
-      purchasers: [
-        { username: 'user5', avatar_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user6', avatar_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user7', avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=48&h=48' },
-      ],
-    },
-    replies: [
-      { username: 'morning_grind',  avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&h=96', question: "what's your actual morning routine? not the polished version, the real one.",   price: 8,  time_ago: '23h' },
-      { username: 'nutr_nerd',      avatar_url: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?auto=format&fit=crop&w=96&h=96', question: "how early do you wake up before your first client session starts each day?",    price: 5,  time_ago: '20h' },
-      { username: 'adventurekid_',  avatar_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=96&h=96', question: "does your morning routine change on days when you're not training anyone?",    price: 4,  time_ago: '14h' },
-    ],
-  },
-  {
-    id: 't3',
-    time_ago: '3d',
-    views: 892,
-    likes: 143,
-    saves: 29,
-    question: 'best single drill for hip mobility you actually use with your athletes?',
-    price: 15,
-    asker: {
-      username: 'physio_kai',
-      avatar_url: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&w=96&h=96',
-      purchase_count: 9,
-      purchasers: [
-        { username: 'user8', avatar_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user9', avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=48&h=48' },
-      ],
-    },
-    replies: [
-      { username: 'physio_kai',    avatar_url: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&w=96&h=96', question: "best single drill for hip mobility you actually use with your athletes?",            price: 15, time_ago: '3d' },
-      { username: 'alex_fit',      avatar_url: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?auto=format&fit=crop&w=96&h=96', question: "how many times a week do you program this drill and at what point in a session?",    price: 9,  time_ago: '2d' },
-    ],
-  },
-  {
-    id: 't4',
-    time_ago: '5d',
-    views: 2240,
-    likes: 387,
-    saves: 62,
-    question: 'do you track macros with all your clients or just the competitive ones?',
-    price: 10,
-    asker: {
-      username: 'nutr_nerd',
-      avatar_url: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?auto=format&fit=crop&w=96&h=96',
-      purchase_count: 17,
-      purchasers: [
-        { username: 'user10', avatar_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user11', avatar_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user12', avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user13', avatar_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=48&h=48' },
-      ],
-    },
-    replies: [
-      { username: 'nutr_nerd',     avatar_url: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?auto=format&fit=crop&w=96&h=96', question: "do you track macros with all your clients or just the competitive ones?",         price: 10, time_ago: '5d' },
-      { username: 'morning_grind', avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&h=96', question: "what app do you use for macro tracking? does it actually change their results?",   price: 7,  time_ago: '4d' },
-      { username: 'physio_kai',    avatar_url: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&w=96&h=96', question: "at what point do you stop tracking and shift to intuitive eating with clients?",   price: 12, time_ago: '3d' },
-    ],
-  },
-  {
-    id: 't5',
-    time_ago: '1w',
-    views: 4700,
-    likes: 841,
-    saves: 134,
-    question: 'what supplement stack do you actually recommend vs the stuff you just sell?',
-    price: 18,
-    images: [
-      'https://picsum.photos/seed/supps1101/600/750',
-      'https://picsum.photos/seed/greens1101/600/750',
-    ],
-    asker: {
-      username: 'skeptic_sam',
-      avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&h=96',
-      purchase_count: 31,
-      purchasers: [
-        { username: 'user14', avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user15', avatar_url: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user16', avatar_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=48&h=48' },
-      ],
-    },
-    replies: [
-      { username: 'skeptic_sam',   avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&h=96', question: "what supplement stack do you actually recommend vs the stuff you just sell?",    price: 18, time_ago: '1w' },
-      { username: 'nutr_nerd',     avatar_url: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?auto=format&fit=crop&w=96&h=96', question: "is creatine actually worth it for someone who isn't lifting heavy every day?",  price: 10, time_ago: '6d' },
-      { username: 'alex_fit',      avatar_url: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?auto=format&fit=crop&w=96&h=96', question: "does timing really matter for protein? or is total daily intake all that counts?", price: 14, time_ago: '5d' },
-      { username: 'morning_grind', avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&h=96', question: "what's the one supplement you'd keep if you could only pick one for performance?",  price: 8,  time_ago: '4d' },
-    ],
-  },
-]
 
 // ─── Local question (added via ask-bubble) ────────────────────────────────────
 
@@ -463,11 +291,10 @@ function ThreadItem({
   const hasImages  = !!(thread.images && thread.images.length > 0)
   const [showAllReplies, setShowAllReplies] = useState(false)
 
-  // Resolve creator — falls back to MOCK_CREATOR if not overridden per-thread
   const creator = thread.creator ?? {
-    display_name: MOCK_CREATOR.display_name,
-    username:     MOCK_CREATOR.username,
-    initials:     MOCK_CREATOR.display_name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase(),
+    display_name: '',
+    username:     '',
+    initials:     '?',
     avatar_url:   undefined,
   }
 
@@ -882,9 +709,9 @@ function PurchaseSheet({
   onPurchased?: (id: string) => void
 }) {
   const creatorDisplay = thread?.creator ?? {
-    display_name: MOCK_CREATOR.display_name,
-    username:     MOCK_CREATOR.username,
-    initials:     MOCK_CREATOR.display_name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase(),
+    display_name: '',
+    username:     '',
+    initials:     '?',
     avatar_url:   undefined,
   }
   const initials = creatorDisplay.initials
@@ -1231,8 +1058,7 @@ function CreatorAvatar({
   initials?: string
   avatarUrl?: string
 }) {
-  const initials = overrideInitials
-    ?? MOCK_CREATOR.display_name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()
+  const initials = overrideInitials ?? '?'
 
   if (avatarUrl) {
     return (
@@ -1254,227 +1080,6 @@ function CreatorAvatar({
   )
 }
 
-// ─── Fan-profile mock threads (Alex's answered Q&As) ──────────────────────────
-// Only answered threads are shown — pending ones are not public yet.
-
-const ALEX_ASKER = {
-  username:       ASKER_PROFILE.username,
-  avatar_url:     ASKER_PROFILE.avatar_url,
-  purchase_count: 0,
-  purchasers:     [] as { username: string; avatar_url: string }[],
-}
-
-const MOCK_FAN_THREADS: AnswerThread[] = [
-  {
-    id: 'ft1',
-    time_ago: '4h',
-    views: 1840,
-    likes: 312,
-    saves: 47,
-    question: "how do you cut weight without losing muscle? i've been trying for months and keep losing strength.",
-    price: 12,
-    creator: { display_name: 'Coach Dre', username: 'coach_dre', initials: 'CD' },
-    images: [
-      'https://picsum.photos/seed/lift701/600/750',
-      'https://picsum.photos/seed/lift702/600/750',
-      'https://picsum.photos/seed/lift703/600/750',
-    ],
-    asker: { ...ALEX_ASKER, purchase_count: 22,
-      purchasers: [
-        { username: 'user1', avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user2', avatar_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user3', avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=48&h=48' },
-      ],
-    },
-  },
-  {
-    id: 'ft2',
-    time_ago: '1d',
-    views: 940,
-    likes: 178,
-    saves: 33,
-    question: "what color grading tools do you actually use? trying to nail those shadows in DaVinci.",
-    price: 4,
-    creator: {
-      display_name: 'Marcus Lee', username: 'marcus.creative', initials: 'ML',
-      avatar_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=96&h=96',
-    },
-    images: [
-      'https://picsum.photos/seed/cinema201/600/750',
-      'https://picsum.photos/seed/cinema202/600/750',
-    ],
-    asker: { ...ALEX_ASKER, purchase_count: 8,
-      purchasers: [
-        { username: 'user4', avatar_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user5', avatar_url: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?auto=format&fit=crop&w=48&h=48' },
-      ],
-    },
-  },
-  {
-    id: 'ft3',
-    time_ago: '4d',
-    views: 2300,
-    likes: 204,
-    saves: 41,
-    question: "which Sony body is this and did you use any ND filter for this shot?",
-    price: 3,
-    creator: {
-      display_name: 'Leo Santos', username: 'lens.leo', initials: 'LS',
-      avatar_url: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?auto=format&fit=crop&w=96&h=96',
-    },
-    images: [
-      'https://picsum.photos/seed/lens401/600/750',
-    ],
-    asker: { ...ALEX_ASKER, purchase_count: 17,
-      purchasers: [
-        { username: 'user6', avatar_url: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user7', avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user8', avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user9', avatar_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=48&h=48' },
-      ],
-    },
-  },
-  {
-    id: 'ft4',
-    time_ago: '6d',
-    views: 1120,
-    likes: 89,
-    saves: 17,
-    question: "what's the lightest tent you'd actually recommend for solo alpine camping?",
-    price: 6,
-    creator: {
-      display_name: 'Jake Torres', username: 'mountain.guide', initials: 'JT',
-      avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=96&h=96',
-    },
-    images: [
-      'https://picsum.photos/seed/trail501/600/750',
-      'https://picsum.photos/seed/trail502/600/750',
-    ],
-    asker: { ...ALEX_ASKER, purchase_count: 11,
-      purchasers: [
-        { username: 'user10', avatar_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user11', avatar_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=48&h=48' },
-      ],
-    },
-  },
-  {
-    id: 'ft5',
-    time_ago: '2w',
-    views: 3410,
-    likes: 441,
-    saves: 76,
-    question: "what are your top 3 tips for restaurant-quality pasta at home?",
-    price: 8,
-    creator: {
-      display_name: 'Mei Chen', username: 'mei.cooks', initials: 'MC',
-      avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=96&h=96',
-    },
-    images: [
-      'https://picsum.photos/seed/food301/600/750',
-    ],
-    asker: { ...ALEX_ASKER, purchase_count: 34,
-      purchasers: [
-        { username: 'user12', avatar_url: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user13', avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user14', avatar_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=48&h=48' },
-      ],
-    },
-  },
-]
-
-// ─── Alex's own posts (shown on her "You" profile timeline) ───────────────────
-
-const ALEX_CREATOR = {
-  display_name: ASKER_PROFILE.display_name,
-  username:     ASKER_PROFILE.username,
-  initials:     ASKER_PROFILE.display_name.slice(0, 2).toUpperCase(),
-  avatar_url:   ASKER_PROFILE.avatar_url,
-}
-
-const MOCK_ALEX_POSTS: AnswerThread[] = [
-  {
-    id: 'ap1',
-    type: 'post',
-    time_ago: '3h',
-    views: 412,
-    likes: 67,
-    saves: 14,
-    caption: 'golden hour on the ridge. worth every step.',
-    question: '',
-    price: 5,
-    creator: ALEX_CREATOR,
-    images: [
-      'https://picsum.photos/seed/ridge901/600/750',
-      'https://picsum.photos/seed/ridge902/600/750',
-    ],
-  },
-  {
-    id: 'ap2',
-    type: 'post',
-    time_ago: '2d',
-    views: 1830,
-    likes: 294,
-    saves: 58,
-    caption: 'solo weekend in the cascades. packed light, shot heavy.',
-    question: '',
-    price: 8,
-    creator: ALEX_CREATOR,
-    images: [
-      'https://picsum.photos/seed/cascade101/600/750',
-      'https://picsum.photos/seed/cascade102/600/750',
-      'https://picsum.photos/seed/cascade103/600/750',
-    ],
-  },
-  {
-    id: 'ap3',
-    type: 'post',
-    time_ago: '5d',
-    views: 776,
-    likes: 118,
-    saves: 22,
-    caption: 'fog rolling in around 5am. set the alarm, no regrets.',
-    question: '',
-    price: 0,  // free
-    creator: ALEX_CREATOR,
-    images: [
-      'https://picsum.photos/seed/fogmorning1/600/750',
-    ],
-  },
-  {
-    id: 'ap4',
-    type: 'post',
-    time_ago: '1w',
-    views: 2140,
-    likes: 431,
-    saves: 87,
-    caption: 'spent a week in portugal with nothing but a 35mm. still processing.',
-    question: '',
-    price: 12,
-    creator: ALEX_CREATOR,
-    images: [
-      'https://picsum.photos/seed/lisbon201/600/750',
-      'https://picsum.photos/seed/lisbon202/600/750',
-      'https://picsum.photos/seed/lisbon203/600/750',
-      'https://picsum.photos/seed/lisbon204/600/750',
-    ],
-  },
-  {
-    id: 'ap5',
-    type: 'post',
-    time_ago: '2w',
-    views: 988,
-    likes: 176,
-    saves: 31,
-    caption: 'local reservoir at low tide. underrated spot.',
-    question: '',
-    price: 3,
-    creator: ALEX_CREATOR,
-    images: [
-      'https://picsum.photos/seed/reservoir301/600/750',
-      'https://picsum.photos/seed/reservoir302/600/750',
-    ],
-  },
-]
 
 function fmt(n: number) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
@@ -1544,9 +1149,9 @@ function AskSheet({
   }
 
   const creator = thread?.creator ?? {
-    display_name: MOCK_CREATOR.display_name,
-    username:     MOCK_CREATOR.username,
-    initials:     MOCK_CREATOR.display_name.split(' ').map((w: string) => w[0]).join('').slice(0, 2),
+    display_name: '',
+    username:     '',
+    initials:     '?',
     avatar_url:   undefined,
   }
 
@@ -2193,22 +1798,6 @@ function EditPriceSheet({
     </AnimatePresence>
   )
 }
-
-// ─── Fan profile view ─────────────────────────────────────────────────────────
-
-// Interleave Alex's own posts with answered Q&A threads, newest first
-const ALEX_TIMELINE: AnswerThread[] = [
-  MOCK_ALEX_POSTS[0],   // ap1  3h
-  MOCK_FAN_THREADS[0],  // ft1  4h  — Coach Dre (purchased)
-  MOCK_ALEX_POSTS[1],   // ap2  2d
-  MOCK_FAN_THREADS[1],  // ft2  1d  — Marcus (purchased)
-  MOCK_ALEX_POSTS[2],   // ap3  5d
-  MOCK_FAN_THREADS[2],  // ft3  4d  — Leo (available)
-  MOCK_ALEX_POSTS[3],   // ap4  1w
-  MOCK_FAN_THREADS[3],  // ft4  6d  — Jake (available)
-  MOCK_ALEX_POSTS[4],   // ap5  2w
-  MOCK_FAN_THREADS[4],  // ft5  2w  — Mei (available)
-]
 
 // ─── Profile Edit Sheet ───────────────────────────────────────────────────────
 
