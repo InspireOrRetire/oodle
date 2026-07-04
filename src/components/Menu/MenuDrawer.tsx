@@ -23,7 +23,7 @@ export default function MenuDrawer({ isOpen, onClose }: Props) {
   }, [profile?.id, showTopUp])
 
   function go(path: string) { navigate(path); onClose() }
-  function handleSignOut() { onClose(); signOut(); navigate('/auth', { replace: true }) }
+  async function handleSignOut() { onClose(); await signOut(); navigate('/auth', { replace: true }) }
 
   if (!isOpen) return null
 

@@ -1212,6 +1212,7 @@ function MyAnswersSheet({ open, onClose }: { open: boolean; onClose: () => void 
 export default function SettingsPage() {
   const navigate  = useNavigate()
   const { signOut } = useAuth()
+  async function handleSignOut() { await signOut(); navigate('/auth', { replace: true }) }
 
 
   const { profile: realProfile } = useAuth()
@@ -1540,7 +1541,7 @@ export default function SettingsPage() {
         <Row
           icon={<LogOut style={{ width: 14, height: 14 }} strokeWidth={2} />}
           iconBg="#fff0f0" iconColor="#e53e3e"
-          label="Sign out" danger onClick={signOut}
+          label="Sign out" danger onClick={handleSignOut}
         />
         <Row
           icon={<Trash2 style={{ width: 14, height: 14 }} strokeWidth={2} />}
@@ -1588,7 +1589,7 @@ export default function SettingsPage() {
       <MyAnswersSheet open={answersOpen} onClose={() => setAnswersOpen(false)} />
       <DeleteAccountSheet
         open={deleteOpen} onClose={() => setDeleteOpen(false)}
-        onConfirm={signOut}
+        onConfirm={handleSignOut}
       />
 
       <Toast message={toast} />
