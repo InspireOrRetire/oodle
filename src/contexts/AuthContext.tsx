@@ -132,6 +132,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (s?.user) {
+        // Real session — always exit explore mode
+        localStorage.removeItem(EXPLORE_KEY)
+        setExploreMode(false)
         // handle_new_user() trigger may still be committing — retry with back-off
         let p: Profile | null = null
         for (let i = 0; i < 3; i++) {
