@@ -30,7 +30,6 @@ import {
   getCollections, getSavedItems, createCollection,
   type SavedCollection, type SavedItem,
 } from '../services/savedService'
-import { MOCK_FEED_ITEMS } from '../lib/mockFeed'
 import { supabase } from '../lib/supabase'
 import { myQuestionsStore, type LocalAskedQuestion } from '../services/myQuestionsStore'
 
@@ -2143,8 +2142,6 @@ export default function HomePage() {
     if (authLoading) return
     // Auth resolved but no user — nothing to fetch
     if (!user) { setFeedLoading(false); return }
-    // Explore mode: use rich mock feed items directly — no DB call
-    if (isExploreMode) { setFeed(MOCK_FEED_ITEMS); setFeedLoading(false); return }
     let cancelled = false
     setFeedLoading(true)
     setFeedError(null)

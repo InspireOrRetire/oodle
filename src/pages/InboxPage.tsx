@@ -6,7 +6,6 @@ import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
 import { getThreads, subscribeToThreadUpdates, submitAnswer } from '../services/threadService'
 import type { ThreadWithParticipants, AnswerBlock } from '../lib/database.types'
-import { MOCK_THREADS } from '../lib/mockFeed'
 import { formatDistanceToNow } from '../lib/time'
 import { supabase } from '../lib/supabase'
 
@@ -1006,8 +1005,7 @@ export default function InboxPage() {
   useEffect(() => {
     if (authLoading) return
     if (!user) { setLoading(false); return }
-    // Explore mode: use mock threads, no DB call needed
-    if (isExploreMode) { setThreads(MOCK_THREADS); setLoading(false); return }
+    if (isExploreMode) { setThreads([]); setLoading(false); return }
     let cancelled = false
     const timeout = setTimeout(() => { if (!cancelled) setLoading(false) }, 6000)
     getThreads(user.id)

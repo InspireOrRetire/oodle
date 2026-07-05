@@ -26,35 +26,7 @@ interface AuthCtx {
   updateProfile:    (updates: Partial<Profile>) => Promise<void>
 }
 
-// ── Guest/explore-mode mock ───────────────────────────────────────────────────
-
 const EXPLORE_KEY = 'oodle_explore_mode'
-
-const MOCK_GUEST_USER = {
-  id:    'explore-guest',
-  email: 'guest@oodle.app',
-  app_metadata: {}, user_metadata: {}, aud: 'authenticated',
-  created_at: new Date().toISOString(),
-} as unknown as User
-
-const MOCK_GUEST_PROFILE: Profile = {
-  id:                   'explore-guest',
-  role:                 'creator',
-  username:             'you',
-  display_name:         'You (exploring)',
-  avatar_url:           null,
-  bio:                  "Exploring oodle — sign up to unlock everything.",
-  categories:           null,
-  default_answer_price: null,
-  stripe_account_id:    null,
-  stripe_onboarded:     null,
-  followers_count:      0,
-  following_count:      0,
-  onboarding_completed: true,
-  response_rate:        null,
-  created_at:           new Date().toISOString(),
-  updated_at:           new Date().toISOString(),
-}
 
 const Ctx = createContext<AuthCtx | null>(null)
 
@@ -191,15 +163,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await reloadProfile()
   }, [reloadProfile])
 
-  // In explore mode, substitute mock values so every page renders normally
-  const effectiveUser    = exploreMode && !user    ? MOCK_GUEST_USER    : user
-  const effectiveProfile = exploreMode && !profile ? MOCK_GUEST_PROFILE : profile
-
   return (
     <Ctx.Provider value={{
       session,
-      user:             effectiveUser,
-      profile:          effectiveProfile,
+      user,
+      profile,
       loading,
       isExploreMode:    exploreMode,
       enterExploreMode,
