@@ -7,7 +7,6 @@
 import { supabase } from '../lib/supabase'
 import { composeFeed, type ComposedPost } from '../lib/feedComposer'
 import { formatDistanceToNow } from '../lib/time'
-import { MOCK_FEED } from '../lib/mockFeed'
 
 // ── FeedItem — the shape FeedCard expects ─────────────────────────────────────
 // Defined here so feedService owns the adapter; HomePage imports this type.
@@ -154,7 +153,7 @@ export async function fetchExploreFeed(): Promise<ComposedPost[]> {
     .order('created_at', { ascending: false })
     .limit(60)
 
-  if (error || !rawData) return MOCK_FEED
+  if (error || !rawData) return []
   const data = rawData as PostRow013[]
 
   const mapped = data.map(post => {
@@ -183,8 +182,7 @@ export async function fetchExploreFeed(): Promise<ComposedPost[]> {
     }
   })
 
-  // Fall back to mock data if the DB is empty
-  return mapped.length > 0 ? mapped : MOCK_FEED
+  return mapped
 }
 
 // ── fetchComposedFeed ─────────────────────────────────────────────────────────
