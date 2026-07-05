@@ -1523,6 +1523,9 @@ export default function HomePage() {
   const [feed,        setFeed]        = useState<FeedItem[]>([])
   const [feedLoading, setFeedLoading] = useState(true)
   const [feedError,   setFeedError]   = useState<string | null>(null)
+  const [feedFilter,  setFeedFilter]  = useState<'all' | 'recipe' | 'itinerary'>('all')
+
+  const filteredFeed = feedFilter === 'all' ? feed : feed.filter(f => f.post_subtype === feedFilter)
 
   const [feedVersion, setFeedVersion] = useState(0)
   const refreshFeed = useCallback(() => setFeedVersion(v => v + 1), [])
@@ -1878,6 +1881,23 @@ export default function HomePage() {
         </button>
       </div>
 
+      {/* ── Filter pills ── */}
+      <div className="flex gap-2 px-4 py-2.5 bg-white" style={{ borderBottom: '0.5px solid #f0f0f0' }}>
+        {([
+          { key: 'all',       label: 'All' },
+          { key: 'recipe',    label: '🍴 Recipes' },
+          { key: 'itinerary', label: '🗺️ Itineraries' },
+        ] as const).map(f => (
+          <button key={f.key} onClick={() => setFeedFilter(f.key)}
+            className="px-3.5 py-1.5 rounded-full text-[12px] font-semibold transition-all active:opacity-70"
+            style={feedFilter === f.key
+              ? { background: '#111', color: '#fff' }
+              : { background: '#f0f0f0', color: '#666' }}>
+            {f.label}
+          </button>
+        ))}
+      </div>
+
       {/* ── Feed ── */}
       <AnimatePresence mode="wait">
 
@@ -1929,7 +1949,14 @@ export default function HomePage() {
           <motion.div key="feed"
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}>
-            {feed.map(item => (
+            {filteredFeed.length === 0 && (
+              <div className="flex flex-col items-center justify-center pt-24 px-8 text-center">
+                <p className="text-[22px] mb-2">{feedFilter === 'recipe' ? '🍴' : '🗺️'}</p>
+                <p className="text-[15px] font-semibold text-[#111] mb-1">No {feedFilter === 'recipe' ? 'recipes' : 'itineraries'} yet</p>
+                <p className="text-[13px] text-gray-400">Be the first to post one</p>
+              </div>
+            )}
+            {filteredFeed.map(item => (
               <FeedCard
                 key={item.id}
                 item={item}
