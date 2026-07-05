@@ -412,6 +412,7 @@ export async function fetchPostById(postId: string, currentUserId: string) {
     .from('posts')
     .select(`
       id, creator_id, caption, image_urls, price, views,
+      post_subtype, structured_data,
       location_address, location_lat, location_lng,
       question_count, answer_count, created_at,
       creator:users!creator_id (

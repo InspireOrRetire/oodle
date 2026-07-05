@@ -172,6 +172,8 @@ interface AnswerThread {
   question: string       // question text for Q&A threads (below the media / as asker row)
   price: number
   images?: string[]
+  post_subtype?:    'recipe' | 'itinerary'
+  structured_data?: Record<string, unknown>
   replies?: QAReply[]    // stacked Q&A replies — shown Threads-style
   creator?: {            // set from DB; fallback is generic placeholder
     display_name: string
@@ -412,6 +414,65 @@ function ThreadItem({
                   <PostMediaCarousel images={thread.images} aspectRatio="vertical" />
                 </div>
               )}
+              {/* Structured preview — recipe */}
+              {thread.post_subtype === 'recipe' && thread.structured_data && (() => {
+                const r = thread.structured_data as { servings?: number; prep_time?: string; cook_time?: string; ingredients?: string[]; steps?: string[] }
+                return (
+                  <div className="mb-2.5 rounded-[14px] overflow-hidden" style={{ border: '1.5px solid #eee', background: '#fafafa' }}>
+                    {(r.servings || r.prep_time || r.cook_time) && (
+                      <div className="flex divide-x" style={{ borderBottom: '1px solid #eee' }}>
+                        {r.servings   && <div className="flex-1 flex flex-col items-center py-2"><span className="text-[9px] uppercase tracking-wide font-semibold" style={{ color: '#aaa' }}>Serves</span><span className="text-[15px] font-bold text-[#111]">{r.servings}</span></div>}
+                        {r.prep_time  && <div className="flex-1 flex flex-col items-center py-2"><span className="text-[9px] uppercase tracking-wide font-semibold" style={{ color: '#aaa' }}>Prep</span><span className="text-[13px] font-bold text-[#111]">{r.prep_time}</span></div>}
+                        {r.cook_time  && <div className="flex-1 flex flex-col items-center py-2"><span className="text-[9px] uppercase tracking-wide font-semibold" style={{ color: '#aaa' }}>Cook</span><span className="text-[13px] font-bold text-[#111]">{r.cook_time}</span></div>}
+                      </div>
+                    )}
+                    {r.ingredients && r.ingredients.length > 0 && (
+                      <div className="px-3 py-2.5">
+                        <p className="text-[10px] uppercase tracking-wide font-bold mb-1.5" style={{ color: '#aaa' }}>Ingredients · {r.ingredients.length}</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {r.ingredients.slice(0, 5).map((ing, i) => (
+                            <span key={i} className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: '#efefef', color: '#555' }}>{ing}</span>
+                          ))}
+                          {r.ingredients.length > 5 && <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: '#efefef', color: '#888' }}>+{r.ingredients.length - 5} more</span>}
+                        </div>
+                      </div>
+                    )}
+                    {r.steps && r.steps.length > 0 && (
+                      <div className="px-3 pb-2.5"><span className="text-[11px]" style={{ color: '#888' }}>{r.steps.length} steps</span></div>
+                    )}
+                  </div>
+                )
+              })()}
+              {/* Structured preview — itinerary */}
+              {thread.post_subtype === 'itinerary' && thread.structured_data && (() => {
+                const itin = thread.structured_data as { destination?: string; duration?: string; days?: { day: number; title?: string; stops?: { name: string }[] }[] }
+                const totalStops = itin.days?.reduce((s, d) => s + (d.stops?.length ?? 0), 0) ?? 0
+                return (
+                  <div className="mb-2.5 rounded-[14px] overflow-hidden" style={{ border: '1.5px solid #eee', background: '#fafafa' }}>
+                    <div className="flex items-center justify-between px-3 py-2.5" style={{ borderBottom: '1px solid #eee' }}>
+                      <div>
+                        {itin.destination && <p className="text-[15px] font-bold text-[#111]">{itin.destination}</p>}
+                        <p className="text-[11px]" style={{ color: '#888' }}>{itin.days?.length ?? 0} days · {totalStops} stops{itin.duration ? ` · ${itin.duration}` : ''}</p>
+                      </div>
+                      <span className="text-[22px]">🗺️</span>
+                    </div>
+                    {itin.days?.slice(0, 2).map((day, i) => (
+                      <div key={i} className="px-3 py-2" style={{ borderBottom: i < Math.min((itin.days?.length ?? 0), 2) - 1 ? '1px solid #eee' : undefined }}>
+                        <p className="text-[10px] uppercase tracking-wide font-bold mb-1" style={{ color: '#aaa' }}>Day {day.day}{day.title ? ` — ${day.title}` : ''}</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {day.stops?.slice(0, 3).map((stop, si) => (
+                            <span key={si} className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: '#efefef', color: '#555' }}>{stop.name}</span>
+                          ))}
+                          {(day.stops?.length ?? 0) > 3 && <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: '#efefef', color: '#888' }}>+{day.stops!.length - 3}</span>}
+                        </div>
+                      </div>
+                    ))}
+                    {(itin.days?.length ?? 0) > 2 && (
+                      <div className="px-3 py-2 text-center"><span className="text-[11px]" style={{ color: '#888' }}>+{itin.days!.length - 2} more days</span></div>
+                    )}
+                  </div>
+                )
+              })()}
               {/* Action row — matches home feed */}
               <div className="relative flex items-center py-2.5" style={{ borderTop: '0.5px solid #f5f5f7', minHeight: 40 }}>
                 <div className="flex items-center gap-5">
@@ -2906,7 +2967,7 @@ export default function ProfilePage() {
       const [postsResult, threadsResult] = await Promise.all([
         supabase
           .from('posts')
-          .select('id, caption, image_urls, price, question_count, answer_count, created_at')
+          .select('id, caption, image_urls, price, post_subtype, structured_data, question_count, answer_count, created_at')
           .eq('creator_id', uid)
           .order('created_at', { ascending: false })
           .limit(30),
@@ -2934,15 +2995,17 @@ export default function ProfilePage() {
 
       // Map posts → AnswerThread (type:post)
       const postItems: AnswerThread[] = (posts ?? []).map(p => ({
-        id:       p.id,
-        type:     'post' as const,
-        time_ago: formatDistanceToNow(p.created_at),
-        views:    0,
-        caption:  p.caption ?? '',
-        question: '',
-        price:    Number(p.price ?? 0),
-        images:   p.image_urls ?? [],
-        creator:  creatorObj,
+        id:              p.id,
+        type:            'post' as const,
+        time_ago:        formatDistanceToNow(p.created_at),
+        views:           0,
+        caption:         p.caption ?? '',
+        question:        '',
+        price:           Number(p.price ?? 0),
+        images:          p.image_urls ?? [],
+        post_subtype:    (p as any).post_subtype  ?? undefined,
+        structured_data: (p as any).structured_data ?? undefined,
+        creator:         creatorObj,
       }))
 
       // Build a post image map for Q&A threads
@@ -3425,11 +3488,13 @@ export default function ProfilePage() {
         onClose={() => setEditPostThread(null)}
         onPosted={() => setEditPostThread(null)}
         editPost={editPostThread ? {
-          id:        editPostThread.id,
-          caption:   editPostThread.caption,
-          price:     editPostThread.price,
-          post_type: 'type2',
-          images:    editPostThread.images,
+          id:             editPostThread.id,
+          caption:        editPostThread.caption,
+          price:          editPostThread.price,
+          post_type:      'type2',
+          images:         editPostThread.images,
+          post_subtype:   editPostThread.post_subtype,
+          structured_data: editPostThread.structured_data,
         } : undefined}
       />
 

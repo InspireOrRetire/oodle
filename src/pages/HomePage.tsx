@@ -2086,11 +2086,13 @@ export default function HomePage() {
         onClose={() => { setNewPostOpen(false); setEditPostItem(null) }}
         onPosted={() => { setEditPostItem(null); setTimeout(refreshFeed, 1500) }}
         editPost={editPostItem ? {
-          id:        editPostItem.id,
-          caption:   editPostItem.text,
-          price:     editPostItem.price,
-          post_type: editPostItem.post_type,
-          images:    editPostItem.images,
+          id:             editPostItem.id,
+          caption:        editPostItem.text,
+          price:          editPostItem.price,
+          post_type:      editPostItem.post_type,
+          images:         editPostItem.images,
+          post_subtype:   editPostItem.post_subtype,
+          structured_data: editPostItem.structured_data as Record<string, unknown> | undefined,
         } : undefined}
       />
 
