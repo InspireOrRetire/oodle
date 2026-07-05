@@ -255,7 +255,66 @@ export async function fetchComposedFeed(userId: string): Promise<ComposedPost[]>
     }
   }
 
-  return composeFeed(result)
+  const composed = composeFeed(result)
+
+  // ── Platform-wide fallback ────────────────────────────────────────────────
+  // When the composed feed is thin (< 20 posts), the time-windowed RPC found
+  // very little content — typical on a small platform where creators don't post
+  // every day. Pull ALL posts with no time limit, dedup against what's already
+  // shown, and append. This gives Threads-style "see everyone" behaviour so
+  // new users never land on an empty feed.
+  if (composed.length < 20) {
+    const shownIds = new Set(composed.map(p => p.id))
+
+    // Grab purchased post IDs so locked posts render correctly in the supplement
+    const { data: purchaseRows } = await supabase
+      .from('post_purchases')
+      .select('post_id')
+      .eq('buyer_id', userId)
+    const purchasedIds = new Set((purchaseRows ?? []).map((r: any) => r.post_id as string))
+
+    const { data: allPosts } = await (supabase as any)
+      .from('posts')
+      .select(`
+        id, creator_id, caption, image_urls, price,
+        post_type, fixed_price, views,
+        location_address, question_count, answer_count, created_at,
+        users!creator_id (
+          username, display_name, avatar_url, categories, response_rate
+        )
+      `)
+      .order('created_at', { ascending: false })
+      .limit(60)
+
+    if (allPosts && allPosts.length > 0) {
+      const supplement: import('../lib/feedComposer').ComposedPost[] = (allPosts as any[])
+        .filter(p => !shownIds.has(p.id))
+        .map(p => ({
+          id:                    p.id,
+          creator_id:            p.creator_id,
+          creator_username:      p.users?.username      ?? '',
+          creator_display_name:  p.users?.display_name  ?? null,
+          creator_avatar_url:    p.users?.avatar_url    ?? null,
+          creator_response_rate: p.users?.response_rate ?? null,
+          categories:            p.users?.categories    ?? [],
+          created_at:            p.created_at,
+          caption:               p.caption              ?? null,
+          image_urls:            p.image_urls           ?? [],
+          price:                 p.price                ?? null,
+          post_type:             (p.post_type ?? 'type1') as 'type1' | 'type2',
+          fixed_price:           p.fixed_price          ?? null,
+          location_address:      p.location_address     ?? null,
+          question_count:        p.question_count       ?? 0,
+          answer_count:          p.answer_count         ?? 0,
+          views:                 p.views                ?? 0,
+          is_purchased:          purchasedIds.has(p.id),
+          _slot:                 'discovery' as const,
+        }))
+      return [...composed, ...supplement]
+    }
+  }
+
+  return composed
 }
 
 // ── fetchPostById ─────────────────────────────────────────────────────────────
