@@ -114,13 +114,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (p) break
           await new Promise(r => setTimeout(r, 500 * (i + 1)))
         }
-        // If a pending username was stored at signup, apply it now (once)
-        const pendingUsername = localStorage.getItem('pending_username')
-        if (p && pendingUsername && !p.username) {
-          localStorage.removeItem('pending_username')
-          await AuthService.updateMyProfile({ username: pendingUsername }).catch(() => null)
-          p = await loadProfile(s.user.id).catch(() => p)
-        }
         if (mounted) setProfile(p)
       } else {
         if (mounted) setProfile(null)
@@ -129,6 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => { mounted = false; clearTimeout(fallbackTimer); subscription.unsubscribe() }
   }, [])
+
 
   const signUp = useCallback(async (email: string, password: string, role: Role) => {
     await AuthService.signUp(email, password, role)

@@ -9,7 +9,6 @@ export default function AuthPage() {
   const [tab, setTab] = useState<'in' | 'up'>('in')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [username, setUsername] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
@@ -60,9 +59,7 @@ export default function AuthPage() {
         await signIn(email, password)
         // navigation handled by the useEffect above once user is set
       } else {
-        if (!username.trim()) { setError('Username required'); setLoading(false); return }
         if (password.length < 6) { setError('Password must be 6+ characters'); setLoading(false); return }
-        if (username) localStorage.setItem('pending_username', username.trim().toLowerCase())
         await signUp(email, password, 'fan')
         setDone(true)
       }
@@ -134,11 +131,6 @@ export default function AuthPage() {
         </div>
 
         <div className="space-y-3">
-          {tab === 'up' && (
-            <input type="text" placeholder="Username" value={username}
-              onChange={e => setUsername(e.target.value.replace(/\s/g, '').toLowerCase())}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
-          )}
           <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)}
             className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
           <input type="password" placeholder="Password" value={password}
