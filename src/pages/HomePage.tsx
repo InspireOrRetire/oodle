@@ -1788,16 +1788,18 @@ export default function HomePage() {
         className="flex items-center gap-3 px-4 py-3.5 bg-white"
         style={{ borderBottom: '0.5px solid #f0f0f0' }}
       >
-        {activeProfile.avatar_url
-          ? <img src={activeProfile.avatar_url} alt={activeProfile.username}
-              className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
-          : <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ background: '#111' }}>
-              <span className="text-white font-semibold" style={{ fontSize: 13 }}>
-                {(activeProfile.display_name?.[0] ?? '?')}
-              </span>
-            </div>
-        }
+        <button onClick={() => navigate('/profile')} className="flex-shrink-0">
+          {activeProfile.avatar_url
+            ? <img src={activeProfile.avatar_url} alt={activeProfile.username}
+                className="w-9 h-9 rounded-full object-cover" />
+            : <div className="w-9 h-9 rounded-full flex items-center justify-center"
+                style={{ background: '#111' }}>
+                <span className="text-white font-semibold" style={{ fontSize: 13 }}>
+                  {(activeProfile.display_name?.[0] ?? '?')}
+                </span>
+              </div>
+          }
+        </button>
         <button
           onClick={() => { iosKbRef.current?.focus(); setNewPostOpen(true) }}
           className="flex-1 text-left py-2 px-3.5 rounded-full"
