@@ -331,10 +331,14 @@ export async function fetchCreatorProfile(username: string, currentUserId: strin
 // Trigram-indexed search used by the search overlay.
 
 export async function searchCreators(query: string, limit = 20) {
+  // Strip leading @ so typing "@jdevore" still finds "jdevore"
+  const q = query.replace(/^@+/, '').trim()
+  if (!q) return []
+
   const { data, error } = await supabase
     .from('users')
     .select('id, username, display_name, avatar_url, followers_count, role')
-    .or(`username.ilike.%${query}%,display_name.ilike.%${query}%`)
+    .or(`username.ilike.%${q}%,display_name.ilike.%${q}%,email.ilike.%${q}%`)
     .order('followers_count', { ascending: false })
     .limit(limit)
 
