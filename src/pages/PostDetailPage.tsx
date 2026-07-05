@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { ArrowLeft, MoreHorizontal, MapPin,  Check, MessageCircle, X as XIcon, Lock, Bookmark, Eye, PencilLine } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, MapPin, Check, MessageCircle, X as XIcon, Lock, Bookmark, Eye, PencilLine } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import type { FeedItem } from '../services/feedService'
+import type { FeedItem, RecipeData, ItineraryData } from '../services/feedService'
 import { fetchPostById, composedPostToFeedItem, incrementPostView } from '../services/feedService'
 import VerifiedBadge from '../components/prsnc/VerifiedBadge'
 import PostMediaCarousel from '../components/Post/PostMediaCarousel'
@@ -99,6 +99,7 @@ export default function PostDetailPage() {
         // Map to FeedItem shape
         const c = data.creator as { id: string; username: string; display_name: string; avatar_url: string | null }
         const d = data as typeof data & { views?: number }
+        const anyData = data as any
         const mapped: FeedItem = {
           id:           data.id,
           type:         'qa',
@@ -112,16 +113,18 @@ export default function PostDetailPage() {
             verified:      false,
             response_rate: null,
           },
-          time_ago:     'just now',
-          views:        (d.views ?? 0) + 1,
-          text:         data.caption ?? '',
-          images:       data.image_urls ?? [],
-          price:        data.price ?? 0,
-          isLocked:     !data.is_purchased,
-          likes:        0,
-          comments:     (data as { question_count?: number }).question_count ?? 0,
-          saves:        0,
-          replies:      [],
+          time_ago:       'just now',
+          views:          (d.views ?? 0) + 1,
+          text:           data.caption ?? '',
+          images:         data.image_urls ?? [],
+          price:          data.price ?? 0,
+          post_subtype:   anyData.post_subtype  ?? undefined,
+          structured_data: anyData.structured_data ?? undefined,
+          isLocked:       !data.is_purchased,
+          likes:          0,
+          comments:       (data as { question_count?: number }).question_count ?? 0,
+          saves:          0,
+          replies:        [],
         }
         setFetchedItem(mapped)
       })
@@ -269,11 +272,100 @@ export default function PostDetailPage() {
 
           {/* Location */}
           {item.location_address && (
-            <div className="flex items-center gap-1.5 mb-1">
+            <div className="flex items-center gap-1.5 mb-3">
               <MapPin style={{ width: 13, height: 13, color: '#10b981', flexShrink: 0 }} strokeWidth={1.75} />
               <span className="text-[13px]" style={{ color: '#666' }}>📍 {item.location_address}</span>
             </div>
           )}
+
+          {/* ── Full recipe display ── */}
+          {item.post_subtype === 'recipe' && item.structured_data && (() => {
+            const r = item.structured_data as RecipeData
+            return (
+              <div className="rounded-[16px] overflow-hidden mb-1" style={{ border: '1.5px solid #eee' }}>
+                {/* Meta row */}
+                {(r.servings || r.prep_time || r.cook_time) && (
+                  <div className="flex divide-x" style={{ borderBottom: '1px solid #eee', background: '#fafafa' }}>
+                    {r.servings   && <div className="flex-1 flex flex-col items-center py-3"><span className="text-[9px] uppercase tracking-wide font-semibold mb-0.5" style={{ color: '#aaa' }}>Serves</span><span className="text-[18px] font-bold text-[#111]">{r.servings}</span></div>}
+                    {r.prep_time  && <div className="flex-1 flex flex-col items-center py-3"><span className="text-[9px] uppercase tracking-wide font-semibold mb-0.5" style={{ color: '#aaa' }}>Prep</span><span className="text-[15px] font-bold text-[#111]">{r.prep_time}</span></div>}
+                    {r.cook_time  && <div className="flex-1 flex flex-col items-center py-3"><span className="text-[9px] uppercase tracking-wide font-semibold mb-0.5" style={{ color: '#aaa' }}>Cook</span><span className="text-[15px] font-bold text-[#111]">{r.cook_time}</span></div>}
+                  </div>
+                )}
+                {/* Ingredients */}
+                {r.ingredients?.length > 0 && (
+                  <div className="px-4 pt-4 pb-3" style={{ borderBottom: '1px solid #eee' }}>
+                    <p className="text-[11px] uppercase tracking-wide font-bold mb-3" style={{ color: '#888' }}>Ingredients</p>
+                    {r.ingredients.map((ing, i) => (
+                      <div key={i} className="flex items-start gap-2.5 mb-2">
+                        <div className="w-[5px] h-[5px] rounded-full flex-shrink-0 mt-[7px]" style={{ background: '#111' }} />
+                        <span className="text-[15px] text-[#111] leading-snug">{ing}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {/* Steps */}
+                {r.steps?.length > 0 && (
+                  <div className="px-4 pt-4 pb-4">
+                    <p className="text-[11px] uppercase tracking-wide font-bold mb-3" style={{ color: '#888' }}>Steps</p>
+                    {r.steps.map((step, i) => (
+                      <div key={i} className="flex items-start gap-3 mb-3">
+                        <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-[1px]" style={{ background: '#111', minWidth: 24 }}>
+                          <span className="text-white font-bold" style={{ fontSize: 10 }}>{i + 1}</span>
+                        </div>
+                        <p className="flex-1 text-[15px] text-[#111] leading-[1.5]">{step}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })()}
+
+          {/* ── Full itinerary display ── */}
+          {item.post_subtype === 'itinerary' && item.structured_data && (() => {
+            const itin = item.structured_data as ItineraryData
+            return (
+              <div className="rounded-[16px] overflow-hidden mb-1" style={{ border: '1.5px solid #eee' }}>
+                {/* Header */}
+                <div className="flex items-center justify-between px-4 py-3.5" style={{ background: '#fafafa', borderBottom: '1px solid #eee' }}>
+                  <div>
+                    {itin.destination && <p className="text-[18px] font-bold text-[#111]">{itin.destination}</p>}
+                    <p className="text-[12px]" style={{ color: '#888' }}>
+                      {itin.days?.length ?? 0} days{itin.duration ? ` · ${itin.duration}` : ''}
+                    </p>
+                  </div>
+                  <span className="text-[28px]">🗺️</span>
+                </div>
+                {/* Days */}
+                {itin.days?.map((day, di) => (
+                  <div key={di} style={{ borderBottom: di < (itin.days?.length ?? 0) - 1 ? '1px solid #eee' : undefined }}>
+                    <div className="px-4 py-2.5" style={{ background: '#f7f7f7' }}>
+                      <p className="text-[12px] font-bold uppercase tracking-wide" style={{ color: '#666' }}>
+                        Day {day.day}{day.title ? ` — ${day.title}` : ''}
+                      </p>
+                    </div>
+                    <div className="px-4 pt-3 pb-3">
+                      {day.stops?.map((stop, si) => (
+                        <div key={si} className="flex items-start gap-3 mb-2.5">
+                          <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+                            style={{ background: stop.type === 'food' ? '#fef3c7' : stop.type === 'hotel' ? '#dbeafe' : stop.type === 'transport' ? '#f3e8ff' : '#f0fdf4', border: '1px solid rgba(0,0,0,0.06)' }}>
+                            <span style={{ fontSize: 10 }}>
+                              {stop.type === 'food' ? '🍴' : stop.type === 'hotel' ? '🏨' : stop.type === 'transport' ? '🚌' : '📍'}
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[14px] font-semibold text-[#111] leading-snug">{stop.name}</p>
+                            {stop.notes && <p className="text-[12px] mt-0.5" style={{ color: '#888' }}>{stop.notes}</p>}
+                            {stop.link  && <a href={stop.link} target="_blank" rel="noopener noreferrer" className="text-[11px] mt-0.5 block" style={{ color: '#0ea5e9' }} onClick={e => e.stopPropagation()}>{stop.link}</a>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
+          })()}
         </div>
 
         {/* ── CTA section — always above community questions ── */}

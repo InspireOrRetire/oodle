@@ -102,7 +102,7 @@ export default function NewPostSheet({
   userId: string
   onClose: () => void
   onPosted?: () => void
-  editPost?: { id: string; caption?: string; price?: number; post_type?: 'type1' | 'type2'; images?: string[] }
+  editPost?: { id: string; caption?: string; price?: number; post_type?: 'type1' | 'type2'; images?: string[]; post_subtype?: 'recipe' | 'itinerary'; structured_data?: Record<string, unknown> }
 }) {
   type PostMode    = 'questions' | 'answer'
   type PostSubtype = 'none' | 'recipe' | 'itinerary'
@@ -193,12 +193,35 @@ export default function NewPostSheet({
       setExistingImageUrls([])
     }
     setPosted(false); setPostError(null)
-    setPostSubtype('none')
-    setRecipeServings(''); setRecipePrepTime(''); setRecipeCookTime('')
-    setIngredients([{ text: '' }, { text: '' }, { text: '' }])
-    setSteps([{ text: '' }, { text: '' }])
-    setItinDestination(''); setItinDuration('')
-    setItinDays([{ day: 1, title: '', stops: [{ name: '', type: 'attraction', notes: '', link: '' }] }])
+    // Pre-fill subtype + structured data in edit mode
+    const sd = editPost?.structured_data
+    const sub = editPost?.post_subtype ?? 'none'
+    setPostSubtype(sub)
+    if (sub === 'recipe' && sd) {
+      const r = sd as { servings?: number; prep_time?: string; cook_time?: string; ingredients?: string[]; steps?: string[] }
+      setRecipeServings(r.servings != null ? String(r.servings) : '')
+      setRecipePrepTime(r.prep_time ?? '')
+      setRecipeCookTime(r.cook_time ?? '')
+      setIngredients(r.ingredients?.length ? r.ingredients.map(t => ({ text: t })) : [{ text: '' }, { text: '' }, { text: '' }])
+      setSteps(r.steps?.length ? r.steps.map(t => ({ text: t })) : [{ text: '' }, { text: '' }])
+    } else {
+      setRecipeServings(''); setRecipePrepTime(''); setRecipeCookTime('')
+      setIngredients([{ text: '' }, { text: '' }, { text: '' }])
+      setSteps([{ text: '' }, { text: '' }])
+    }
+    if (sub === 'itinerary' && sd) {
+      const itin = sd as { destination?: string; duration?: string; days?: { day: number; title?: string; stops?: { name: string; type?: string; notes?: string; link?: string }[] }[] }
+      setItinDestination(itin.destination ?? '')
+      setItinDuration(itin.duration ?? '')
+      setItinDays(itin.days?.length ? itin.days.map(d => ({
+        day: d.day,
+        title: d.title ?? '',
+        stops: d.stops?.length ? d.stops.map(s => ({ name: s.name, type: (s.type ?? 'attraction') as ItinStop['type'], notes: s.notes ?? '', link: s.link ?? '' })) : [{ name: '', type: 'attraction' as const, notes: '', link: '' }],
+      })) : [{ day: 1, title: '', stops: [{ name: '', type: 'attraction' as const, notes: '', link: '' }] }])
+    } else {
+      setItinDestination(''); setItinDuration('')
+      setItinDays([{ day: 1, title: '', stops: [{ name: '', type: 'attraction', notes: '', link: '' }] }])
+    }
     setImages([]); setVideo(null); setPdfFile(null); setGatedLink(''); setLinkPanelOpen(false); setLocation(null)
     setLocLoading(false); setLocManual(false); setLocText('')
     setListOpen(false); setListItems([{ type: 'line', text: '' }, { type: 'line', text: '' }, { type: 'line', text: '' }])
@@ -350,6 +373,10 @@ export default function NewPostSheet({
       const updatePayload: Record<string, unknown> = {
         caption: caption.trim() || null,
         price:   priceNum || null,
+      }
+      if (postSubtype !== 'none') {
+        updatePayload.post_subtype    = postSubtype
+        updatePayload.structured_data = buildStructuredData()
       }
       if (location) {
         updatePayload.location_address = location.label
