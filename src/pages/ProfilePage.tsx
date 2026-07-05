@@ -3149,7 +3149,6 @@ export default function ProfilePage() {
                 <p className="text-[10px] mb-[1px]" style={{ color: '#bbb' }}>{user.email}</p>
               )}
               {user?.id && (
-                <p className="text-[9px] mb-[6px] font-mono" style={{ color: '#ccc' }}>id: {user.id}</p>
               )}
               <p className="text-[12px] text-[#888] leading-[1.4] mb-[6px]">{activeProfile.bio}</p>
             </div>
