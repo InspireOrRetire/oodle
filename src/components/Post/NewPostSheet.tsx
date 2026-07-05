@@ -148,11 +148,11 @@ export default function NewPostSheet({
   const linkActive   = linkPanelOpen || gatedLink.trim() !== ''
   const locActive    = location !== null
 
-  const canPost = isAnswerMode
-    ? (caption.trim() || images.length > 0 || video || pdfFile || gatedLink.trim() || location || listItems.some(r => r.text.trim())) && !posted
-    : (caption.trim() || qImages.length > 0 || qVideo) && !posted
-
   const [existingImageUrls, setExistingImageUrls] = useState<string[]>([])
+
+  const canPost = isAnswerMode
+    ? (caption.trim() || images.length > 0 || existingImageUrls.length > 0 || video || pdfFile || gatedLink.trim() || location || listItems.some(r => r.text.trim())) && !posted
+    : (caption.trim() || qImages.length > 0 || qVideo) && !posted
 
   const [prevOpen, setPrevOpen] = useState(false)
   if (open && !prevOpen) {
