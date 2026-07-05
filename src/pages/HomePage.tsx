@@ -298,7 +298,7 @@ function FeedCard({
                         className="inline-flex items-center gap-1 active:opacity-75 transition-opacity"
                       >
                         <Pencil style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
-                        <span className="text-[12px] font-semibold text-[#111] tracking-tight">Edit</span>
+                        <span className="text-[12px] font-semibold text-[#111] tracking-tight">Edit · {cp(item.price!)}</span>
                       </button>
                     ) : (
                       <button

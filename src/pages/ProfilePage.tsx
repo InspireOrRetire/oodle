@@ -445,7 +445,7 @@ function ThreadItem({
                       {isOwner ? (
                         <>
                           <Pencil style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
-                          <span className="text-[12px] font-semibold text-[#111] tracking-tight">Edit</span>
+                          <span className="text-[12px] font-semibold text-[#111] tracking-tight">Edit · {cp(thread.price)}</span>
                         </>
                       ) : (
                         <>
@@ -627,7 +627,7 @@ function ThreadItem({
                             >
                               <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight">
                                 {isOwner
-                                  ? <><Pencil style={{ width: 9, height: 9 }} strokeWidth={2.5} />Edit</>
+                                  ? <><Pencil style={{ width: 9, height: 9 }} strokeWidth={2.5} />Edit · {cp(thread.price)}</>
                                   : <><Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{cp(thread.price)}</>
                                 }
                               </span>
