@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Check, Zap, Lock } from 'lucide-react'
+import { ArrowLeft, Check,  Lock } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { oo } from '../../lib/oo'
 
@@ -275,7 +275,7 @@ export default function UnlockSheet({
                               style={{ border: sel ? '1.5px solid #111' : '1px solid #ebebeb', background: sel ? '#111' : 'white' }}>
                               <div className="flex items-center justify-center rounded-full flex-shrink-0"
                                 style={{ width: 40, height: 40, background: '#111' }}>
-                                <Zap style={{ width: 18, height: 18, color: 'white' }} strokeWidth={2} fill="white" />
+                                <span style={{ fontWeight: 800, color: 'white', fontSize: 13 }}>$?</span>
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-0.5">

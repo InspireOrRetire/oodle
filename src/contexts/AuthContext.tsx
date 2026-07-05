@@ -26,35 +26,7 @@ interface AuthCtx {
   updateProfile:    (updates: Partial<Profile>) => Promise<void>
 }
 
-// ── Guest/explore-mode mock ───────────────────────────────────────────────────
-
 const EXPLORE_KEY = 'oodle_explore_mode'
-
-const MOCK_GUEST_USER = {
-  id:    'explore-guest',
-  email: 'guest@oodle.app',
-  app_metadata: {}, user_metadata: {}, aud: 'authenticated',
-  created_at: new Date().toISOString(),
-} as unknown as User
-
-const MOCK_GUEST_PROFILE: Profile = {
-  id:                   'explore-guest',
-  role:                 'creator',
-  username:             'you',
-  display_name:         'You (exploring)',
-  avatar_url:           null,
-  bio:                  "Exploring oodle — sign up to unlock everything.",
-  categories:           null,
-  default_answer_price: null,
-  stripe_account_id:    null,
-  stripe_onboarded:     null,
-  followers_count:      0,
-  following_count:      0,
-  onboarding_completed: true,
-  response_rate:        null,
-  created_at:           new Date().toISOString(),
-  updated_at:           new Date().toISOString(),
-}
 
 const Ctx = createContext<AuthCtx | null>(null)
 
@@ -69,9 +41,11 @@ async function loadProfile(userId: string): Promise<Profile | null> {
     .from('users')
     .select(`
       id, role, username, display_name, avatar_url, bio,
-      categories, default_answer_price, stripe_onboarded,
+      categories, default_answer_price, stripe_account_id, stripe_onboarded,
       followers_count, following_count, onboarding_completed,
-      response_rate, created_at, updated_at
+      response_rate, public_profile,
+      email_notifications, push_notifications, show_answer_price,
+      created_at, updated_at
     `)
     .eq('id', userId)
     .maybeSingle()   // returns null (not an error) when row is missing
@@ -130,19 +104,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (s?.user) {
+        // Real session — always exit explore mode
+        localStorage.removeItem(EXPLORE_KEY)
+        setExploreMode(false)
         // handle_new_user() trigger may still be committing — retry with back-off
         let p: Profile | null = null
         for (let i = 0; i < 3; i++) {
           p = await loadProfile(s.user.id).catch(() => null)
           if (p) break
           await new Promise(r => setTimeout(r, 500 * (i + 1)))
-        }
-        // If a pending username was stored at signup, apply it now (once)
-        const pendingUsername = localStorage.getItem('pending_username')
-        if (p && pendingUsername && !p.username) {
-          localStorage.removeItem('pending_username')
-          await AuthService.updateMyProfile({ username: pendingUsername }).catch(() => null)
-          p = await loadProfile(s.user.id).catch(() => p)
         }
         if (mounted) setProfile(p)
       } else {
@@ -152,6 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => { mounted = false; clearTimeout(fallbackTimer); subscription.unsubscribe() }
   }, [])
+
 
   const signUp = useCallback(async (email: string, password: string, role: Role) => {
     await AuthService.signUp(email, password, role)
@@ -186,15 +157,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await reloadProfile()
   }, [reloadProfile])
 
-  // In explore mode, substitute mock values so every page renders normally
-  const effectiveUser    = exploreMode && !user    ? MOCK_GUEST_USER    : user
-  const effectiveProfile = exploreMode && !profile ? MOCK_GUEST_PROFILE : profile
-
   return (
     <Ctx.Provider value={{
       session,
-      user:             effectiveUser,
-      profile:          effectiveProfile,
+      user,
+      profile,
       loading,
       isExploreMode:    exploreMode,
       enterExploreMode,

@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Share2, Menu, Plus, Minus, MoreHorizontal, Link, Zap, Bookmark, Check, ArrowLeft, Mail, Heart, MessageCircle, ChevronUp, ChevronDown, Copy, AtSign, Camera, ChevronRight as ChevronRightIcon, Image, Video, MapPin, List, Type, FileText, X, Search, Lock, ShoppingCart } from 'lucide-react'
+import { Share2, Menu, Plus, Minus, MoreHorizontal, Link,  Bookmark, Check, ArrowLeft, Mail, Heart, MessageCircle, ChevronUp, ChevronDown, Copy, AtSign, Camera, ChevronRight as ChevronRightIcon, Image, Video, MapPin, List, Type, FileText, X, Search, Lock, ShoppingCart, Pencil } from 'lucide-react'
 import { oo } from '../lib/oo'
 // Plain number for card price pills — no $? prefix on timeline cards
 const cp = (n: number) => n % 1 === 0 ? String(n) : n.toFixed(2)
@@ -11,6 +11,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import FollowToast from '../components/UI/FollowToast'
 import PostOptionsSheet from '../components/Post/PostOptionsSheet'
+import NewPostSheet from '../components/Post/NewPostSheet'
 import SaveSheet from '../components/UI/SaveSheet'
 import PostMediaCarousel from '../components/Post/PostMediaCarousel'
 import TokenKeypad from '../components/Post/TokenKeypad'
@@ -150,26 +151,7 @@ function FollowersSheetProfile({
   )
 }
 
-// Placeholder profiles kept only for legacy mock data objects defined below.
-const CREATOR_PROFILE = { display_name: '', username: '', avatar_url: '' }
-const ASKER_PROFILE   = { display_name: '', username: '', avatar_url: '' }
-
-// ─── Mock profile ──────────────────────────────────────────────────────────────
-
-const MOCK_CREATOR = {
-  display_name: 'Coach Dre',
-  username: 'coach_dre',
-  pin: '4821',
-  bio: "Performance coach. I answer what DMs can't.",
-  link: 'coach-dre.com',
-  answer_price: 20,
-  answers_count: 47,
-  questions_count: 312,
-  response_rate: 98,
-  is_active: true,
-}
-
-// ─── Mock answer timeline ──────────────────────────────────────────────────────
+// ─── Answer thread types ──────────────────────────────────────────────────────
 
 interface QAReply {
   username: string
@@ -191,7 +173,7 @@ interface AnswerThread {
   price: number
   images?: string[]
   replies?: QAReply[]    // stacked Q&A replies — shown Threads-style
-  creator?: {            // overrides MOCK_CREATOR when set (used on fan profile)
+  creator?: {            // set from DB; fallback is generic placeholder
     display_name: string
     username: string
     initials: string
@@ -204,159 +186,6 @@ interface AnswerThread {
     purchasers: { username: string; avatar_url: string }[]
   }
 }
-
-const MOCK_THREADS: AnswerThread[] = [
-  {
-    id: 'p0',
-    type: 'post',
-    time_ago: '45m',
-    views: 620,
-    likes: 84,
-    saves: 12,
-    caption: "new training block starts monday. here's what the first week looks like.",
-    question: '',
-    price: 0,
-    images: [
-      'https://picsum.photos/seed/gym101/600/750',
-      'https://picsum.photos/seed/gym102/600/750',
-      'https://picsum.photos/seed/gym103/600/750',
-      'https://picsum.photos/seed/gym104/600/750',
-    ],
-  },
-  {
-    id: 't1',
-    time_ago: '2h',
-    views: 1840,
-    likes: 312,
-    saves: 47,
-    question: "how do you cut weight without losing muscle? i've been trying for months and keep losing strength.",
-    price: 12,
-    images: [
-      'https://picsum.photos/seed/lift701/600/750',
-      'https://picsum.photos/seed/lift702/600/750',
-      'https://picsum.photos/seed/lift703/600/750',
-    ],
-    asker: {
-      username: 'alex_fit',
-      avatar_url: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?auto=format&fit=crop&w=96&h=96',
-      purchase_count: 14,
-      purchasers: [
-        { username: 'user1', avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user2', avatar_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user3', avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user4', avatar_url: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&w=48&h=48' },
-      ],
-    },
-    replies: [
-      { username: 'alex_fit',     avatar_url: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?auto=format&fit=crop&w=96&h=96', question: "how do you cut weight without losing muscle? i've been trying for months and keep losing strength.",  price: 12, time_ago: '2h' },
-      { username: 'morning_grind', avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&h=96', question: "what's your protein target during a cut? i keep losing strength every time i go into a deficit.",         price: 8,  time_ago: '1h' },
-      { username: 'physio_kai',    avatar_url: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&w=96&h=96', question: "do you track macros through the whole cut or just keep it simple with whole foods?",                   price: 6,  time_ago: '45m' },
-    ],
-  },
-  {
-    id: 't2',
-    time_ago: '1d',
-    views: 3100,
-    likes: 528,
-    saves: 91,
-    question: "what's your actual morning routine? not the polished version, the real one.",
-    price: 8,
-    images: [
-      'https://picsum.photos/seed/morning901/600/750',
-    ],
-    asker: {
-      username: 'morning_grind',
-      avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&h=96',
-      purchase_count: 22,
-      purchasers: [
-        { username: 'user5', avatar_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user6', avatar_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user7', avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=48&h=48' },
-      ],
-    },
-    replies: [
-      { username: 'morning_grind',  avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&h=96', question: "what's your actual morning routine? not the polished version, the real one.",   price: 8,  time_ago: '23h' },
-      { username: 'nutr_nerd',      avatar_url: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?auto=format&fit=crop&w=96&h=96', question: "how early do you wake up before your first client session starts each day?",    price: 5,  time_ago: '20h' },
-      { username: 'adventurekid_',  avatar_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=96&h=96', question: "does your morning routine change on days when you're not training anyone?",    price: 4,  time_ago: '14h' },
-    ],
-  },
-  {
-    id: 't3',
-    time_ago: '3d',
-    views: 892,
-    likes: 143,
-    saves: 29,
-    question: 'best single drill for hip mobility you actually use with your athletes?',
-    price: 15,
-    asker: {
-      username: 'physio_kai',
-      avatar_url: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&w=96&h=96',
-      purchase_count: 9,
-      purchasers: [
-        { username: 'user8', avatar_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user9', avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=48&h=48' },
-      ],
-    },
-    replies: [
-      { username: 'physio_kai',    avatar_url: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&w=96&h=96', question: "best single drill for hip mobility you actually use with your athletes?",            price: 15, time_ago: '3d' },
-      { username: 'alex_fit',      avatar_url: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?auto=format&fit=crop&w=96&h=96', question: "how many times a week do you program this drill and at what point in a session?",    price: 9,  time_ago: '2d' },
-    ],
-  },
-  {
-    id: 't4',
-    time_ago: '5d',
-    views: 2240,
-    likes: 387,
-    saves: 62,
-    question: 'do you track macros with all your clients or just the competitive ones?',
-    price: 10,
-    asker: {
-      username: 'nutr_nerd',
-      avatar_url: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?auto=format&fit=crop&w=96&h=96',
-      purchase_count: 17,
-      purchasers: [
-        { username: 'user10', avatar_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user11', avatar_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user12', avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user13', avatar_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=48&h=48' },
-      ],
-    },
-    replies: [
-      { username: 'nutr_nerd',     avatar_url: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?auto=format&fit=crop&w=96&h=96', question: "do you track macros with all your clients or just the competitive ones?",         price: 10, time_ago: '5d' },
-      { username: 'morning_grind', avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&h=96', question: "what app do you use for macro tracking? does it actually change their results?",   price: 7,  time_ago: '4d' },
-      { username: 'physio_kai',    avatar_url: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&w=96&h=96', question: "at what point do you stop tracking and shift to intuitive eating with clients?",   price: 12, time_ago: '3d' },
-    ],
-  },
-  {
-    id: 't5',
-    time_ago: '1w',
-    views: 4700,
-    likes: 841,
-    saves: 134,
-    question: 'what supplement stack do you actually recommend vs the stuff you just sell?',
-    price: 18,
-    images: [
-      'https://picsum.photos/seed/supps1101/600/750',
-      'https://picsum.photos/seed/greens1101/600/750',
-    ],
-    asker: {
-      username: 'skeptic_sam',
-      avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&h=96',
-      purchase_count: 31,
-      purchasers: [
-        { username: 'user14', avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user15', avatar_url: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user16', avatar_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=48&h=48' },
-      ],
-    },
-    replies: [
-      { username: 'skeptic_sam',   avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&h=96', question: "what supplement stack do you actually recommend vs the stuff you just sell?",    price: 18, time_ago: '1w' },
-      { username: 'nutr_nerd',     avatar_url: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?auto=format&fit=crop&w=96&h=96', question: "is creatine actually worth it for someone who isn't lifting heavy every day?",  price: 10, time_ago: '6d' },
-      { username: 'alex_fit',      avatar_url: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?auto=format&fit=crop&w=96&h=96', question: "does timing really matter for protein? or is total daily intake all that counts?", price: 14, time_ago: '5d' },
-      { username: 'morning_grind', avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&h=96', question: "what's the one supplement you'd keep if you could only pick one for performance?",  price: 8,  time_ago: '4d' },
-    ],
-  },
-]
 
 // ─── Local question (added via ask-bubble) ────────────────────────────────────
 
@@ -392,12 +221,14 @@ function ActionRow({
   return (
     <div className="flex items-center gap-3 py-2.5 pl-[52px] pr-2">
       {/* Question */}
-      <button onClick={onAsk} className="flex items-center gap-1 active:opacity-60 transition-opacity">
-        <MessageCircle style={{ width: 16, height: 16, color: '#c0c0c8', flexShrink: 0 }} strokeWidth={1.75} />
-        {questionCount > 0 && (
-          <span className="text-[11px]" style={{ color: '#bbb' }}>{fmtN(questionCount)}</span>
-        )}
-      </button>
+      {onAsk && (
+        <button onClick={onAsk} className="flex items-center gap-1 active:opacity-60 transition-opacity">
+          <MessageCircle style={{ width: 16, height: 16, color: '#c0c0c8', flexShrink: 0 }} strokeWidth={1.75} />
+          {questionCount > 0 && (
+            <span className="text-[11px]" style={{ color: '#bbb' }}>{fmtN(questionCount)}</span>
+          )}
+        </button>
+      )}
 
       {/* Save / Bookmark — always opens the save sheet (even when already saved) */}
       <button
@@ -463,11 +294,10 @@ function ThreadItem({
   const hasImages  = !!(thread.images && thread.images.length > 0)
   const [showAllReplies, setShowAllReplies] = useState(false)
 
-  // Resolve creator — falls back to MOCK_CREATOR if not overridden per-thread
   const creator = thread.creator ?? {
-    display_name: MOCK_CREATOR.display_name,
-    username:     MOCK_CREATOR.username,
-    initials:     MOCK_CREATOR.display_name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase(),
+    display_name: '',
+    username:     '',
+    initials:     '?',
     avatar_url:   undefined,
   }
 
@@ -529,7 +359,7 @@ function ThreadItem({
               onClick={() => { snap(0); onUnlock(thread) }}
             >
               <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Zap style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2.5} fill="#111" />
+                <span style={{ fontWeight: 800, color: '#111', fontSize: 9 }}>$?</span>
               </div>
               <span style={{ fontSize: 14, fontWeight: 600, color: 'white', fontFamily: 'DM Mono, monospace' }}>
                 {cp(thread.price)}
@@ -589,10 +419,12 @@ function ThreadItem({
                     <Share2 style={{ width: 12, height: 12, color: '#555' }} strokeWidth={1.75} />
                     <span className="text-[12px] font-medium" style={{ color: '#555' }}>Share</span>
                   </button>
-                  <button onClick={e => { e.stopPropagation(); onAsk?.() }} className="flex items-center gap-1.5 active:opacity-70 transition-opacity">
-                    <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
-                    <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
-                  </button>
+                  {!isOwner && (
+                    <button onClick={e => { e.stopPropagation(); onAsk?.() }} className="flex items-center gap-1.5 active:opacity-70 transition-opacity">
+                      <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
+                      <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
+                    </button>
+                  )}
                   <button onClick={e => { e.stopPropagation(); onSave() }} className="flex items-center gap-1.5 active:opacity-70 transition-opacity">
                     <Bookmark style={{ width: 12, height: 12, color: isSaved ? '#111' : '#555' }} strokeWidth={2} fill={isSaved ? '#111' : 'none'} />
                     <span className="text-[12px] font-medium" style={{ color: isSaved ? '#111' : '#555' }}>{isSaved ? 'Saved' : 'Save'}</span>
@@ -610,8 +442,17 @@ function ThreadItem({
                       onClick={e => { e.stopPropagation(); isOwner ? onEditPrice?.() : onUnlock(thread) }}
                       className="inline-flex items-center gap-1 active:opacity-75 transition-opacity"
                     >
-                      <Lock style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
-                      <span className="text-[12px] font-semibold text-[#111] tracking-tight">{cp(thread.price)}</span>
+                      {isOwner ? (
+                        <>
+                          <Pencil style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
+                          <span className="text-[12px] font-semibold text-[#111] tracking-tight">Edit · {cp(thread.price)}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Lock style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
+                          <span className="text-[12px] font-semibold text-[#111] tracking-tight">{cp(thread.price)}</span>
+                        </>
+                      )}
                     </button>
                   )}
                 </div>
@@ -696,7 +537,10 @@ function ThreadItem({
                             style={{ background: '#000', marginTop: 1 }}
                           >
                             <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight">
-                              <Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{cp(thread.price)}
+                              {isOwner
+                                ? <><Pencil style={{ width: 9, height: 9 }} strokeWidth={2.5} />Edit</>
+                                : <><Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{cp(thread.price)}</>
+                              }
                             </span>
                           </button>
                         )}
@@ -782,7 +626,10 @@ function ThreadItem({
                               style={{ background: '#000', marginTop: 1 }}
                             >
                               <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight">
-                                <Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{cp(thread.price)}
+                                {isOwner
+                                  ? <><Pencil style={{ width: 9, height: 9 }} strokeWidth={2.5} />Edit · {cp(thread.price)}</>
+                                  : <><Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{cp(thread.price)}</>
+                                }
                               </span>
                             </button>
                           )}
@@ -834,10 +681,12 @@ function ThreadItem({
                 <Share2 style={{ width: 12, height: 12, color: '#555' }} strokeWidth={1.75} />
                 <span className="text-[12px] font-medium" style={{ color: '#555' }}>Share</span>
               </button>
-              <button onClick={e => { e.stopPropagation(); onAsk?.() }} className="flex items-center gap-1.5 active:opacity-70 transition-opacity">
-                <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
-                <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
-              </button>
+              {!isOwner && (
+                <button onClick={e => { e.stopPropagation(); onAsk?.() }} className="flex items-center gap-1.5 active:opacity-70 transition-opacity">
+                  <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
+                  <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
+                </button>
+              )}
               <button onClick={e => { e.stopPropagation(); onSave() }} className="flex items-center gap-1.5 active:opacity-70 transition-opacity">
                 <Bookmark style={{ width: 12, height: 12, color: isSaved ? '#111' : '#555' }} strokeWidth={2} fill={isSaved ? '#111' : 'none'} />
                 <span className="text-[12px] font-medium" style={{ color: isSaved ? '#111' : '#555' }}>{isSaved ? 'Saved' : 'Save'}</span>
@@ -882,9 +731,9 @@ function PurchaseSheet({
   onPurchased?: (id: string) => void
 }) {
   const creatorDisplay = thread?.creator ?? {
-    display_name: MOCK_CREATOR.display_name,
-    username:     MOCK_CREATOR.username,
-    initials:     MOCK_CREATOR.display_name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase(),
+    display_name: '',
+    username:     '',
+    initials:     '?',
     avatar_url:   undefined,
   }
   const initials = creatorDisplay.initials
@@ -1099,7 +948,7 @@ function PurchaseSheet({
                               }}>
                               <div className="flex items-center justify-center rounded-full flex-shrink-0"
                                 style={{ width: 40, height: 40, background: '#111' }}>
-                                <Zap style={{ width: 18, height: 18, color: 'white' }} strokeWidth={2} fill="white" />
+                                <span style={{ fontWeight: 800, color: 'white', fontSize: 13 }}>$?</span>
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-0.5">
@@ -1231,8 +1080,7 @@ function CreatorAvatar({
   initials?: string
   avatarUrl?: string
 }) {
-  const initials = overrideInitials
-    ?? MOCK_CREATOR.display_name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()
+  const initials = overrideInitials ?? '?'
 
   if (avatarUrl) {
     return (
@@ -1254,227 +1102,6 @@ function CreatorAvatar({
   )
 }
 
-// ─── Fan-profile mock threads (Alex's answered Q&As) ──────────────────────────
-// Only answered threads are shown — pending ones are not public yet.
-
-const ALEX_ASKER = {
-  username:       ASKER_PROFILE.username,
-  avatar_url:     ASKER_PROFILE.avatar_url,
-  purchase_count: 0,
-  purchasers:     [] as { username: string; avatar_url: string }[],
-}
-
-const MOCK_FAN_THREADS: AnswerThread[] = [
-  {
-    id: 'ft1',
-    time_ago: '4h',
-    views: 1840,
-    likes: 312,
-    saves: 47,
-    question: "how do you cut weight without losing muscle? i've been trying for months and keep losing strength.",
-    price: 12,
-    creator: { display_name: 'Coach Dre', username: 'coach_dre', initials: 'CD' },
-    images: [
-      'https://picsum.photos/seed/lift701/600/750',
-      'https://picsum.photos/seed/lift702/600/750',
-      'https://picsum.photos/seed/lift703/600/750',
-    ],
-    asker: { ...ALEX_ASKER, purchase_count: 22,
-      purchasers: [
-        { username: 'user1', avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user2', avatar_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user3', avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=48&h=48' },
-      ],
-    },
-  },
-  {
-    id: 'ft2',
-    time_ago: '1d',
-    views: 940,
-    likes: 178,
-    saves: 33,
-    question: "what color grading tools do you actually use? trying to nail those shadows in DaVinci.",
-    price: 4,
-    creator: {
-      display_name: 'Marcus Lee', username: 'marcus.creative', initials: 'ML',
-      avatar_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=96&h=96',
-    },
-    images: [
-      'https://picsum.photos/seed/cinema201/600/750',
-      'https://picsum.photos/seed/cinema202/600/750',
-    ],
-    asker: { ...ALEX_ASKER, purchase_count: 8,
-      purchasers: [
-        { username: 'user4', avatar_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user5', avatar_url: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?auto=format&fit=crop&w=48&h=48' },
-      ],
-    },
-  },
-  {
-    id: 'ft3',
-    time_ago: '4d',
-    views: 2300,
-    likes: 204,
-    saves: 41,
-    question: "which Sony body is this and did you use any ND filter for this shot?",
-    price: 3,
-    creator: {
-      display_name: 'Leo Santos', username: 'lens.leo', initials: 'LS',
-      avatar_url: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?auto=format&fit=crop&w=96&h=96',
-    },
-    images: [
-      'https://picsum.photos/seed/lens401/600/750',
-    ],
-    asker: { ...ALEX_ASKER, purchase_count: 17,
-      purchasers: [
-        { username: 'user6', avatar_url: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user7', avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user8', avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user9', avatar_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=48&h=48' },
-      ],
-    },
-  },
-  {
-    id: 'ft4',
-    time_ago: '6d',
-    views: 1120,
-    likes: 89,
-    saves: 17,
-    question: "what's the lightest tent you'd actually recommend for solo alpine camping?",
-    price: 6,
-    creator: {
-      display_name: 'Jake Torres', username: 'mountain.guide', initials: 'JT',
-      avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=96&h=96',
-    },
-    images: [
-      'https://picsum.photos/seed/trail501/600/750',
-      'https://picsum.photos/seed/trail502/600/750',
-    ],
-    asker: { ...ALEX_ASKER, purchase_count: 11,
-      purchasers: [
-        { username: 'user10', avatar_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user11', avatar_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=48&h=48' },
-      ],
-    },
-  },
-  {
-    id: 'ft5',
-    time_ago: '2w',
-    views: 3410,
-    likes: 441,
-    saves: 76,
-    question: "what are your top 3 tips for restaurant-quality pasta at home?",
-    price: 8,
-    creator: {
-      display_name: 'Mei Chen', username: 'mei.cooks', initials: 'MC',
-      avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=96&h=96',
-    },
-    images: [
-      'https://picsum.photos/seed/food301/600/750',
-    ],
-    asker: { ...ALEX_ASKER, purchase_count: 34,
-      purchasers: [
-        { username: 'user12', avatar_url: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user13', avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=48&h=48' },
-        { username: 'user14', avatar_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=48&h=48' },
-      ],
-    },
-  },
-]
-
-// ─── Alex's own posts (shown on her "You" profile timeline) ───────────────────
-
-const ALEX_CREATOR = {
-  display_name: ASKER_PROFILE.display_name,
-  username:     ASKER_PROFILE.username,
-  initials:     ASKER_PROFILE.display_name.slice(0, 2).toUpperCase(),
-  avatar_url:   ASKER_PROFILE.avatar_url,
-}
-
-const MOCK_ALEX_POSTS: AnswerThread[] = [
-  {
-    id: 'ap1',
-    type: 'post',
-    time_ago: '3h',
-    views: 412,
-    likes: 67,
-    saves: 14,
-    caption: 'golden hour on the ridge. worth every step.',
-    question: '',
-    price: 5,
-    creator: ALEX_CREATOR,
-    images: [
-      'https://picsum.photos/seed/ridge901/600/750',
-      'https://picsum.photos/seed/ridge902/600/750',
-    ],
-  },
-  {
-    id: 'ap2',
-    type: 'post',
-    time_ago: '2d',
-    views: 1830,
-    likes: 294,
-    saves: 58,
-    caption: 'solo weekend in the cascades. packed light, shot heavy.',
-    question: '',
-    price: 8,
-    creator: ALEX_CREATOR,
-    images: [
-      'https://picsum.photos/seed/cascade101/600/750',
-      'https://picsum.photos/seed/cascade102/600/750',
-      'https://picsum.photos/seed/cascade103/600/750',
-    ],
-  },
-  {
-    id: 'ap3',
-    type: 'post',
-    time_ago: '5d',
-    views: 776,
-    likes: 118,
-    saves: 22,
-    caption: 'fog rolling in around 5am. set the alarm, no regrets.',
-    question: '',
-    price: 0,  // free
-    creator: ALEX_CREATOR,
-    images: [
-      'https://picsum.photos/seed/fogmorning1/600/750',
-    ],
-  },
-  {
-    id: 'ap4',
-    type: 'post',
-    time_ago: '1w',
-    views: 2140,
-    likes: 431,
-    saves: 87,
-    caption: 'spent a week in portugal with nothing but a 35mm. still processing.',
-    question: '',
-    price: 12,
-    creator: ALEX_CREATOR,
-    images: [
-      'https://picsum.photos/seed/lisbon201/600/750',
-      'https://picsum.photos/seed/lisbon202/600/750',
-      'https://picsum.photos/seed/lisbon203/600/750',
-      'https://picsum.photos/seed/lisbon204/600/750',
-    ],
-  },
-  {
-    id: 'ap5',
-    type: 'post',
-    time_ago: '2w',
-    views: 988,
-    likes: 176,
-    saves: 31,
-    caption: 'local reservoir at low tide. underrated spot.',
-    question: '',
-    price: 3,
-    creator: ALEX_CREATOR,
-    images: [
-      'https://picsum.photos/seed/reservoir301/600/750',
-      'https://picsum.photos/seed/reservoir302/600/750',
-    ],
-  },
-]
 
 function fmt(n: number) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
@@ -1544,9 +1171,9 @@ function AskSheet({
   }
 
   const creator = thread?.creator ?? {
-    display_name: MOCK_CREATOR.display_name,
-    username:     MOCK_CREATOR.username,
-    initials:     MOCK_CREATOR.display_name.split(' ').map((w: string) => w[0]).join('').slice(0, 2),
+    display_name: '',
+    username:     '',
+    initials:     '?',
     avatar_url:   undefined,
   }
 
@@ -2173,7 +1800,7 @@ function EditPriceSheet({
               {value > 0 && (
                 <div className="flex items-center gap-2 rounded-[12px] px-4 py-3 mb-5"
                   style={{ background: '#f0fdf4', border: '0.5px solid #c8e6c9' }}>
-                  <Zap style={{ width: 12, height: 12, color: '#3a9a4a' }} strokeWidth={2} fill="#3a9a4a" />
+                  <span style={{ fontWeight: 800, color: '#3a9a4a', fontSize: 10 }}>$?</span>
                   <span className="text-[11px]" style={{ color: '#3a9a4a' }}>
                     You earn ~${(value * 0.85).toFixed(2)} per unlock after fees
                   </span>
@@ -2194,22 +1821,6 @@ function EditPriceSheet({
   )
 }
 
-// ─── Fan profile view ─────────────────────────────────────────────────────────
-
-// Interleave Alex's own posts with answered Q&A threads, newest first
-const ALEX_TIMELINE: AnswerThread[] = [
-  MOCK_ALEX_POSTS[0],   // ap1  3h
-  MOCK_FAN_THREADS[0],  // ft1  4h  — Coach Dre (purchased)
-  MOCK_ALEX_POSTS[1],   // ap2  2d
-  MOCK_FAN_THREADS[1],  // ft2  1d  — Marcus (purchased)
-  MOCK_ALEX_POSTS[2],   // ap3  5d
-  MOCK_FAN_THREADS[2],  // ft3  4d  — Leo (available)
-  MOCK_ALEX_POSTS[3],   // ap4  1w
-  MOCK_FAN_THREADS[3],  // ft4  6d  — Jake (available)
-  MOCK_ALEX_POSTS[4],   // ap5  2w
-  MOCK_FAN_THREADS[4],  // ft5  2w  — Mei (available)
-]
-
 // ─── Profile Edit Sheet ───────────────────────────────────────────────────────
 
 const CATEGORY_OPTIONS = [
@@ -2220,7 +1831,7 @@ const CATEGORY_OPTIONS = [
 ]
 
 function ProfileEditPage({ open, onClose, onSaved }: { open: boolean; onClose: () => void; onSaved: () => void }) {
-  const { updateProfile, profile, user } = useAuth()
+  const { updateProfile, profile, user, signOut } = useAuth()
 
   const [name,         setName]         = useState('')
   const [username,     setUsername]     = useState('')
@@ -2231,6 +1842,9 @@ function ProfileEditPage({ open, onClose, onSaved }: { open: boolean; onClose: (
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [avatarFile,   setAvatarFile]   = useState<File | null>(null)
   const [saved,        setSaved]        = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [deleteError,   setDeleteError]   = useState<string | null>(null)
   const avatarInputRef = useRef<HTMLInputElement>(null)
 
   // Sync form whenever page opens
@@ -2284,6 +1898,18 @@ function ProfileEditPage({ open, onClose, onSaved }: { open: boolean; onClose: (
       setError(msg)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleDeleteAccount() {
+    setDeleteLoading(true); setDeleteError(null)
+    try {
+      const { error } = await supabase.functions.invoke('delete-account')
+      if (error) throw error
+      await signOut()
+    } catch (e: unknown) {
+      setDeleteError((e as { message?: string })?.message || 'Failed to delete account')
+      setDeleteLoading(false)
     }
   }
 
@@ -2445,9 +2071,73 @@ function ProfileEditPage({ open, onClose, onSaved }: { open: boolean; onClose: (
               </div>
             </div>
 
+            {/* Danger zone */}
+            <div className="px-5 pt-2 pb-2">
+              <button
+                onClick={() => { setDeleteConfirm(true); setDeleteError(null) }}
+                className="w-full py-3 text-center text-[14px] active:opacity-60 transition-opacity"
+                style={{ color: '#e53e3e' }}
+              >
+                Delete account
+              </button>
+            </div>
+
             {/* Bottom safe area spacer */}
             <div className="h-10" />
           </div>
+
+          {/* Delete confirmation sheet */}
+          <AnimatePresence>
+            {deleteConfirm && (
+              <>
+                <motion.div
+                  className="absolute inset-0 z-10"
+                  style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  onClick={() => { if (!deleteLoading) { setDeleteConfirm(false); setDeleteError(null) } }}
+                />
+                <motion.div
+                  className="absolute bottom-0 left-0 right-0 z-20 bg-white rounded-t-[24px] px-5"
+                  style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 20px)' }}
+                  initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+                  transition={{ type: 'spring', damping: 32, stiffness: 340 }}
+                >
+                  <div className="flex justify-center pt-3 pb-5">
+                    <div className="w-9 h-[4px] rounded-full bg-[#e0e0e0]" />
+                  </div>
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"
+                    style={{ background: '#fff1f0' }}>
+                    <X className="w-6 h-6 text-red-500" strokeWidth={2} />
+                  </div>
+                  <p className="text-[18px] font-bold text-[#111] text-center mb-2">Delete account?</p>
+                  <p className="text-[14px] text-center mb-6" style={{ color: '#888' }}>
+                    This permanently deletes your profile, posts, and messages. It cannot be undone.
+                  </p>
+                  {deleteError && (
+                    <p className="text-[13px] text-red-500 text-center mb-4">{deleteError}</p>
+                  )}
+                  <button
+                    onClick={handleDeleteAccount}
+                    disabled={deleteLoading}
+                    className="w-full py-[14px] rounded-[14px] flex items-center justify-center mb-3 active:opacity-80 transition-opacity"
+                    style={{ background: '#e53e3e' }}
+                  >
+                    <span className="text-[15px] font-semibold text-white">
+                      {deleteLoading ? 'Deleting…' : 'Yes, delete my account'}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => { setDeleteConfirm(false); setDeleteError(null) }}
+                    disabled={deleteLoading}
+                    className="w-full py-[14px] rounded-[14px] flex items-center justify-center active:opacity-80 transition-opacity"
+                    style={{ background: '#f5f5f7' }}
+                  >
+                    <span className="text-[15px] font-semibold text-[#111]">Cancel</span>
+                  </button>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </motion.div>
       )}
     </AnimatePresence>
@@ -2806,12 +2496,12 @@ function CreatePostSheet({
                       >
                         {/* ── Price block — Apple Cash style ── */}
                         <div className="mb-4 rounded-[20px] overflow-hidden"
-                          style={{ border: '1.5px solid #111', background: 'rgba(232,184,0,0.04)' }}>
+                          style={{ border: '1.5px solid rgba(0,0,0,0.2)', background: 'rgba(0,0,0,0.02)' }}>
                           {/* Label */}
                           <div className="flex items-center justify-center gap-1.5 px-4 py-2.5"
-                            style={{ borderBottom: '0.5px solid rgba(232,184,0,0.2)' }}>
-                            <Zap style={{ width: 11, height: 11, color: '#111', flexShrink: 0 }} strokeWidth={2} fill="#111" />
-                            <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: '#b88c00' }}>Answer price</span>
+                            style={{ borderBottom: '0.5px solid rgba(0,0,0,0.08)' }}>
+                            <span style={{ fontWeight: 800, color: '#111', fontSize: 11 }}>$?</span>
+                            <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: '#888' }}>Answer price</span>
                           </div>
                           {/* Controls */}
                           <div className="flex items-center justify-center pt-5 pb-2" style={{ gap: 6 }}>
@@ -2831,8 +2521,8 @@ function CreatePostSheet({
                                 style={{ fontSize: 52, lineHeight: 1.1, color: Number(price) > 0 ? '#111' : '#ccc' }}>
                                 {price || '0'}
                               </span>
-                              <span className="text-[13px] font-semibold mt-1" style={{ color: '#b88c00' }}>
-                                {Number(price) > 0 ? 'USD' : 'free'}
+                              <span className="text-[13px] font-semibold mt-1" style={{ color: '#888' }}>
+                                {Number(price) > 0 ? '$?' : 'free'}
                               </span>
                             </button>
                             <button
@@ -2846,8 +2536,8 @@ function CreatePostSheet({
                           {/* Earnings */}
                           {Number(price) > 0 && (
                             <div className="flex justify-center px-5 pb-4 pt-1">
-                              <span className="text-[11px]" style={{ color: '#b88c00' }}>
-                                You keep <span className="font-bold">⚡{Math.floor(Number(price) * 0.8)}</span>
+                              <span className="text-[11px]" style={{ color: '#888' }}>
+                                You keep <span className="font-bold">USD {Math.floor(Number(price) * 0.8)}</span>
                               </span>
                             </div>
                           )}
@@ -3343,6 +3033,7 @@ export default function ProfilePage() {
   const [savedItems,    setSavedItems]    = useState<Record<string, Set<string>>>({})
   const [saveTarget,    setSaveTarget]    = useState<string | null>(null)
   const [editPriceId,   setEditPriceId]   = useState<string | null>(null)
+  const [editPostThread, setEditPostThread] = useState<AnswerThread | null>(null)
   const [localPrices,   setLocalPrices]   = useState<Record<string, number>>({})
   const [savedPriceEarnings, setSavedPriceEarnings] = useState<number | null>(null)
   const [priceSavedToast,  setPriceSavedToast]  = useState<number | null>(null)
@@ -3451,9 +3142,12 @@ export default function ProfilePage() {
               <p className="text-[15px] font-semibold text-[#111] leading-tight mb-[2px]">
                 {activeProfile.display_name}
               </p>
-              <p className="text-[11px] text-[#aaa] mb-[6px]">
+              <p className="text-[11px] text-[#aaa] mb-[2px]">
                 @{activeProfile.username}
               </p>
+              {user?.email && (
+                <p className="text-[10px] mb-[1px]" style={{ color: '#bbb' }}>{user.email}</p>
+              )}
               <p className="text-[12px] text-[#888] leading-[1.4] mb-[6px]">{activeProfile.bio}</p>
             </div>
           </div>
@@ -3581,7 +3275,7 @@ export default function ProfilePage() {
                 onFollow={handleFollow}
                 onUnlock={setPurchaseThread}
                 onSave={() => setSaveTarget(thread.id)}
-                onEditPrice={() => setEditPriceId(thread.id)}
+                onEditPrice={() => thread.type === 'post' ? setEditPostThread(thread) : setEditPriceId(thread.id)}
                 onAsk={() => setAskThread(thread)}
                 onOptions={thread.type === 'post' ? () => setPostOptionsId(thread.id) : undefined}
               />
@@ -3721,6 +3415,23 @@ export default function ProfilePage() {
         }}
       />
 
+
+      {/* ── Edit post sheet (opened when owner taps Pencil/Edit on a priced post) ── */}
+      <NewPostSheet
+        open={editPostThread !== null}
+        avatarUrl={activeProfile.avatar_url ?? undefined}
+        username={activeProfile.username}
+        userId={user?.id ?? ''}
+        onClose={() => setEditPostThread(null)}
+        onPosted={() => setEditPostThread(null)}
+        editPost={editPostThread ? {
+          id:        editPostThread.id,
+          caption:   editPostThread.caption,
+          price:     editPostThread.price,
+          post_type: 'type2',
+          images:    editPostThread.images,
+        } : undefined}
+      />
 
       {/* ── Edit profile page (full-screen right→left slide) ── */}
       <ProfileEditPage

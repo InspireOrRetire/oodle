@@ -193,7 +193,7 @@ const SECTIONS: Section[] = [
     ],
   },
   {
-    icon: '⚡',
+    icon: '$?',
     title: 'Features & programs',
     articles: [
       {

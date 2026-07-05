@@ -30,8 +30,10 @@ export async function signIn(email: string, password: string) {
 }
 
 // ── Sign out ──────────────────────────────────────────────────────────────────
+// scope:'local' clears the token from localStorage immediately without a network
+// call, so sign-out works even offline or when the server rejects the request.
 export async function signOut() {
-  const { error } = await supabase.auth.signOut()
+  const { error } = await supabase.auth.signOut({ scope: 'local' })
   if (error) throw error
 }
 
@@ -64,9 +66,18 @@ export async function getMyProfile() {
   return data
 }
 
+// ── Delete own account ────────────────────────────────────────────────────────
+// Calls a SECURITY DEFINER Postgres function that removes the public.users row
+// and the auth.users identity. Client must sign out immediately after.
+export async function deleteOwnAccount() {
+  const { error } = await supabase.rpc('delete_own_account')
+  if (error) throw error
+}
+
 // ── Update profile ────────────────────────────────────────────────────────────
-// Updates the users row, or inserts it if the handle_new_user trigger missed it.
-// Does NOT select after update — avoids RLS auth.role() issues on the read-back.
+// Upserts the users row. Using upsert (not update) so it works even when
+// the handle_new_user trigger hasn't created the row yet, and so that a
+// silent RLS block on UPDATE (0 rows, no error) doesn't swallow the save.
 export async function updateMyProfile(updates: Pick<
   TablesUpdate<'users'>,
   'username' | 'display_name' | 'avatar_url' | 'bio' | 'categories' | 'default_answer_price' | 'onboarding_completed'
@@ -74,23 +85,14 @@ export async function updateMyProfile(updates: Pick<
   const session = await getSession()
   if (!session) throw new Error('Not authenticated')
 
-  // Simple update — no .select() to avoid RLS read-back issues
-  const { error: updateErr } = await supabase
-    .from('users')
-    .update(updates)
-    .eq('id', session.user.id)
-
-  if (!updateErr) return
-
-  // Row doesn't exist yet (PGRST116 or similar) — upsert it
-  const { error: upsertErr } = await supabase
+  const { error } = await supabase
     .from('users')
     .upsert({
       id:    session.user.id,
       email: session.user.email ?? '',
       role:  (session.user.user_metadata?.role as string) ?? 'fan',
       ...updates,
-    })
+    }, { onConflict: 'id' })
 
-  if (upsertErr) throw upsertErr
+  if (error) throw error
 }

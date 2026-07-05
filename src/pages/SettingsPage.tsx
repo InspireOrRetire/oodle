@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, ChevronRight, Zap, TrendingUp, CreditCard, Bell, Lock,
+  ArrowLeft, ChevronRight, TrendingUp, CreditCard, Bell, Lock,
   User, Globe, HelpCircle, LogOut, Trash2, Shield, Eye, EyeOff,
   Smartphone, DollarSign, Star, Check, X, Plus, AlertTriangle,
   Building2, Camera,
@@ -957,7 +957,7 @@ function BuyTokensSheet({ open, onClose, onPurchased }: { open: boolean; onClose
                 <motion.div key="done" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
                   className="flex flex-col items-center py-10 px-6 pb-12">
                   <div className="w-16 h-16 rounded-full bg-[#111] flex items-center justify-center mb-4">
-                    <Zap style={{ width: 28, height: 28, color: '#111' }} strokeWidth={2} fill="#111" />
+                    <span style={{ fontWeight: 900, color: '#111', fontSize: 18 }}>$?</span>
                   </div>
                   <p className="text-[20px] font-bold text-[#111] mb-1">Balance added!</p>
                   <p className="text-[12px] mb-5" style={{ color: '#aaa' }}>
@@ -987,7 +987,7 @@ function BuyTokensSheet({ open, onClose, onPurchased }: { open: boolean; onClose
                           style={{ border: sel ? '1.5px solid #111' : '1px solid #ebebeb', background: sel ? '#111' : 'white' }}>
                           <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
                             style={{ background: '#111' }}>
-                            <Zap style={{ width: 16, height: 16, color: 'white' }} strokeWidth={2} fill="white" />
+                            <span style={{ fontWeight: 800, color: 'white', fontSize: 13 }}>$?</span>
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
@@ -1152,7 +1152,7 @@ function MyAnswersSheet({ open, onClose }: { open: boolean; onClose: () => void 
             <div className="flex flex-col items-center justify-center pt-16 px-8 text-center">
               <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4"
                 style={{ background: '#f4f4f6' }}>
-                <Zap style={{ width: 24, height: 24, color: '#ccc' }} strokeWidth={1.75} />
+                <span style={{ fontWeight: 800, color: '#ccc', fontSize: 16 }}>$?</span>
               </div>
               <p className="text-[15px] font-semibold text-[#111] mb-1">No purchases yet</p>
               <p className="text-[13px] leading-snug" style={{ color: '#aaa' }}>
@@ -1212,6 +1212,7 @@ function MyAnswersSheet({ open, onClose }: { open: boolean; onClose: () => void 
 export default function SettingsPage() {
   const navigate  = useNavigate()
   const { signOut } = useAuth()
+  async function handleSignOut() { await signOut(); navigate('/auth', { replace: true }) }
 
 
   const { profile: realProfile } = useAuth()
@@ -1404,7 +1405,7 @@ export default function SettingsPage() {
               </div>
             </div>
             <Row
-              icon={<DollarSign style={{ width: 14, height: 14 }} strokeWidth={2} />}
+              icon={<span style={{ fontWeight: 800, fontSize: 12 }}>$?</span>}
               iconBg="#f0f4ff" iconColor="#3b5bdb"
               label="Payout settings" sublabel="Chase Bank · ending 4821"
               chevron last onClick={() => setPayoutOpen(true)}
@@ -1540,7 +1541,7 @@ export default function SettingsPage() {
         <Row
           icon={<LogOut style={{ width: 14, height: 14 }} strokeWidth={2} />}
           iconBg="#fff0f0" iconColor="#e53e3e"
-          label="Sign out" danger onClick={signOut}
+          label="Sign out" danger onClick={handleSignOut}
         />
         <Row
           icon={<Trash2 style={{ width: 14, height: 14 }} strokeWidth={2} />}
@@ -1588,7 +1589,7 @@ export default function SettingsPage() {
       <MyAnswersSheet open={answersOpen} onClose={() => setAnswersOpen(false)} />
       <DeleteAccountSheet
         open={deleteOpen} onClose={() => setDeleteOpen(false)}
-        onConfirm={signOut}
+        onConfirm={handleSignOut}
       />
 
       <Toast message={toast} />

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { oo } from '../lib/oo'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, MapPin, Square, Plus, Star, Zap, X, Camera, Video, FileText, Lock, AlignLeft, Type, Search, ChevronUp, ChevronDown, Flag } from 'lucide-react'
+import { ArrowLeft, MapPin, Square, Plus, Star,  X, Camera, Video, FileText, Lock, AlignLeft, Type, Search, ChevronUp, ChevronDown, Flag } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import AnswerComposer from '../components/Thread/AnswerComposer'
 import AnswerComposerSheet from '../components/Thread/AnswerComposerSheet'
@@ -13,7 +13,6 @@ import {
 } from '../services/threadService'
 import type { ThreadWithParticipants, MessageRow, AnswerBlock } from '../lib/database.types'
 import type { Json } from '../lib/database.types'
-import { MOCK_THREADS } from '../lib/mockFeed'
 import MapTileCard from '../components/UI/MapTileCard'
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -348,14 +347,6 @@ export default function MessageDetailPage() {
   useEffect(() => {
     if (!id || !user) return
     let cancelled = false
-
-    // Check mock threads first (explore mode / empty DB)
-    const mockThread = MOCK_THREADS.find(t => t.id === id)
-    if (mockThread) {
-      setThread(mockThread)
-      setLoading(false)
-      return
-    }
 
     getThread(id)
       .then(data => {
@@ -697,7 +688,7 @@ export default function MessageDetailPage() {
             <div className="px-4 py-3 flex items-center gap-3" style={{ borderBottom: '0.5px solid #f0f0f0' }}>
               <span className="text-[13px] text-gray-500 flex-shrink-0">Unlock price</span>
               <div className="flex items-center gap-1.5 ml-auto bg-gray-50 rounded-xl px-3 py-2" style={{ border: '0.5px solid #e8e8e8' }}>
-                <span className="text-[13px] text-gray-400">⚡</span>
+                <span className="text-[13px] text-gray-400">$</span>
                 <input
                   type="number"
                   inputMode="decimal"
@@ -725,7 +716,7 @@ export default function MessageDetailPage() {
                 className="flex items-center gap-3 rounded-2xl px-4 py-4"
                 style={{ background: '#f9f9f9', border: '0.5px solid #ebebeb' }}
               >
-                <span className="text-[18px] text-gray-400">⚡</span>
+                <span className="text-[18px] text-gray-400">$</span>
                 <input
                   type="number"
                   inputMode="decimal"
@@ -1012,7 +1003,7 @@ export default function MessageDetailPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-[13px] font-semibold text-gray-800">
-                        ⚡{thread.price} <span className="font-normal text-gray-400">per unlock</span>
+                        $?{thread.price} <span className="font-normal text-gray-400">per unlock</span>
                       </p>
                       <p className="text-[11px] text-gray-400 mt-0.5">
                         ~${(thread.price * 0.07).toFixed(2)} earned per purchase
@@ -1546,7 +1537,7 @@ export default function MessageDetailPage() {
                       {/* Stepper pill */}
                       <div className="flex items-center gap-1.5 rounded-full pl-2.5 pr-1.5 py-1.5"
                         style={{ background: '#111' }}>
-                        <Zap style={{ width: 10, height: 10, color: '#111' }} strokeWidth={2.5} fill="#111" />
+                        <span style={{ fontWeight: 800, color: 'white', fontSize: 9 }}>$?</span>
                         {/* Down arrow — only when price > 0 */}
                         {answerPrice > 0 && (
                           <button
@@ -1632,7 +1623,7 @@ export default function MessageDetailPage() {
                   className="w-full flex items-center justify-center gap-2 py-3 rounded-[14px] transition-all disabled:opacity-30"
                   style={{ background: '#111' }}
                 >
-                  <Zap style={{ width: 14, height: 14, color: 'white' }} strokeWidth={2.5} fill="white" />
+                  <span style={{ fontWeight: 800, color: 'white', fontSize: 12 }}>$?</span>
                   <span className="text-[14px] font-bold text-white">Send answer</span>
                 </button>
 
@@ -1880,11 +1871,10 @@ export default function MessageDetailPage() {
                 animate={{ left: 3 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 40 }}
               >
-                <Zap
+                <DollarSign
                   className="w-3 h-3"
                   style={{ color: '#9ca3af' }}
                   strokeWidth={2.5}
-                  fill="none"
                 />
               </motion.div>
             </button>

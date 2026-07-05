@@ -83,7 +83,7 @@ export default function TokenKeypad({ open, initialValue, onClose }: Props) {
                 {display || '0'}
               </p>
               <p className="text-[13px] mt-2" style={{ color: 'rgba(255,255,255,0.38)' }}>
-                {numVal > 0 ? `You keep ⚡${earnings}` : 'Set a price in tokens'}
+                {numVal > 0 ? `You keep $? ${earnings}` : 'Set a price in tokens'}
               </p>
             </div>
 
@@ -124,7 +124,7 @@ export default function TokenKeypad({ open, initialValue, onClose }: Props) {
               <button
                 onClick={() => onClose(display)}
                 className="w-full py-[15px] rounded-2xl text-[16px] font-bold active:opacity-80 transition-opacity"
-                style={{ background: '#E8B800', color: '#111' }}
+                style={{ background: '#111', color: '#fff' }}
               >
                 Done
               </button>

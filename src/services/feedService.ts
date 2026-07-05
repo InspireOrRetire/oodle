@@ -7,7 +7,6 @@
 import { supabase } from '../lib/supabase'
 import { composeFeed, type ComposedPost } from '../lib/feedComposer'
 import { formatDistanceToNow } from '../lib/time'
-import { MOCK_FEED } from '../lib/mockFeed'
 
 // ── FeedItem — the shape FeedCard expects ─────────────────────────────────────
 // Defined here so feedService owns the adapter; HomePage imports this type.
@@ -154,7 +153,7 @@ export async function fetchExploreFeed(): Promise<ComposedPost[]> {
     .order('created_at', { ascending: false })
     .limit(60)
 
-  if (error || !rawData) return MOCK_FEED
+  if (error || !rawData) return []
   const data = rawData as PostRow013[]
 
   const mapped = data.map(post => {
@@ -183,8 +182,7 @@ export async function fetchExploreFeed(): Promise<ComposedPost[]> {
     }
   })
 
-  // Fall back to mock data if the DB is empty
-  return mapped.length > 0 ? mapped : MOCK_FEED
+  return mapped
 }
 
 // ── fetchComposedFeed ─────────────────────────────────────────────────────────
@@ -257,7 +255,113 @@ export async function fetchComposedFeed(userId: string): Promise<ComposedPost[]>
     }
   }
 
-  return composeFeed(result)
+  const composed = composeFeed(result)
+
+  // ── Always include the user's own posts ───────────────────────────────────
+  // The RPC only returns posts from creators the user follows; users don't
+  // follow themselves, so own posts would never appear without this fetch.
+  {
+    const { data: ownPosts } = await (supabase as any)
+      .from('posts')
+      .select(`
+        id, creator_id, caption, image_urls, price,
+        post_type, fixed_price, views,
+        location_address, question_count, answer_count, created_at,
+        users!creator_id (
+          username, display_name, avatar_url, categories, response_rate
+        )
+      `)
+      .eq('creator_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(20)
+
+    if (ownPosts && ownPosts.length > 0) {
+      const composedIds = new Set(composed.map((p: any) => p.id))
+      const ownItems = (ownPosts as any[])
+        .filter(p => !composedIds.has(p.id))
+        .map(p => ({
+          id:                    p.id,
+          creator_id:            p.creator_id,
+          creator_username:      p.users?.username      ?? '',
+          creator_display_name:  p.users?.display_name  ?? null,
+          creator_avatar_url:    p.users?.avatar_url    ?? null,
+          creator_response_rate: p.users?.response_rate ?? null,
+          categories:            p.users?.categories    ?? [],
+          created_at:            p.created_at,
+          caption:               p.caption              ?? null,
+          image_urls:            p.image_urls           ?? [],
+          price:                 p.price                ?? null,
+          post_type:             (p.post_type ?? 'type1') as 'type1' | 'type2',
+          fixed_price:           p.fixed_price          ?? null,
+          location_address:      p.location_address     ?? null,
+          question_count:        p.question_count       ?? 0,
+          answer_count:          p.answer_count         ?? 0,
+          views:                 p.views                ?? 0,
+          is_purchased:          false,
+          _slot:                 'followed' as const,
+        }))
+      composed.unshift(...ownItems)
+    }
+  }
+
+  // ── Platform-wide fallback ────────────────────────────────────────────────
+  // When the composed feed is thin (< 20 posts), the time-windowed RPC found
+  // very little content — typical on a small platform where creators don't post
+  // every day. Pull ALL posts with no time limit, dedup against what's already
+  // shown, and append. This gives Threads-style "see everyone" behaviour so
+  // new users never land on an empty feed.
+  if (composed.length < 20) {
+    const shownIds = new Set(composed.map(p => p.id))
+
+    // Grab purchased post IDs so locked posts render correctly in the supplement
+    const { data: purchaseRows } = await supabase
+      .from('post_purchases')
+      .select('post_id')
+      .eq('buyer_id', userId)
+    const purchasedIds = new Set((purchaseRows ?? []).map((r: any) => r.post_id as string))
+
+    const { data: allPosts } = await (supabase as any)
+      .from('posts')
+      .select(`
+        id, creator_id, caption, image_urls, price,
+        post_type, fixed_price, views,
+        location_address, question_count, answer_count, created_at,
+        users!creator_id (
+          username, display_name, avatar_url, categories, response_rate
+        )
+      `)
+      .order('created_at', { ascending: false })
+      .limit(60)
+
+    if (allPosts && allPosts.length > 0) {
+      const supplement: import('../lib/feedComposer').ComposedPost[] = (allPosts as any[])
+        .filter(p => !shownIds.has(p.id))
+        .map(p => ({
+          id:                    p.id,
+          creator_id:            p.creator_id,
+          creator_username:      p.users?.username      ?? '',
+          creator_display_name:  p.users?.display_name  ?? null,
+          creator_avatar_url:    p.users?.avatar_url    ?? null,
+          creator_response_rate: p.users?.response_rate ?? null,
+          categories:            p.users?.categories    ?? [],
+          created_at:            p.created_at,
+          caption:               p.caption              ?? null,
+          image_urls:            p.image_urls           ?? [],
+          price:                 p.price                ?? null,
+          post_type:             (p.post_type ?? 'type1') as 'type1' | 'type2',
+          fixed_price:           p.fixed_price          ?? null,
+          location_address:      p.location_address     ?? null,
+          question_count:        p.question_count       ?? 0,
+          answer_count:          p.answer_count         ?? 0,
+          views:                 p.views                ?? 0,
+          is_purchased:          purchasedIds.has(p.id),
+          _slot:                 'discovery' as const,
+        }))
+      return [...composed, ...supplement]
+    }
+  }
+
+  return composed
 }
 
 // ── fetchPostById ─────────────────────────────────────────────────────────────
@@ -333,10 +437,14 @@ export async function fetchCreatorProfile(username: string, currentUserId: strin
 // Trigram-indexed search used by the search overlay.
 
 export async function searchCreators(query: string, limit = 20) {
+  // Strip leading @ so typing "@jdevore" still finds "jdevore"
+  const q = query.replace(/^@+/, '').trim()
+  if (!q) return []
+
   const { data, error } = await supabase
     .from('users')
     .select('id, username, display_name, avatar_url, followers_count, role')
-    .or(`username.ilike.%${query}%,display_name.ilike.%${query}%`)
+    .or(`username.ilike.%${q}%,display_name.ilike.%${q}%,email.ilike.%${q}%`)
     .order('followers_count', { ascending: false })
     .limit(limit)
 

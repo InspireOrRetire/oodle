@@ -138,7 +138,7 @@ export function notifMeta(type: NotificationType): { emoji: string; accent: stri
     case 'new_question':      return { emoji: '❓', accent: '#7c3aed' }
     case 'new_dm_question':   return { emoji: '💬', accent: '#0ea5e9' }
     case 'answer_dropped':    return { emoji: '✅', accent: '#16a34a' }
-    case 'payment_received':  return { emoji: '⚡', accent: '#111' }
+    case 'payment_received':  return { emoji: '$?', accent: '#111' }
     case 'payment_processed': return { emoji: '💳', accent: '#111' }
     case 'dm_followup':       return { emoji: '↩️', accent: '#6b7280' }
     case 'question_declined': return { emoji: '✕',  accent: '#dc2626' }
