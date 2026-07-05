@@ -202,7 +202,6 @@ export default function SaveSheet({
                             {/* Name + count */}
                             <div className="flex-1 min-w-0 text-left">
                               <p className="text-[14px] font-semibold text-[#111] truncate">{col.name}</p>
-                              <p className="text-[11px] text-[#bbb] mt-[2px]">{col.count} saved</p>
                             </div>
 
                             {/* Checkmark */}
