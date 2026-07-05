@@ -78,11 +78,11 @@ function SlideCreatorModel() {
         <span className="text-5xl">🎯</span>
       </div>
       <h2 className="text-[30px] font-bold text-[#111] mb-4 leading-tight">
-        Direct access to experts
+        Real answers from real people
       </h2>
       <p className="text-[16px] text-[#666] leading-[1.7] mb-8">
-        Creators are chefs, trainers, stylists, developers — real people with real knowledge.
-        Ask them anything and get a personalised answer.
+        Chefs, trainers, stylists, developers — everyday people who've lived it.
+        Ask them anything and get a personal answer straight from them.
       </p>
 
       <div className="w-full space-y-4">
