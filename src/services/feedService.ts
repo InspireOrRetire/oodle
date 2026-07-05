@@ -38,6 +38,35 @@ export interface QAReply {
   cart_count?: number
 }
 
+// ── Structured content types ──────────────────────────────────────────────────
+
+export interface RecipeData {
+  servings?:    number
+  prep_time?:   string
+  cook_time?:   string
+  ingredients:  string[]
+  steps:        string[]
+}
+
+export interface ItineraryStop {
+  name:   string
+  type?:  'attraction' | 'food' | 'hotel' | 'transport' | 'other'
+  notes?: string
+  link?:  string
+}
+
+export interface ItineraryDay {
+  day:    number
+  title?: string
+  stops:  ItineraryStop[]
+}
+
+export interface ItineraryData {
+  destination?: string
+  duration?:    string
+  days:         ItineraryDay[]
+}
+
 export interface FeedItem {
   id:         string
   creator:    FeedCreator
@@ -53,6 +82,8 @@ export interface FeedItem {
   price?:           number
   fixed_price?:     number
   post_type?:       'type1' | 'type2'   // defaults to type1 when absent
+  post_subtype?:    'recipe' | 'itinerary'
+  structured_data?: RecipeData | ItineraryData
   location_address?: string
   isLocked:         boolean
   likes:            number
@@ -108,6 +139,8 @@ export function composedPostToFeedItem(cp: ComposedPost): FeedItem {
     price:            cp.price          ?? undefined,
     fixed_price:      cp.fixed_price    ?? undefined,
     location_address: cp.location_address ?? undefined,
+    post_subtype:     (cp as any).post_subtype  ?? undefined,
+    structured_data:  (cp as any).structured_data ?? undefined,
     isLocked,
     likes:       0,
     comments:    cp.question_count,
@@ -145,6 +178,7 @@ export async function fetchExploreFeed(): Promise<ComposedPost[]> {
     .select(`
       id, creator_id, caption, image_urls, price,
       post_type, fixed_price, views,
+      post_subtype, structured_data,
       location_address, question_count, answer_count, created_at,
       creator:users!creator_id (
         username, display_name, avatar_url, categories, response_rate
@@ -266,6 +300,7 @@ export async function fetchComposedFeed(userId: string): Promise<ComposedPost[]>
       .select(`
         id, creator_id, caption, image_urls, price,
         post_type, fixed_price, views,
+        post_subtype, structured_data,
         location_address, question_count, answer_count, created_at,
         users!creator_id (
           username, display_name, avatar_url, categories, response_rate
@@ -293,6 +328,8 @@ export async function fetchComposedFeed(userId: string): Promise<ComposedPost[]>
           price:                 p.price                ?? null,
           post_type:             (p.post_type ?? 'type1') as 'type1' | 'type2',
           fixed_price:           p.fixed_price          ?? null,
+          post_subtype:          p.post_subtype         ?? null,
+          structured_data:       p.structured_data      ?? null,
           location_address:      p.location_address     ?? null,
           question_count:        p.question_count       ?? 0,
           answer_count:          p.answer_count         ?? 0,
@@ -325,6 +362,7 @@ export async function fetchComposedFeed(userId: string): Promise<ComposedPost[]>
       .select(`
         id, creator_id, caption, image_urls, price,
         post_type, fixed_price, views,
+        post_subtype, structured_data,
         location_address, question_count, answer_count, created_at,
         users!creator_id (
           username, display_name, avatar_url, categories, response_rate
@@ -350,6 +388,8 @@ export async function fetchComposedFeed(userId: string): Promise<ComposedPost[]>
           price:                 p.price                ?? null,
           post_type:             (p.post_type ?? 'type1') as 'type1' | 'type2',
           fixed_price:           p.fixed_price          ?? null,
+          post_subtype:          p.post_subtype         ?? null,
+          structured_data:       p.structured_data      ?? null,
           location_address:      p.location_address     ?? null,
           question_count:        p.question_count       ?? 0,
           answer_count:          p.answer_count         ?? 0,

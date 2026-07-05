@@ -18,7 +18,7 @@ import MenuDrawer from '../components/UI/MenuDrawer'
 import SaveSheet, { type SaveCollection } from '../components/UI/SaveSheet'
 import { useLayout } from '../contexts/LayoutContext'
 import { useAuth } from '../contexts/AuthContext'
-import { fetchComposedFeed, composedPostToFeedItem, searchCreators as searchCreatorsDB, type FeedItem, type FeedCreator } from '../services/feedService'
+import { fetchComposedFeed, composedPostToFeedItem, searchCreators as searchCreatorsDB, type FeedItem, type FeedCreator, type RecipeData, type ItineraryData } from '../services/feedService'
 import { createThreadWithMedia } from '../services/threadService'
 import type { ThreadWithParticipants } from '../lib/database.types'
 import {
@@ -261,6 +261,75 @@ function FeedCard({
                   <span className="text-[13px]" style={{ color: '#666' }}>📍 {item.location_address}</span>
                 </div>
               )}
+              {/* ── Structured preview card ── */}
+              {item.post_subtype === 'recipe' && item.structured_data && (() => {
+                const r = item.structured_data as RecipeData
+                return (
+                  <div className="mb-2.5 rounded-[14px] overflow-hidden" style={{ border: '1.5px solid #eee', background: '#fafafa' }}>
+                    {/* Meta badges */}
+                    <div className="flex divide-x" style={{ borderBottom: '1px solid #eee' }}>
+                      {r.servings && <div className="flex-1 flex flex-col items-center py-2"><span className="text-[9px] uppercase tracking-wide font-semibold" style={{ color: '#aaa' }}>Serves</span><span className="text-[15px] font-bold text-[#111]">{r.servings}</span></div>}
+                      {r.prep_time && <div className="flex-1 flex flex-col items-center py-2"><span className="text-[9px] uppercase tracking-wide font-semibold" style={{ color: '#aaa' }}>Prep</span><span className="text-[13px] font-bold text-[#111]">{r.prep_time}</span></div>}
+                      {r.cook_time && <div className="flex-1 flex flex-col items-center py-2"><span className="text-[9px] uppercase tracking-wide font-semibold" style={{ color: '#aaa' }}>Cook</span><span className="text-[13px] font-bold text-[#111]">{r.cook_time}</span></div>}
+                    </div>
+                    {/* Ingredient teaser */}
+                    {r.ingredients && r.ingredients.length > 0 && (
+                      <div className="px-3 py-2.5">
+                        <p className="text-[10px] uppercase tracking-wide font-bold mb-1.5" style={{ color: '#aaa' }}>Ingredients · {r.ingredients.length}</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {r.ingredients.slice(0, 5).map((ing, i) => (
+                            <span key={i} className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: '#efefef', color: '#555' }}>{ing}</span>
+                          ))}
+                          {r.ingredients.length > 5 && (
+                            <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: '#efefef', color: '#888' }}>+{r.ingredients.length - 5} more</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    {/* Steps count teaser */}
+                    {r.steps && r.steps.length > 0 && (
+                      <div className="px-3 pb-2.5 flex items-center gap-1.5">
+                        <span className="text-[11px]" style={{ color: '#888' }}>{r.steps.length} steps · {item.isLocked ? 'Unlock to see full recipe' : 'Tap to view'}</span>
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
+              {item.post_subtype === 'itinerary' && item.structured_data && (() => {
+                const itin = item.structured_data as ItineraryData
+                const totalStops = itin.days?.reduce((sum, d) => sum + (d.stops?.length ?? 0), 0) ?? 0
+                return (
+                  <div className="mb-2.5 rounded-[14px] overflow-hidden" style={{ border: '1.5px solid #eee', background: '#fafafa' }}>
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-3 py-2.5" style={{ borderBottom: '1px solid #eee' }}>
+                      <div>
+                        {itin.destination && <p className="text-[15px] font-bold text-[#111]">{itin.destination}</p>}
+                        <p className="text-[11px]" style={{ color: '#888' }}>{itin.days?.length ?? 0} days · {totalStops} stops{itin.duration ? ` · ${itin.duration}` : ''}</p>
+                      </div>
+                      <span className="text-[22px]">🗺️</span>
+                    </div>
+                    {/* Day previews */}
+                    {itin.days?.slice(0, 2).map((day, i) => (
+                      <div key={i} className="px-3 py-2" style={{ borderBottom: i < Math.min((itin.days?.length ?? 0), 2) - 1 ? '1px solid #eee' : undefined }}>
+                        <p className="text-[10px] uppercase tracking-wide font-bold mb-1" style={{ color: '#aaa' }}>Day {day.day}{day.title ? ` — ${day.title}` : ''}</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {day.stops?.slice(0, 3).map((stop, si) => (
+                            <span key={si} className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: '#efefef', color: '#555' }}>{stop.name}</span>
+                          ))}
+                          {(day.stops?.length ?? 0) > 3 && (
+                            <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: '#efefef', color: '#888' }}>+{day.stops.length - 3}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    {(itin.days?.length ?? 0) > 2 && (
+                      <div className="px-3 py-2 text-center">
+                        <span className="text-[11px]" style={{ color: '#888' }}>{item.isLocked ? 'Unlock to see full itinerary' : `+${itin.days!.length - 2} more days`}</span>
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
               {/* ── Action row ── */}
               <div className="relative flex items-center py-2.5" style={{ borderTop: '0.5px solid #f5f5f7', minHeight: 40 }}>
                 {/* Share · Ask · Save — left-aligned group */}

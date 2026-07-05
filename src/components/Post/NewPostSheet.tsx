@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   X, Check, Plus, Minus, Camera, MapPin, AlignLeft, FileText,
   Search, Link2, SlidersHorizontal, Image as ImageIcon, Type,
+  ChefHat, Map, GripVertical,
 } from 'lucide-react'
 import TokenKeypad from './TokenKeypad'
 import { supabase } from '../../lib/supabase'
@@ -103,14 +104,35 @@ export default function NewPostSheet({
   onPosted?: () => void
   editPost?: { id: string; caption?: string; price?: number; post_type?: 'type1' | 'type2'; images?: string[] }
 }) {
-  type PostMode = 'questions' | 'answer'
-  type ListRow  = { type: 'title' | 'line'; text: string }
+  type PostMode    = 'questions' | 'answer'
+  type PostSubtype = 'none' | 'recipe' | 'itinerary'
+  type ListRow     = { type: 'title' | 'line'; text: string }
 
-  const [mode,    setMode]    = useState<PostMode>('questions')
-  const [caption, setCaption] = useState('')
-  const [posted,  setPosted]  = useState(false)
-  const [postError, setPostError] = useState<string | null>(null)
+  type IngredientRow = { text: string }
+  type StepRow       = { text: string }
+  type ItinStop      = { name: string; type: 'attraction' | 'food' | 'hotel' | 'transport' | 'other'; notes: string; link: string }
+  type ItinDay       = { day: number; title: string; stops: ItinStop[] }
+
+  const [mode,       setMode]       = useState<PostMode>('questions')
+  const [postSubtype, setPostSubtype] = useState<PostSubtype>('none')
+  const [caption,    setCaption]    = useState('')
+  const [posted,     setPosted]     = useState(false)
+  const [postError,  setPostError]  = useState<string | null>(null)
   const [showPostOptions, setShowPostOptions] = useState(false)
+
+  // ── Recipe state ─────────────────────────────────────────────────────────────
+  const [recipeServings,  setRecipeServings]  = useState('')
+  const [recipePrepTime,  setRecipePrepTime]  = useState('')
+  const [recipeCookTime,  setRecipeCookTime]  = useState('')
+  const [ingredients,     setIngredients]     = useState<IngredientRow[]>([{ text: '' }, { text: '' }, { text: '' }])
+  const [steps,           setSteps]           = useState<StepRow[]>([{ text: '' }, { text: '' }])
+
+  // ── Itinerary state ───────────────────────────────────────────────────────────
+  const [itinDestination, setItinDestination] = useState('')
+  const [itinDuration,    setItinDuration]    = useState('')
+  const [itinDays,        setItinDays]        = useState<ItinDay[]>([
+    { day: 1, title: '', stops: [{ name: '', type: 'attraction', notes: '', link: '' }] },
+  ])
 
   // answer-mode attachments
   const [price,         setPrice]        = useState('')
@@ -150,8 +172,12 @@ export default function NewPostSheet({
 
   const [existingImageUrls, setExistingImageUrls] = useState<string[]>([])
 
+  const hasStructuredContent =
+    (postSubtype === 'recipe' && (ingredients.some(r => r.text.trim()) || steps.some(r => r.text.trim()))) ||
+    (postSubtype === 'itinerary' && itinDays.some(d => d.stops.some(s => s.name.trim())))
+
   const canPost = isAnswerMode
-    ? (caption.trim() || images.length > 0 || existingImageUrls.length > 0 || video || pdfFile || gatedLink.trim() || location || listItems.some(r => r.text.trim())) && !posted
+    ? (caption.trim() || images.length > 0 || existingImageUrls.length > 0 || video || pdfFile || gatedLink.trim() || location || listItems.some(r => r.text.trim()) || hasStructuredContent) && !posted
     : (caption.trim() || qImages.length > 0 || qVideo) && !posted
 
   const [prevOpen, setPrevOpen] = useState(false)
@@ -167,6 +193,12 @@ export default function NewPostSheet({
       setExistingImageUrls([])
     }
     setPosted(false); setPostError(null)
+    setPostSubtype('none')
+    setRecipeServings(''); setRecipePrepTime(''); setRecipeCookTime('')
+    setIngredients([{ text: '' }, { text: '' }, { text: '' }])
+    setSteps([{ text: '' }, { text: '' }])
+    setItinDestination(''); setItinDuration('')
+    setItinDays([{ day: 1, title: '', stops: [{ name: '', type: 'attraction', notes: '', link: '' }] }])
     setImages([]); setVideo(null); setPdfFile(null); setGatedLink(''); setLinkPanelOpen(false); setLocation(null)
     setLocLoading(false); setLocManual(false); setLocText('')
     setListOpen(false); setListItems([{ type: 'line', text: '' }, { type: 'line', text: '' }, { type: 'line', text: '' }])
@@ -175,6 +207,61 @@ export default function NewPostSheet({
   if (!open && prevOpen) setPrevOpen(false)
 
   // autoFocus on the textarea handles keyboard-on-open; no setTimeout needed
+
+  function buildStructuredData(): Record<string, unknown> | null {
+    if (postSubtype === 'recipe') {
+      return {
+        servings:    recipeServings  ? Number(recipeServings)  : undefined,
+        prep_time:   recipePrepTime  || undefined,
+        cook_time:   recipeCookTime  || undefined,
+        ingredients: ingredients.map(r => r.text).filter(Boolean),
+        steps:       steps.map(r => r.text).filter(Boolean),
+      }
+    }
+    if (postSubtype === 'itinerary') {
+      return {
+        destination: itinDestination || undefined,
+        duration:    itinDuration    || undefined,
+        days: itinDays.map(d => ({
+          day:   d.day,
+          title: d.title || undefined,
+          stops: d.stops.filter(s => s.name.trim()).map(s => ({
+            name:  s.name,
+            type:  s.type !== 'attraction' ? s.type : undefined,
+            notes: s.notes || undefined,
+            link:  s.link  || undefined,
+          })),
+        })),
+      }
+    }
+    return null
+  }
+
+  // ── Recipe helpers ────────────────────────────────────────────────────────────
+  function updateIngredient(i: number, val: string) { setIngredients(p => p.map((r, idx) => idx === i ? { text: val } : r)) }
+  function addIngredient()  { setIngredients(p => [...p, { text: '' }]) }
+  function removeIngredient(i: number) { setIngredients(p => p.length > 1 ? p.filter((_, idx) => idx !== i) : [{ text: '' }]) }
+
+  function updateStep(i: number, val: string) { setSteps(p => p.map((r, idx) => idx === i ? { text: val } : r)) }
+  function addStep()  { setSteps(p => [...p, { text: '' }]) }
+  function removeStep(i: number) { setSteps(p => p.length > 1 ? p.filter((_, idx) => idx !== i) : [{ text: '' }]) }
+
+  // ── Itinerary helpers ─────────────────────────────────────────────────────────
+  function addItinDay() {
+    setItinDays(p => [...p, { day: p.length + 1, title: '', stops: [{ name: '', type: 'attraction', notes: '', link: '' }] }])
+  }
+  function updateItinDay(di: number, field: 'title', val: string) {
+    setItinDays(p => p.map((d, idx) => idx === di ? { ...d, [field]: val } : d))
+  }
+  function addStop(di: number) {
+    setItinDays(p => p.map((d, idx) => idx === di ? { ...d, stops: [...d.stops, { name: '', type: 'attraction' as const, notes: '', link: '' }] } : d))
+  }
+  function updateStop(di: number, si: number, field: keyof ItinStop, val: string) {
+    setItinDays(p => p.map((d, idx) => idx === di ? { ...d, stops: d.stops.map((s, sidx) => sidx === si ? { ...s, [field]: val } : s) } : d))
+  }
+  function removeStop(di: number, si: number) {
+    setItinDays(p => p.map((d, idx) => idx === di ? { ...d, stops: d.stops.length > 1 ? d.stops.filter((_, sidx) => sidx !== si) : d.stops } : d))
+  }
 
   async function handlePost() {
     if (!canPost || !userId) return
@@ -195,6 +282,10 @@ export default function NewPostSheet({
         caption:    caption.trim() || null,
         image_urls: [],
         price:      priceNum || null,
+      }
+      if (postSubtype !== 'none') {
+        insertPayload.post_subtype = postSubtype
+        insertPayload.structured_data = buildStructuredData()
       }
       if (location) {
         insertPayload.location_address = location.label
@@ -402,13 +493,31 @@ export default function NewPostSheet({
                       {([{ key: 'questions', label: 'Ask me anything' }, { key: 'answer', label: 'Sell an answer' }] as { key: PostMode; label: string }[]).map(opt => (
                         <button key={opt.key} onClick={() => setMode(opt.key)}
                           className="flex-1 py-[9px] px-3 rounded-[10px] text-[13px] font-semibold transition-all"
-                          style={mode === opt.key
-                            ? (opt.key === 'answer' ? { background: '#111', color: '#fff' } : { background: '#111', color: '#fff' })
-                            : { background: 'transparent', color: '#999' }}>
+                          style={mode === opt.key ? { background: '#111', color: '#fff' } : { background: 'transparent', color: '#999' }}>
                           {opt.label}
                         </button>
                       ))}
                     </div>
+
+                    {/* Subtype picker — only in answer mode */}
+                    {isAnswerMode && (
+                      <div className="flex gap-2 mb-4">
+                        {([
+                          { key: 'none',      label: 'General',    icon: null },
+                          { key: 'recipe',    label: 'Recipe',     icon: <ChefHat style={{ width: 14, height: 14 }} strokeWidth={1.75} /> },
+                          { key: 'itinerary', label: 'Itinerary',  icon: <Map     style={{ width: 14, height: 14 }} strokeWidth={1.75} /> },
+                        ] as { key: PostSubtype; label: string; icon: React.ReactNode }[]).map(opt => (
+                          <button key={opt.key} onClick={() => setPostSubtype(opt.key)}
+                            className="flex items-center gap-1.5 px-3 py-[7px] rounded-full text-[12px] font-semibold transition-all active:opacity-70"
+                            style={postSubtype === opt.key
+                              ? { background: '#111', color: '#fff' }
+                              : { background: '#f0f0f0', color: '#666' }}>
+                            {opt.icon}
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
 
                     {/* Composer row */}
                     <div className="flex gap-3">
@@ -550,6 +659,154 @@ export default function NewPostSheet({
                               </button>
                             ))}
                           </div>
+
+                          {/* ── Recipe builder ─────────────────────────────────────── */}
+                          {postSubtype === 'recipe' && (
+                            <div className="mb-4 rounded-[18px] overflow-hidden" style={{ border: '1.5px solid #e8e8e8', background: '#fafafa' }}>
+                              {/* Meta row */}
+                              <div className="flex gap-0" style={{ borderBottom: '1px solid #eee' }}>
+                                <div className="flex-1 flex flex-col items-center py-3 px-2" style={{ borderRight: '1px solid #eee' }}>
+                                  <span className="text-[10px] uppercase tracking-wide font-semibold mb-1" style={{ color: '#aaa' }}>Servings</span>
+                                  <input type="number" value={recipeServings} onChange={e => setRecipeServings(e.target.value)}
+                                    placeholder="4" className="w-full text-center text-[16px] font-bold text-[#111] bg-transparent outline-none placeholder-[#ccc]" />
+                                </div>
+                                <div className="flex-1 flex flex-col items-center py-3 px-2" style={{ borderRight: '1px solid #eee' }}>
+                                  <span className="text-[10px] uppercase tracking-wide font-semibold mb-1" style={{ color: '#aaa' }}>Prep</span>
+                                  <input type="text" value={recipePrepTime} onChange={e => setRecipePrepTime(e.target.value)}
+                                    placeholder="15 min" className="w-full text-center text-[16px] font-bold text-[#111] bg-transparent outline-none placeholder-[#ccc]" />
+                                </div>
+                                <div className="flex-1 flex flex-col items-center py-3 px-2">
+                                  <span className="text-[10px] uppercase tracking-wide font-semibold mb-1" style={{ color: '#aaa' }}>Cook</span>
+                                  <input type="text" value={recipeCookTime} onChange={e => setRecipeCookTime(e.target.value)}
+                                    placeholder="45 min" className="w-full text-center text-[16px] font-bold text-[#111] bg-transparent outline-none placeholder-[#ccc]" />
+                                </div>
+                              </div>
+
+                              {/* Ingredients */}
+                              <div className="px-4 pt-3 pb-2" style={{ borderBottom: '1px solid #eee' }}>
+                                <p className="text-[11px] uppercase tracking-wide font-bold mb-2" style={{ color: '#888' }}>Ingredients</p>
+                                {ingredients.map((row, i) => (
+                                  <div key={i} className="flex items-center gap-2 mb-1.5">
+                                    <div className="w-[5px] h-[5px] rounded-full flex-shrink-0" style={{ background: '#ccc' }} />
+                                    <input type="text" value={row.text} onChange={e => updateIngredient(i, e.target.value)}
+                                      onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addIngredient() } if (e.key === 'Backspace' && !row.text && ingredients.length > 1) { e.preventDefault(); removeIngredient(i) } }}
+                                      placeholder={`Ingredient ${i + 1}`}
+                                      className="flex-1 text-[14px] text-[#111] bg-transparent outline-none placeholder-[#ccc]" />
+                                    {ingredients.length > 1 && (
+                                      <button onClick={() => removeIngredient(i)} className="active:opacity-50 flex-shrink-0">
+                                        <X style={{ width: 12, height: 12, color: '#ccc', strokeWidth: 2 }} />
+                                      </button>
+                                    )}
+                                  </div>
+                                ))}
+                                <button onClick={addIngredient} className="mt-1 flex items-center gap-1.5 active:opacity-60">
+                                  <Plus style={{ width: 13, height: 13, color: '#888', strokeWidth: 2.5 }} />
+                                  <span className="text-[12px] font-semibold" style={{ color: '#888' }}>Add ingredient</span>
+                                </button>
+                              </div>
+
+                              {/* Steps */}
+                              <div className="px-4 pt-3 pb-3">
+                                <p className="text-[11px] uppercase tracking-wide font-bold mb-2" style={{ color: '#888' }}>Steps</p>
+                                {steps.map((row, i) => (
+                                  <div key={i} className="flex items-start gap-2.5 mb-2">
+                                    <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-[1px]"
+                                      style={{ background: '#111', minWidth: 20 }}>
+                                      <span className="text-white font-bold" style={{ fontSize: 9 }}>{i + 1}</span>
+                                    </div>
+                                    <textarea value={row.text} onChange={e => updateStep(i, e.target.value)}
+                                      onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addStep() } }}
+                                      placeholder={`Step ${i + 1}…`} rows={1}
+                                      className="flex-1 text-[14px] text-[#111] bg-transparent outline-none resize-none placeholder-[#ccc] leading-snug"
+                                      style={{ minHeight: 22 }} />
+                                    {steps.length > 1 && (
+                                      <button onClick={() => removeStep(i)} className="active:opacity-50 flex-shrink-0 mt-[2px]">
+                                        <X style={{ width: 12, height: 12, color: '#ccc', strokeWidth: 2 }} />
+                                      </button>
+                                    )}
+                                  </div>
+                                ))}
+                                <button onClick={addStep} className="mt-1 flex items-center gap-1.5 active:opacity-60">
+                                  <Plus style={{ width: 13, height: 13, color: '#888', strokeWidth: 2.5 }} />
+                                  <span className="text-[12px] font-semibold" style={{ color: '#888' }}>Add step</span>
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* ── Itinerary builder ───────────────────────────────────── */}
+                          {postSubtype === 'itinerary' && (
+                            <div className="mb-4 rounded-[18px] overflow-hidden" style={{ border: '1.5px solid #e8e8e8', background: '#fafafa' }}>
+                              {/* Destination + duration */}
+                              <div className="flex gap-0" style={{ borderBottom: '1px solid #eee' }}>
+                                <div className="flex-1 flex flex-col py-3 px-4" style={{ borderRight: '1px solid #eee' }}>
+                                  <span className="text-[10px] uppercase tracking-wide font-semibold mb-1" style={{ color: '#aaa' }}>Destination</span>
+                                  <input type="text" value={itinDestination} onChange={e => setItinDestination(e.target.value)}
+                                    placeholder="Tokyo, Japan" className="text-[15px] font-bold text-[#111] bg-transparent outline-none placeholder-[#ccc]" />
+                                </div>
+                                <div className="flex flex-col py-3 px-4" style={{ width: 110 }}>
+                                  <span className="text-[10px] uppercase tracking-wide font-semibold mb-1" style={{ color: '#aaa' }}>Duration</span>
+                                  <input type="text" value={itinDuration} onChange={e => setItinDuration(e.target.value)}
+                                    placeholder="5 days" className="text-[15px] font-bold text-[#111] bg-transparent outline-none placeholder-[#ccc]" />
+                                </div>
+                              </div>
+
+                              {/* Days */}
+                              {itinDays.map((day, di) => (
+                                <div key={di} style={{ borderBottom: '1px solid #eee' }}>
+                                  {/* Day header */}
+                                  <div className="flex items-center gap-2 px-4 py-2.5" style={{ background: '#f2f2f2' }}>
+                                    <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: '#888' }}>Day {day.day}</span>
+                                    <input type="text" value={day.title} onChange={e => updateItinDay(di, 'title', e.target.value)}
+                                      placeholder="Add a title…"
+                                      className="flex-1 text-[13px] font-semibold text-[#111] bg-transparent outline-none placeholder-[#ccc]" />
+                                  </div>
+
+                                  {/* Stops */}
+                                  <div className="px-4 pt-2 pb-2">
+                                    {day.stops.map((stop, si) => (
+                                      <div key={si} className="flex items-start gap-2 mb-2">
+                                        <GripVertical style={{ width: 14, height: 14, color: '#ccc', flexShrink: 0, marginTop: 3 }} strokeWidth={1.5} />
+                                        <div className="flex-1 min-w-0">
+                                          <input type="text" value={stop.name} onChange={e => updateStop(di, si, 'name', e.target.value)}
+                                            placeholder="Place name…"
+                                            className="w-full text-[14px] font-semibold text-[#111] bg-transparent outline-none placeholder-[#ccc] mb-1" />
+                                          <div className="flex gap-2">
+                                            <select value={stop.type} onChange={e => updateStop(di, si, 'type', e.target.value)}
+                                              className="text-[11px] bg-transparent outline-none" style={{ color: '#888' }}>
+                                              <option value="attraction">Attraction</option>
+                                              <option value="food">Food</option>
+                                              <option value="hotel">Hotel</option>
+                                              <option value="transport">Transport</option>
+                                              <option value="other">Other</option>
+                                            </select>
+                                            <input type="text" value={stop.notes} onChange={e => updateStop(di, si, 'notes', e.target.value)}
+                                              placeholder="Notes…"
+                                              className="flex-1 text-[11px] text-[#888] bg-transparent outline-none placeholder-[#ccc]" />
+                                          </div>
+                                        </div>
+                                        {day.stops.length > 1 && (
+                                          <button onClick={() => removeStop(di, si)} className="active:opacity-50 flex-shrink-0 mt-[2px]">
+                                            <X style={{ width: 12, height: 12, color: '#ccc', strokeWidth: 2 }} />
+                                          </button>
+                                        )}
+                                      </div>
+                                    ))}
+                                    <button onClick={() => addStop(di)} className="flex items-center gap-1.5 active:opacity-60">
+                                      <Plus style={{ width: 12, height: 12, color: '#888', strokeWidth: 2.5 }} />
+                                      <span className="text-[12px] font-semibold" style={{ color: '#888' }}>Add stop</span>
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+
+                              {/* Add day */}
+                              <button onClick={addItinDay} className="w-full flex items-center justify-center gap-1.5 py-3 active:opacity-60">
+                                <Plus style={{ width: 13, height: 13, color: '#888', strokeWidth: 2.5 }} />
+                                <span className="text-[12px] font-semibold" style={{ color: '#888' }}>Add day</span>
+                              </button>
+                            </div>
+                          )}
 
                           {/* Existing images (edit mode, read-only) */}
                           {existingImageUrls.length > 0 && (
