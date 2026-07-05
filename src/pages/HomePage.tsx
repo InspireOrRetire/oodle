@@ -1982,7 +1982,6 @@ export default function HomePage() {
           const postId = saveTarget
           if (!postId || !user?.id) { setSaveTarget(null); return }
           setSavedItems(prev => ({ ...prev, [postId]: selected }))
-          setSaveTarget(null)
           if (selected.size === 0) {
             await (supabase as any).from('saved_items').delete().eq('user_id', user.id).eq('post_id', postId)
           } else {
@@ -1992,6 +1991,7 @@ export default function HomePage() {
               { onConflict: 'user_id,post_id' }
             )
           }
+          setSaveTarget(null)
         }}
         onCreateCollection={async name => {
           const { data, error } = await (supabase as any)
@@ -2013,7 +2013,7 @@ export default function HomePage() {
         username={activeProfile.username}
         userId={user?.id ?? ''}
         onClose={() => { setNewPostOpen(false); setEditPostItem(null) }}
-        onPosted={() => { refreshFeed(); setEditPostItem(null) }}
+        onPosted={() => { setEditPostItem(null); setTimeout(refreshFeed, 1500) }}
         editPost={editPostItem ? {
           id:        editPostItem.id,
           caption:   editPostItem.text,

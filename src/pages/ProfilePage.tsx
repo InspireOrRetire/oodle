@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Share2, Menu, Plus, Minus, MoreHorizontal, Link,  Bookmark, Check, ArrowLeft, Mail, Heart, MessageCircle, ChevronUp, ChevronDown, Copy, AtSign, Camera, ChevronRight as ChevronRightIcon, Image, Video, MapPin, List, Type, FileText, X, Search, Lock, ShoppingCart } from 'lucide-react'
+import { Share2, Menu, Plus, Minus, MoreHorizontal, Link,  Bookmark, Check, ArrowLeft, Mail, Heart, MessageCircle, ChevronUp, ChevronDown, Copy, AtSign, Camera, ChevronRight as ChevronRightIcon, Image, Video, MapPin, List, Type, FileText, X, Search, Lock, ShoppingCart, Pencil } from 'lucide-react'
 import { oo } from '../lib/oo'
 // Plain number for card price pills — no $? prefix on timeline cards
 const cp = (n: number) => n % 1 === 0 ? String(n) : n.toFixed(2)
@@ -11,6 +11,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import FollowToast from '../components/UI/FollowToast'
 import PostOptionsSheet from '../components/Post/PostOptionsSheet'
+import NewPostSheet from '../components/Post/NewPostSheet'
 import SaveSheet from '../components/UI/SaveSheet'
 import PostMediaCarousel from '../components/Post/PostMediaCarousel'
 import TokenKeypad from '../components/Post/TokenKeypad'
@@ -441,8 +442,17 @@ function ThreadItem({
                       onClick={e => { e.stopPropagation(); isOwner ? onEditPrice?.() : onUnlock(thread) }}
                       className="inline-flex items-center gap-1 active:opacity-75 transition-opacity"
                     >
-                      <Lock style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
-                      <span className="text-[12px] font-semibold text-[#111] tracking-tight">{cp(thread.price)}</span>
+                      {isOwner ? (
+                        <>
+                          <Pencil style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
+                          <span className="text-[12px] font-semibold text-[#111] tracking-tight">Edit</span>
+                        </>
+                      ) : (
+                        <>
+                          <Lock style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
+                          <span className="text-[12px] font-semibold text-[#111] tracking-tight">{cp(thread.price)}</span>
+                        </>
+                      )}
                     </button>
                   )}
                 </div>
@@ -527,7 +537,10 @@ function ThreadItem({
                             style={{ background: '#000', marginTop: 1 }}
                           >
                             <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight">
-                              <Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{cp(thread.price)}
+                              {isOwner
+                                ? <><Pencil style={{ width: 9, height: 9 }} strokeWidth={2.5} />Edit</>
+                                : <><Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{cp(thread.price)}</>
+                              }
                             </span>
                           </button>
                         )}
@@ -613,7 +626,10 @@ function ThreadItem({
                               style={{ background: '#000', marginTop: 1 }}
                             >
                               <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight">
-                                <Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{cp(thread.price)}
+                                {isOwner
+                                  ? <><Pencil style={{ width: 9, height: 9 }} strokeWidth={2.5} />Edit</>
+                                  : <><Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{cp(thread.price)}</>
+                                }
                               </span>
                             </button>
                           )}
@@ -3017,6 +3033,7 @@ export default function ProfilePage() {
   const [savedItems,    setSavedItems]    = useState<Record<string, Set<string>>>({})
   const [saveTarget,    setSaveTarget]    = useState<string | null>(null)
   const [editPriceId,   setEditPriceId]   = useState<string | null>(null)
+  const [editPostThread, setEditPostThread] = useState<AnswerThread | null>(null)
   const [localPrices,   setLocalPrices]   = useState<Record<string, number>>({})
   const [savedPriceEarnings, setSavedPriceEarnings] = useState<number | null>(null)
   const [priceSavedToast,  setPriceSavedToast]  = useState<number | null>(null)
@@ -3261,7 +3278,7 @@ export default function ProfilePage() {
                 onFollow={handleFollow}
                 onUnlock={setPurchaseThread}
                 onSave={() => setSaveTarget(thread.id)}
-                onEditPrice={() => setEditPriceId(thread.id)}
+                onEditPrice={() => thread.type === 'post' ? setEditPostThread(thread) : setEditPriceId(thread.id)}
                 onAsk={() => setAskThread(thread)}
                 onOptions={thread.type === 'post' ? () => setPostOptionsId(thread.id) : undefined}
               />
@@ -3401,6 +3418,23 @@ export default function ProfilePage() {
         }}
       />
 
+
+      {/* ── Edit post sheet (opened when owner taps Pencil/Edit on a priced post) ── */}
+      <NewPostSheet
+        open={editPostThread !== null}
+        avatarUrl={activeProfile.avatar_url ?? undefined}
+        username={activeProfile.username}
+        userId={user?.id ?? ''}
+        onClose={() => setEditPostThread(null)}
+        onPosted={() => setEditPostThread(null)}
+        editPost={editPostThread ? {
+          id:        editPostThread.id,
+          caption:   editPostThread.caption,
+          price:     editPostThread.price,
+          post_type: 'type2',
+          images:    editPostThread.images,
+        } : undefined}
+      />
 
       {/* ── Edit profile page (full-screen right→left slide) ── */}
       <ProfileEditPage
