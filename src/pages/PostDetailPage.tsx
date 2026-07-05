@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { ArrowLeft, MoreHorizontal, MapPin, Check, MessageCircle, X as XIcon, Lock, Bookmark, Eye, PencilLine } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, MapPin, Check, MessageCircle, X as XIcon, Lock, Bookmark, Eye, PencilLine, Download } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { FeedItem, RecipeData, ItineraryData } from '../services/feedService'
 import { fetchPostById, composedPostToFeedItem, incrementPostView } from '../services/feedService'
@@ -14,6 +14,7 @@ import { myQuestionsStore } from '../services/myQuestionsStore'
 import { useAuth } from '../contexts/AuthContext'
 import { oo } from '../lib/oo'
 import { savePost, unsavePost } from '../services/savedService'
+import { shareOrDownloadPDF } from '../lib/generateAnswerPDF'
 import { supabase } from '../lib/supabase'
 import PostOptionsSheet from '../components/Post/PostOptionsSheet'
 
@@ -60,6 +61,7 @@ export default function PostDetailPage() {
   const iosKbRef = useRef<HTMLInputElement>(null)
   const [isSaved, setIsSaved] = useState(false)
   const [optionsOpen, setOptionsOpen] = useState(false)
+  const [pdfLoading, setPdfLoading] = useState(false)
 
   // Prefer item passed via navigation state (no reload flash)
   const navState = location.state as { item?: FeedItem; focusedReplyIndex?: number } | null
@@ -366,6 +368,26 @@ export default function PostDetailPage() {
               </div>
             )
           })()}
+
+          {/* ── Download PDF button (recipe / itinerary only) ── */}
+          {(item.post_subtype === 'recipe' || item.post_subtype === 'itinerary') && item.structured_data && (
+            <div className="mt-3 mb-1">
+              <button
+                onClick={async () => {
+                  setPdfLoading(true)
+                  try { await shareOrDownloadPDF(item) } finally { setPdfLoading(false) }
+                }}
+                disabled={pdfLoading}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-[14px] active:opacity-70 transition-opacity"
+                style={{ background: '#f5f5f7', border: '1px solid #e5e5e5' }}
+              >
+                <Download style={{ width: 15, height: 15, color: '#111' }} strokeWidth={2} />
+                <span className="text-[13px] font-semibold text-[#111]">
+                  {pdfLoading ? 'Generating PDF…' : 'Save / Share PDF'}
+                </span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* ── CTA section — always above community questions ── */}
