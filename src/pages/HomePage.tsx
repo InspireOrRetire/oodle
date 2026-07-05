@@ -1784,7 +1784,7 @@ export default function HomePage() {
             <img
               src="/oodle-logo.png"
               alt="oodle"
-              style={{ width: 28, height: 28, objectFit: 'contain' }}
+              style={{ height: 36, width: 'auto', objectFit: 'contain' }}
             />
           </div>
 
