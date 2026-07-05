@@ -8,7 +8,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Camera, Zap } from 'lucide-react'
+import { Camera, DollarSign } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import * as AuthService from '../../lib/auth'
@@ -324,7 +324,7 @@ function SlideTokens() {
     <div className="flex flex-col items-center text-center px-8 pt-10 pb-6">
       <div className="w-24 h-24 rounded-full flex items-center justify-center mb-8"
         style={{ background: '#fff8e7', border: '2px solid #f5e6b0' }}>
-        <Zap className="w-12 h-12" style={{ color: '#111' }} strokeWidth={2} fill="#111" />
+        <span style={{ fontWeight: 900, color: '#111', fontSize: 48, lineHeight: 1 }}>$?</span>
       </div>
       <h2 className="text-[30px] font-bold text-[#111] mb-4 leading-tight">
         Your balance is your currency
@@ -336,7 +336,7 @@ function SlideTokens() {
       <div className="w-full rounded-2xl px-6 py-5 text-left space-y-4"
         style={{ background: '#f9f9f9', border: '0.5px solid #ededed' }}>
         {[
-          { icon: '⚡', label: 'Ask a question',    sub: 'Send any question to a creator you follow' },
+          { icon: '$?', label: 'Ask a question',    sub: 'Send any question to a creator you follow' },
           { icon: '🔒', label: 'Answers are gated', sub: 'Use your balance to unlock the creator\'s response' },
           { icon: '📲', label: 'Anyone can benefit', sub: 'Others can pay to see the same Q&A — creators earn passively' },
         ].map(row => (
@@ -494,7 +494,7 @@ function SlideFirstPost({
 
       <div className="flex items-center gap-3 mb-5 px-1">
         <div className="flex items-center gap-2">
-          <Zap className="w-4 h-4 flex-shrink-0" style={{ color: '#111' }} strokeWidth={2} fill="#111" />
+          <span style={{ fontWeight: 800, color: '#111', fontSize: 13, flexShrink: 0 }}>$?</span>
           <span className="text-[14px] font-semibold text-[#111]">Unlock price</span>
         </div>
         <div className="flex items-center gap-2 ml-auto">

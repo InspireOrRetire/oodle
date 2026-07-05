@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Share2, Menu, Plus, Minus, MoreHorizontal, Link, Zap, Bookmark, Check, ArrowLeft, Mail, Heart, MessageCircle, ChevronUp, ChevronDown, Copy, AtSign, Camera, ChevronRight as ChevronRightIcon, Image, Video, MapPin, List, Type, FileText, X, Search, Lock, ShoppingCart } from 'lucide-react'
+import { Share2, Menu, Plus, Minus, MoreHorizontal, Link,  Bookmark, Check, ArrowLeft, Mail, Heart, MessageCircle, ChevronUp, ChevronDown, Copy, AtSign, Camera, ChevronRight as ChevronRightIcon, Image, Video, MapPin, List, Type, FileText, X, Search, Lock, ShoppingCart } from 'lucide-react'
 import { oo } from '../lib/oo'
 // Plain number for card price pills — no $? prefix on timeline cards
 const cp = (n: number) => n % 1 === 0 ? String(n) : n.toFixed(2)
@@ -358,7 +358,7 @@ function ThreadItem({
               onClick={() => { snap(0); onUnlock(thread) }}
             >
               <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Zap style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2.5} fill="#111" />
+                <span style={{ fontWeight: 800, color: '#111', fontSize: 9 }}>$?</span>
               </div>
               <span style={{ fontSize: 14, fontWeight: 600, color: 'white', fontFamily: 'DM Mono, monospace' }}>
                 {cp(thread.price)}
@@ -932,7 +932,7 @@ function PurchaseSheet({
                               }}>
                               <div className="flex items-center justify-center rounded-full flex-shrink-0"
                                 style={{ width: 40, height: 40, background: '#111' }}>
-                                <Zap style={{ width: 18, height: 18, color: 'white' }} strokeWidth={2} fill="white" />
+                                <span style={{ fontWeight: 800, color: 'white', fontSize: 13 }}>$?</span>
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-0.5">
@@ -1784,7 +1784,7 @@ function EditPriceSheet({
               {value > 0 && (
                 <div className="flex items-center gap-2 rounded-[12px] px-4 py-3 mb-5"
                   style={{ background: '#f0fdf4', border: '0.5px solid #c8e6c9' }}>
-                  <Zap style={{ width: 12, height: 12, color: '#3a9a4a' }} strokeWidth={2} fill="#3a9a4a" />
+                  <span style={{ fontWeight: 800, color: '#3a9a4a', fontSize: 10 }}>$?</span>
                   <span className="text-[11px]" style={{ color: '#3a9a4a' }}>
                     You earn ~${(value * 0.85).toFixed(2)} per unlock after fees
                   </span>
@@ -2480,12 +2480,12 @@ function CreatePostSheet({
                       >
                         {/* ── Price block — Apple Cash style ── */}
                         <div className="mb-4 rounded-[20px] overflow-hidden"
-                          style={{ border: '1.5px solid #111', background: 'rgba(232,184,0,0.04)' }}>
+                          style={{ border: '1.5px solid rgba(0,0,0,0.2)', background: 'rgba(0,0,0,0.02)' }}>
                           {/* Label */}
                           <div className="flex items-center justify-center gap-1.5 px-4 py-2.5"
-                            style={{ borderBottom: '0.5px solid rgba(232,184,0,0.2)' }}>
-                            <Zap style={{ width: 11, height: 11, color: '#111', flexShrink: 0 }} strokeWidth={2} fill="#111" />
-                            <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: '#b88c00' }}>Answer price</span>
+                            style={{ borderBottom: '0.5px solid rgba(0,0,0,0.08)' }}>
+                            <span style={{ fontWeight: 800, color: '#111', fontSize: 11 }}>$?</span>
+                            <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: '#888' }}>Answer price</span>
                           </div>
                           {/* Controls */}
                           <div className="flex items-center justify-center pt-5 pb-2" style={{ gap: 6 }}>
@@ -2505,8 +2505,8 @@ function CreatePostSheet({
                                 style={{ fontSize: 52, lineHeight: 1.1, color: Number(price) > 0 ? '#111' : '#ccc' }}>
                                 {price || '0'}
                               </span>
-                              <span className="text-[13px] font-semibold mt-1" style={{ color: '#b88c00' }}>
-                                {Number(price) > 0 ? 'USD' : 'free'}
+                              <span className="text-[13px] font-semibold mt-1" style={{ color: '#888' }}>
+                                {Number(price) > 0 ? '$?' : 'free'}
                               </span>
                             </button>
                             <button
@@ -2520,8 +2520,8 @@ function CreatePostSheet({
                           {/* Earnings */}
                           {Number(price) > 0 && (
                             <div className="flex justify-center px-5 pb-4 pt-1">
-                              <span className="text-[11px]" style={{ color: '#b88c00' }}>
-                                You keep <span className="font-bold">⚡{Math.floor(Number(price) * 0.8)}</span>
+                              <span className="text-[11px]" style={{ color: '#888' }}>
+                                You keep <span className="font-bold">USD {Math.floor(Number(price) * 0.8)}</span>
                               </span>
                             </div>
                           )}

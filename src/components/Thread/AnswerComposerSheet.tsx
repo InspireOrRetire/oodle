@@ -6,7 +6,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion'
 import {
-  Camera, Video, Mic, Image as ImageIcon, Zap, ChevronUp, X, Check,
+  Camera, Video, Mic, Image as ImageIcon,  ChevronUp, X, Check,
   FileText, Link as LinkIcon, MapPin, AlignLeft, Plus,
 } from 'lucide-react'
 import PriceSetterSheet from '../UI/PriceSetterSheet'
@@ -460,9 +460,9 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
                     className="flex items-center gap-1.5 rounded-full px-3.5 py-2"
                     style={{ background: '#111' }}
                   >
-                    {price > 0 && <Zap style={{ width: 12, height: 12, color: '#fff' }} strokeWidth={2.5} fill="#fff" />}
+                    {price > 0 && <span style={{ fontWeight: 800, color: '#fff', fontSize: 11 }}>$?</span>}
                     <span className="text-[13px] font-semibold text-white">
-                      {price === 0 ? 'Free' : `$${price}`}
+                      {price === 0 ? 'Free' : `$?${price}`}
                     </span>
                     <ChevronUp style={{ width: 13, height: 13, color: '#aaa', transform: 'rotate(180deg)' }} strokeWidth={2} />
                   </button>
@@ -754,7 +754,7 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
                           <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
                         ) : (
                           <>
-                            <Zap style={{ width: 16, height: 16, color: '#111' }} strokeWidth={2.5} fill="#111" />
+                            <span style={{ fontWeight: 800, color: '#111', fontSize: 14 }}>$?</span>
                             <span className="text-[15px] font-bold text-[#111]">Send answer</span>
                           </>
                         )}

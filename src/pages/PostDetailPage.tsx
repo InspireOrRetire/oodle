@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { ArrowLeft, MoreHorizontal, MapPin, Zap, Check, MessageCircle, X as XIcon, Lock, Bookmark, Eye, PencilLine } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, MapPin,  Check, MessageCircle, X as XIcon, Lock, Bookmark, Eye, PencilLine } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { FeedItem } from '../services/feedService'
 import { fetchPostById, composedPostToFeedItem, incrementPostView } from '../services/feedService'
@@ -532,7 +532,7 @@ export default function PostDetailPage() {
                 className="w-12 h-12 rounded-full flex items-center justify-center mb-3"
                 style={{ background: '#f5f5f5', border: '1px solid #e0e0e0' }}
               >
-                <Zap className="w-5 h-5" style={{ color: '#111' }} strokeWidth={1.75} fill="#111" />
+                <span style={{ fontWeight: 800, color: '#111', fontSize: 16 }}>$?</span>
               </div>
               <p className="text-[14px] font-semibold text-[#111] mb-1">Be the first to ask</p>
               <p className="text-[13px]" style={{ color: '#aaa' }}>

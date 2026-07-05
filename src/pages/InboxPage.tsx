@@ -84,7 +84,7 @@ function ChatRow({
           </div>
           <p className={`text-[13px] leading-snug truncate ${unread ? 'font-medium text-gray-900' : 'text-gray-400'}`}>{preview}</p>
           {price != null && price > 0 && (
-            <span className="text-[10px] text-gray-300 mt-[5px] block">⚡{price}</span>
+            <span className="text-[10px] text-gray-300 mt-[5px] block">$?{price}</span>
           )}
         </div>
 
@@ -370,7 +370,7 @@ function AnswerComposeSheet({
 
   const isAnswerMode = mode === 'answer'
   const btnStyle     = isAnswerMode
-    ? { background: '#E8B800', color: '#111' }
+    ? { background: '#111', color: '#fff' }
     : { background: '#111',     color: '#fff' }
 
   const initials = (name?: string | null) =>
@@ -430,7 +430,7 @@ function AnswerComposeSheet({
               </button>
               <button onClick={() => setMode('answer')}
                 className="rounded-full px-4 py-1.5 text-[13px] font-semibold transition-all"
-                style={mode === 'answer' ? { background: '#E8B800', color: '#111' } : { background: '#f2f2f2', color: '#888' }}>
+                style={mode === 'answer' ? { background: '#111', color: '#fff' } : { background: '#f2f2f2', color: '#888' }}>
                 Sell an answer
               </button>
             </div>
@@ -466,8 +466,8 @@ function AnswerComposeSheet({
                 <>
                   {/* Price block */}
                   <div className="mx-4 mb-3 rounded-[14px] px-4 py-3 flex items-center gap-3"
-                    style={{ border: '1.5px solid #E8B800' }}>
-                    <span className="text-[13px] text-[#E8B800] font-semibold">Price</span>
+                    style={{ border: '1.5px solid #111' }}>
+                    <span className="text-[13px] text-[#111] font-semibold">Price</span>
                     <span className="text-[18px] font-bold text-[#111] flex-shrink-0">$</span>
                     <input type="number" inputMode="decimal" min={1} value={price}
                       onChange={e => setPrice(e.target.value)}
@@ -541,7 +541,7 @@ function AnswerComposeSheet({
                         className="px-4 mb-2 overflow-hidden">
                         <input type="url" placeholder="Paste a gated URL…" value={gatedLink}
                           onChange={e => setGatedLink(e.target.value)}
-                          className="w-full border border-[#e5e5ea] rounded-[10px] px-3 py-2.5 text-[13px] text-[#111] focus:outline-none focus:border-[#E8B800]" />
+                          className="w-full border border-[#e5e5ea] rounded-[10px] px-3 py-2.5 text-[13px] text-[#111] focus:outline-none focus:border-[#111]" />
                       </motion.div>
                     )}
                     {locActive && (

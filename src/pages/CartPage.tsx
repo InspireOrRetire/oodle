@@ -85,7 +85,7 @@ export default function CartPage() {
             <ShoppingCart className="w-14 h-14 mb-4" style={{ color: '#e5e5ea' }} strokeWidth={1.25} />
             <p className="text-[16px] font-semibold text-[#111] mb-1">Your cart is empty</p>
             <p className="text-[13px] mb-6" style={{ color: '#aaa' }}>
-              Tap ⚡ on any answer to save it here
+              Tap $? on any answer to save it here
             </p>
             <button
               onClick={() => navigate('/')}

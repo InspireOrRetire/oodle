@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { X, Wallet, Users, Zap, ShoppingBag, ShoppingCart, Leaf, HelpCircle, Settings, ChevronRight, LogOut } from 'lucide-react'
+import { X, Wallet, Users, DollarSign, ShoppingBag, ShoppingCart, Leaf, HelpCircle, Settings, ChevronRight, LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { supabase } from '../../lib/supabase'
@@ -44,7 +44,7 @@ export default function MenuDrawer({ isOpen, onClose }: Props) {
           <div className="space-y-1 mb-1">
             {[
               { icon: Users, label: 'Discover Friends', path: '/' },
-              ...(isCreator ? [{ icon: Zap, label: 'Creator Center', path: '/settings' }] : []),
+              ...(isCreator ? [{ icon: DollarSign, label: 'Creator Center', path: '/settings' }] : []),
             ].map(item => (
               <button
                 key={item.label}
