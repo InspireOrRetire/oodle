@@ -557,13 +557,18 @@ export default function NewPostSheet({
                           <motion.div key={mode} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}>
                             <textarea ref={textareaRef}
                               autoFocus
-                              value={caption} onChange={e => setCaption(e.target.value)}
+                              value={caption} onChange={e => {
+                                setCaption(e.target.value)
+                                const el = e.target
+                                el.style.height = 'auto'
+                                el.style.height = el.scrollHeight + 'px'
+                              }}
                               placeholder="Let their queries be known…"
                               rows={isAnswerMode ? 3 : 3}
-                              className="w-full text-[16px] text-[#111] placeholder-[#c0c0c0] resize-none outline-none leading-[1.5] bg-transparent"
+                              className="w-full text-[16px] text-[#111] placeholder-[#c0c0c0] resize-none outline-none leading-[1.5] bg-transparent overflow-hidden"
                               style={isAnswerMode
                                 ? { minHeight: 80 }
-                                : { minHeight: 60, maxHeight: 260 }}
+                                : { minHeight: 60 }}
                             />
                           </motion.div>
                         </AnimatePresence>
@@ -630,50 +635,46 @@ export default function NewPostSheet({
                           initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }}
                           transition={{ type: 'spring', stiffness: 340, damping: 28 }}>
 
-                          {/* Price block — Apple Cash style */}
-                          <div className="mb-4 rounded-[20px] overflow-hidden" style={{ border: Number(price) > 0 ? '1.5px solid rgba(0,0,0,0.2)' : '1.5px dashed #d0d0d0', background: 'rgba(0,0,0,0.02)', transition: 'border 0.15s' }}>
-                            {/* Label */}
-                            <div className="flex items-center justify-center gap-1.5 px-4 py-2.5" style={{ borderBottom: '0.5px solid rgba(0,0,0,0.08)' }}>
+                          {/* Price block — compact row */}
+                          <div className="mb-3 rounded-[14px] px-4 py-2.5 flex items-center" style={{ border: Number(price) > 0 ? '1.5px solid rgba(0,0,0,0.2)' : '1.5px dashed #d0d0d0', background: 'rgba(0,0,0,0.02)', transition: 'border 0.15s', gap: 10 }}>
+                            {/* Label + earnings */}
+                            <div className="flex-1 min-w-0">
                               <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: '#888' }}>Answer price</span>
+                              {Number(price) > 0 && (
+                                <div className="text-[11px] mt-0.5" style={{ color: '#aaa' }}>
+                                  You keep <span className="font-semibold" style={{ color: '#666' }}>USD {Math.floor(Number(price) * 0.8)}</span>
+                                </div>
+                              )}
                             </div>
-                            {/* Controls */}
-                            <div className="flex items-center justify-center pt-5 pb-2" style={{ gap: 6 }}>
+                            {/* Stepper */}
+                            <div className="flex items-center flex-shrink-0" style={{ gap: 8 }}>
                               <button
                                 onClick={() => setPrice(String(Math.max(0, (Number(price) || 0) - 1)))}
-                                className="w-[38px] h-[38px] rounded-full flex items-center justify-center flex-shrink-0 active:opacity-60 transition-opacity"
+                                className="w-[30px] h-[30px] rounded-full flex items-center justify-center active:opacity-60 transition-opacity"
                                 style={{ background: '#1C1C1E' }}
                               >
-                                <Minus style={{ width: 15, height: 15, color: 'white' }} strokeWidth={2.5} />
+                                <Minus style={{ width: 13, height: 13, color: 'white' }} strokeWidth={2.5} />
                               </button>
                               <button
                                 onClick={() => setKeypadOpen(true)}
                                 className="flex flex-col items-center active:opacity-60 transition-opacity"
-                                style={{ width: 90 }}
+                                style={{ minWidth: 44, textAlign: 'center' }}
                               >
-                                <span className="font-bold text-[#111] leading-none"
-                                  style={{ fontSize: 52, lineHeight: 1.1, color: Number(price) > 0 ? '#111' : '#ccc' }}>
+                                <span className="font-bold leading-none" style={{ fontSize: 28, color: Number(price) > 0 ? '#111' : '#ccc' }}>
                                   {price || '0'}
                                 </span>
-                                <span className="text-[13px] font-semibold mt-1" style={{ color: '#888' }}>
+                                <span className="text-[11px] font-semibold" style={{ color: '#aaa', marginTop: 1 }}>
                                   {Number(price) > 0 ? '$?' : 'free'}
                                 </span>
                               </button>
                               <button
                                 onClick={() => setPrice(String((Number(price) || 0) + 1))}
-                                className="w-[38px] h-[38px] rounded-full flex items-center justify-center flex-shrink-0 active:opacity-60 transition-opacity"
+                                className="w-[30px] h-[30px] rounded-full flex items-center justify-center active:opacity-60 transition-opacity"
                                 style={{ background: '#1C1C1E' }}
                               >
-                                <Plus style={{ width: 15, height: 15, color: 'white' }} strokeWidth={2.5} />
+                                <Plus style={{ width: 13, height: 13, color: 'white' }} strokeWidth={2.5} />
                               </button>
                             </div>
-                            {/* Earnings */}
-                            {Number(price) > 0 && (
-                              <div className="flex justify-center px-5 pb-4 pt-1">
-                                <span className="text-[11px]" style={{ color: '#888' }}>
-                                  You keep <span className="font-bold">USD {Math.floor(Number(price) * 0.8)}</span>
-                                </span>
-                              </div>
-                            )}
                           </div>
 
                           {/* Tile row */}
