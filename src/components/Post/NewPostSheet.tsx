@@ -563,7 +563,7 @@ export default function NewPostSheet({
                                 el.style.height = 'auto'
                                 el.style.height = el.scrollHeight + 'px'
                               }}
-                              placeholder="Let their queries be known…"
+                              placeholder="Share your knowledge…"
                               rows={isAnswerMode ? 3 : 3}
                               className="w-full text-[16px] text-[#111] placeholder-[#c0c0c0] resize-none outline-none leading-[1.5] bg-transparent overflow-hidden"
                               style={isAnswerMode
