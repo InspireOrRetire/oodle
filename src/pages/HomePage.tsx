@@ -1882,7 +1882,7 @@ export default function HomePage() {
           className="flex-1 text-left py-2 px-3.5 rounded-full"
           style={{ background: '#f5f5f7' }}
         >
-          <span className="text-[14px]" style={{ color: '#bbb' }}>What's on your mind?</span>
+          <span className="text-[14px]" style={{ color: '#bbb' }}>Let their queries be known</span>
         </button>
       </div>
 
