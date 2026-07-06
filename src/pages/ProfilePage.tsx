@@ -3303,6 +3303,24 @@ export default function ProfilePage() {
 
       {/* ── Answer timeline ── */}
       <div className="bg-white" style={{ borderTop: '0.5px solid #ebebeb' }}>
+
+        {/* ── Compose bar ── */}
+        <div className="flex items-center gap-3 px-4 py-3.5 bg-white" style={{ borderBottom: '0.5px solid #f0f0f0' }}>
+          <button className="flex-shrink-0" onClick={() => setCreatePostOpen(true)}>
+            {activeProfile.avatar_url
+              ? <img src={activeProfile.avatar_url} alt={activeProfile.username} className="w-9 h-9 rounded-full object-cover" />
+              : <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-semibold text-[13px]" style={{ background: '#111' }}>{initials[0]}</div>
+            }
+          </button>
+          <button
+            className="flex-1 text-left py-2 px-3.5 rounded-full"
+            style={{ background: '#f5f5f7' }}
+            onClick={() => setCreatePostOpen(true)}
+          >
+            <span className="text-[14px]" style={{ color: '#bbb' }}>Share your knowledge…</span>
+          </button>
+        </div>
+
         {timelineLoading ? (
           [0,1,2].map(i => (
             <div key={i} className="px-4 py-5 space-y-3" style={{ borderBottom: '0.5px solid #f2f2f2' }}>
