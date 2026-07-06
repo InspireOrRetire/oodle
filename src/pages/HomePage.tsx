@@ -1523,7 +1523,12 @@ export default function HomePage() {
   const [feed,        setFeed]        = useState<FeedItem[]>([])
   const [feedLoading, setFeedLoading] = useState(true)
   const [feedError,   setFeedError]   = useState<string | null>(null)
-  const [feedFilter,  setFeedFilter]  = useState<'all' | 'recipe' | 'itinerary'>('all')
+  const [feedFilter,  setFeedFilter]  = useState<'all' | 'recipe' | 'itinerary'>(() => {
+    const intent = localStorage.getItem('oodle_intent')
+    if (intent === 'chef') return 'recipe'
+    if (intent === 'traveler') return 'itinerary'
+    return 'all'
+  })
 
   const filteredFeed = feedFilter === 'all' ? feed : feed.filter(f => f.post_subtype === feedFilter)
 

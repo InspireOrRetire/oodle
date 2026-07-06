@@ -317,7 +317,77 @@ function SlideProfilePhoto({
   )
 }
 
-// ── Step 2: Tokens ─────────────────────────────────────────────────────────────
+// ── Step 2: Intent ─────────────────────────────────────────────────────────────
+
+const INTENT_OPTIONS = [
+  { key: 'chef',     emoji: '🧑‍🍳', label: 'Chef / Food creator',   sub: 'Share recipes, techniques, and culinary knowledge' },
+  { key: 'traveler', emoji: '✈️',   label: 'Traveler',               sub: 'Share itineraries, destinations, and travel tips' },
+  { key: 'curious',  emoji: '👀',   label: 'Just browsing',          sub: 'Discover creators and explore answers' },
+] as const
+
+type Intent = typeof INTENT_OPTIONS[number]['key']
+
+function SlideIntent({ onNext }: { onNext: () => void }) {
+  const [selected, setSelected] = useState<Intent | null>(null)
+
+  function handleContinue() {
+    if (!selected) return
+    localStorage.setItem('oodle_intent', selected)
+    onNext()
+  }
+
+  return (
+    <div className="flex flex-col px-6 pt-10 pb-6">
+      <h2 className="text-[30px] font-bold text-[#111] mb-2 leading-tight px-2">
+        What brings you here?
+      </h2>
+      <p className="text-[15px] px-2 mb-8" style={{ color: '#888' }}>
+        We'll personalise your feed from the start.
+      </p>
+
+      <div className="space-y-3">
+        {INTENT_OPTIONS.map(opt => (
+          <button
+            key={opt.key}
+            onClick={() => setSelected(opt.key)}
+            className="w-full flex items-center gap-4 px-5 py-4 rounded-[18px] text-left transition-all active:opacity-75"
+            style={{
+              border:     selected === opt.key ? '2px solid #111' : '1.5px solid #e8e8e8',
+              background: selected === opt.key ? '#f8f8f8' : 'white',
+            }}
+          >
+            <span style={{ fontSize: 32, lineHeight: 1 }}>{opt.emoji}</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-[15px] font-semibold text-[#111]">{opt.label}</p>
+              <p className="text-[12px] mt-0.5" style={{ color: '#aaa' }}>{opt.sub}</p>
+            </div>
+            <div
+              className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center transition-all"
+              style={{ border: selected === opt.key ? 'none' : '1.5px solid #ddd', background: selected === opt.key ? '#111' : 'transparent' }}
+            >
+              {selected === opt.key && (
+                <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                  <path d="M1 4l2.5 2.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              )}
+            </div>
+          </button>
+        ))}
+      </div>
+
+      <button
+        onClick={handleContinue}
+        disabled={!selected}
+        className="mt-8 w-full py-4 rounded-[16px] text-[16px] font-bold text-white transition-opacity"
+        style={{ background: '#111', opacity: selected ? 1 : 0.3 }}
+      >
+        Continue
+      </button>
+    </div>
+  )
+}
+
+// ── Step 3 (was 2): Tokens ─────────────────────────────────────────────────────
 
 function SlideTokens() {
   return (
@@ -545,7 +615,7 @@ export default function OnboardingFlow() {
   const { user, reloadProfile } = useAuth()
   const [step, setStep]           = useState(0)
   const [completing, setCompleting] = useState(false)
-  const TOTAL = 5
+  const TOTAL = 6
 
   async function handleComplete() {
     if (!user || completing) return
@@ -562,8 +632,8 @@ export default function OnboardingFlow() {
   function nextStep() { setStep(s => s + 1) }
 
   // Steps 0–1 are mandatory profile setup (no skip, no footer — slides own their buttons)
-  // Steps 2–3 are informational (footer Next + header Skip to last)
-  // Step 4 is first post (slide owns its buttons)
+  // Steps 2–4 are informational (footer Next + header Skip to last)
+  // Step 5 is first post (slide owns its buttons)
   const isMandatorySetup = step < 2
   const isLastStep       = step === TOTAL - 1
 
@@ -578,6 +648,7 @@ export default function OnboardingFlow() {
       onNext={nextStep}
       onReloadProfile={reloadProfile}
     />,
+    <SlideIntent onNext={nextStep} />,
     <SlideTokens />,
     <SlideCreatorModel />,
     <SlideFirstPost
