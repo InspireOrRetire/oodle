@@ -52,9 +52,11 @@ function CreatorAv({ target, size = 72 }: { target: UnlockTarget; size?: number 
 export default function UnlockSheet({
   target,
   onClose,
+  onUnlocked,
 }: {
-  target:  UnlockTarget | null
-  onClose: () => void
+  target:       UnlockTarget | null
+  onClose:      () => void
+  onUnlocked?:  () => void
 }) {
   const [view,      setView]      = useState<UView>('main')
   const [balance,   setBalance]   = useState(0)
@@ -62,7 +64,8 @@ export default function UnlockSheet({
   const [unlocking, setUnlocking] = useState(false)
   const [topping,   setTopping]   = useState(false)
   const [error,     setError]     = useState<string | null>(null)
-  const topupChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
+  const topupChannelRef  = useRef<ReturnType<typeof supabase.channel> | null>(null)
+  const didUnlockRef     = useRef(false)
 
   useEffect(() => {
     let cancelled = false
@@ -88,6 +91,7 @@ export default function UnlockSheet({
       })
       if (fnErr || !data?.success) throw new Error(fnErr?.message ?? data?.error ?? 'Unlock failed')
       setBalance(data.newBalance ?? 0)
+      didUnlockRef.current = true
       nav('success')
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
@@ -126,9 +130,11 @@ export default function UnlockSheet({
   }
 
   function handleClose() {
+    const wasUnlocked = didUnlockRef.current
     if (topupChannelRef.current) { supabase.removeChannel(topupChannelRef.current); topupChannelRef.current = null }
     onClose()
-    setTimeout(() => { setView('main'); setUnlocking(false); setTopping(false); setError(null) }, 380)
+    if (wasUnlocked) onUnlocked?.()
+    setTimeout(() => { setView('main'); setUnlocking(false); setTopping(false); setError(null); didUnlockRef.current = false }, 380)
   }
 
   const V  = { enter: () => ({ y: 14, opacity: 0 }), center: () => ({ y: 0, opacity: 1 }), exit: () => ({ y: -8, opacity: 0 }) }
