@@ -305,6 +305,7 @@ export default function NewPostSheet({
         caption:    caption.trim() || null,
         image_urls: [],
         price:      priceNum || null,
+        post_type:  isAnswerMode ? 'type2' : 'type1',
       }
       if (postSubtype !== 'none') {
         insertPayload.post_subtype = postSubtype
