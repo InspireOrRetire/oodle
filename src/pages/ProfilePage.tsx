@@ -2243,6 +2243,7 @@ export default function ProfilePage() {
   const [realThreads,     setRealThreads]     = useState<AnswerThread[]>([])
   const [timelineLoading, setTimelineLoading] = useState(true)
   const [timelineError,   setTimelineError]   = useState<string | null>(null)
+  const [timelineKey,     setTimelineKey]     = useState(0)
 
   useEffect(() => {
     if (authLoading) return
@@ -2404,7 +2405,6 @@ export default function ProfilePage() {
   const [askThread,     setAskThread]     = useState<AnswerThread | null>(null)
   const [postQuestions, setPostQuestions] = useState<Record<string, LocalQuestion[]>>({})
   const [createPostOpen, setCreatePostOpen] = useState(false)
-  const [timelineKey,    setTimelineKey]    = useState(0)
   const [editProfileOpen, setEditProfileOpen] = useState(false)
   const [postOptionsId, setPostOptionsId] = useState<string | null>(null)
   const [hidePurchaseCounts, setHidePurchaseCounts] = useState<Record<string, boolean>>({})
