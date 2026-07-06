@@ -1,6 +1,6 @@
-import { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, MoreHorizontal, MapPin, Search, X, Lock } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, MapPin, Search, X, Lock, Bookmark, Share2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import type { UserRow, PostRow } from '../lib/database.types'
@@ -312,10 +312,40 @@ function RecentAnswersSheet({
 
 // ─── Profile post card (timeline style) ──────────────────────────────────────
 
-function ProfilePostCard({ post, profile, navigate }: { post: PostRow; profile: UserRow; navigate: (path: string) => void }) {
+function ProfilePostCard({ post, profile, navigate }: { post: PostRow; profile: UserRow; navigate: (path: string, opts?: object) => void }) {
+  const { user: currentUser } = useAuth()
   const displayName = profile.display_name || profile.username || 'User'
   const images: string[] = post.image_urls ?? []
   const ago = timeAgo(post.created_at)
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    if (!currentUser) return
+    supabase.from('saved_items').select('saved_id').eq('user_id', currentUser.id).eq('post_id', post.id).maybeSingle()
+      .then(({ data }) => setSaved(!!data))
+  }, [post.id, currentUser?.id])
+
+  async function toggleSave(e: React.MouseEvent) {
+    e.stopPropagation()
+    if (!currentUser) return
+    if (saved) {
+      setSaved(false)
+      await supabase.from('saved_items').delete().eq('user_id', currentUser.id).eq('post_id', post.id)
+    } else {
+      setSaved(true)
+      await supabase.from('saved_items').insert({ user_id: currentUser.id, post_id: post.id })
+    }
+  }
+
+  function handleShare(e: React.MouseEvent) {
+    e.stopPropagation()
+    const url = `${window.location.origin}/post/${post.id}`
+    if (navigator.share) {
+      navigator.share({ url, title: post.caption ?? '' }).catch(() => {})
+    } else {
+      navigator.clipboard.writeText(url).catch(() => {})
+    }
+  }
 
   return (
     <div
@@ -338,17 +368,6 @@ function ProfilePostCard({ post, profile, navigate }: { post: PostRow; profile: 
           <span className="text-[14px] font-semibold text-[#111]">{displayName}</span>
           <span className="text-[11px]" style={{ color: '#bbb' }}>· {ago}</span>
         </div>
-        {post.price != null && post.price > 0 && (
-          <button
-            onClick={e => { e.stopPropagation(); navigate(`/post/${post.id}`) }}
-            className="inline-flex items-center justify-center rounded-full px-3 py-1 flex-shrink-0 active:opacity-75 transition-opacity"
-            style={{ background: 'white', border: '1px solid #e0e0e0' }}
-          >
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#111] tracking-tight">
-              <Lock style={{ width: 9, height: 9, color: '#111' }} strokeWidth={2.5} />{cp(post.price)}
-            </span>
-          </button>
-        )}
       </div>
 
       {/* Caption */}
@@ -371,12 +390,28 @@ function ProfilePostCard({ post, profile, navigate }: { post: PostRow; profile: 
         </div>
       )}
 
-      {/* Meta row */}
-      <div className="flex items-center gap-3 pb-3">
-        {(post.question_count ?? 0) > 0 && (
-          <span className="text-[11px]" style={{ color: '#bbb' }}>
-            {post.question_count} question{post.question_count !== 1 ? 's' : ''}
-          </span>
+      {/* Action row — matches home feed */}
+      <div className="relative flex items-center pb-3">
+        <div className="flex items-center gap-5">
+          <button onClick={handleShare} className="flex items-center gap-1.5 active:opacity-70 transition-opacity">
+            <Share2 style={{ width: 12, height: 12, color: '#555' }} strokeWidth={1.75} />
+            <span className="text-[12px] font-medium" style={{ color: '#555' }}>Share</span>
+          </button>
+          <button onClick={toggleSave} className="flex items-center gap-1.5 active:opacity-70 transition-opacity">
+            <Bookmark style={{ width: 12, height: 12, color: saved ? '#111' : '#555' }} strokeWidth={2} fill={saved ? '#111' : 'none'} />
+            <span className="text-[12px] font-medium" style={{ color: saved ? '#111' : '#555' }}>{saved ? 'Saved' : 'Save'}</span>
+          </button>
+        </div>
+        {post.price != null && post.price > 0 && (
+          <div className="absolute inset-y-0 right-0 flex items-center">
+            <button
+              onClick={e => { e.stopPropagation(); navigate(`/post/${post.id}`) }}
+              className="inline-flex items-center gap-1 active:opacity-75 transition-opacity"
+            >
+              <Lock style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
+              <span className="text-[12px] font-semibold text-[#111] tracking-tight">{cp(post.price)}</span>
+            </button>
+          </div>
         )}
       </div>
     </div>
