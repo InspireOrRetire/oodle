@@ -62,12 +62,16 @@ export default function PostDetailPage() {
   const [isSaved, setIsSaved] = useState(false)
   const [optionsOpen, setOptionsOpen] = useState(false)
   const [pdfLoading, setPdfLoading] = useState(false)
+  const [justUnlocked, setJustUnlocked] = useState(false)
 
   // Prefer item passed via navigation state (no reload flash)
   const navState = location.state as { item?: FeedItem; focusedReplyIndex?: number } | null
-  const [fetchedItem, setFetchedItem] = useState<FeedItem | null>(null)
+  const [fetchedItem,   setFetchedItem]   = useState<FeedItem | null>(null)
+  const [unlockedItem,  setUnlockedItem]  = useState<FeedItem | null>(null)
 
+  // unlockedItem wins after a successful purchase (re-fetched with full structured_data)
   const item: FeedItem | null =
+    unlockedItem ??
     navState?.item ??
     fetchedItem ??
     null
@@ -89,6 +93,45 @@ export default function PostDetailPage() {
     if (!user || !postId) return
     if (isSaved) { setIsSaved(false); await unsavePost(user.id, postId) }
     else         { setIsSaved(true);  await savePost(user.id, postId) }
+  }
+
+  async function handleUnlocked() {
+    if (!postId || !user) return
+    setJustUnlocked(true)
+    setTimeout(() => setJustUnlocked(false), 3000)
+    try {
+      const data = await fetchPostById(postId, user.id)
+      const c      = data.creator as { id: string; username: string; display_name: string; avatar_url: string | null }
+      const d      = data as typeof data & { views?: number }
+      const anyData = data as any
+      const mapped: FeedItem = {
+        id:              data.id,
+        type:            'qa',
+        creator: {
+          id:            c.id,
+          username:      c.username,
+          display_name:  c.display_name,
+          avatar_url:    c.avatar_url ?? undefined,
+          color:         '#111',
+          initials:      c.display_name?.[0]?.toUpperCase() ?? '?',
+          verified:      false,
+          response_rate: null,
+        },
+        time_ago:        'just now',
+        views:           d.views ?? 0,
+        text:            data.caption ?? '',
+        images:          data.image_urls ?? [],
+        price:           data.price ?? 0,
+        post_subtype:    anyData.post_subtype   ?? undefined,
+        structured_data: anyData.structured_data ?? undefined,
+        isLocked:        false,
+        likes:           0,
+        comments:        (data as { question_count?: number }).question_count ?? 0,
+        saves:           0,
+        replies:         [],
+      }
+      setUnlockedItem(mapped)
+    } catch { /* silently fail — user can pull-to-refresh */ }
   }
 
   // If no item in nav state, fetch real post from Supabase
@@ -280,11 +323,40 @@ export default function PostDetailPage() {
             </div>
           )}
 
+          {/* ── Unlock reveal banner ── */}
+          <AnimatePresence>
+            {justUnlocked && (
+              <motion.div
+                key="unlock-banner"
+                initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                className="flex items-center gap-3 mb-4 px-4 py-3.5 rounded-[16px]"
+                style={{ background: '#111' }}
+              >
+                <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'rgba(255,255,255,0.12)' }}>
+                  <span style={{ fontSize: 18 }}>🔓</span>
+                </div>
+                <div>
+                  <p className="text-[14px] font-bold text-white leading-none mb-0.5">Answer unlocked</p>
+                  <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>Full content is now available below</p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* ── Full recipe display ── */}
           {item.post_subtype === 'recipe' && item.structured_data && (() => {
             const r = item.structured_data as RecipeData
             return (
-              <div className="rounded-[16px] overflow-hidden mb-1" style={{ border: '1.5px solid #eee' }}>
+              <motion.div
+                key="recipe-reveal"
+                initial={justUnlocked ? { opacity: 0, y: 10 } : false}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: 'spring', stiffness: 360, damping: 30, delay: 0.08 }}
+                className="rounded-[16px] overflow-hidden mb-1" style={{ border: '1.5px solid #eee' }}>
                 {/* Meta row */}
                 {(r.servings || r.prep_time || r.cook_time) && (
                   <div className="flex divide-x" style={{ borderBottom: '1px solid #eee', background: '#fafafa' }}>
@@ -319,7 +391,7 @@ export default function PostDetailPage() {
                     ))}
                   </div>
                 )}
-              </div>
+              </motion.div>
             )
           })()}
 
@@ -327,7 +399,12 @@ export default function PostDetailPage() {
           {item.post_subtype === 'itinerary' && item.structured_data && (() => {
             const itin = item.structured_data as ItineraryData
             return (
-              <div className="rounded-[16px] overflow-hidden mb-1" style={{ border: '1.5px solid #eee' }}>
+              <motion.div
+                key="itinerary-reveal"
+                initial={justUnlocked ? { opacity: 0, y: 10 } : false}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: 'spring', stiffness: 360, damping: 30, delay: 0.08 }}
+                className="rounded-[16px] overflow-hidden mb-1" style={{ border: '1.5px solid #eee' }}>
                 {/* Header */}
                 <div className="flex items-center justify-between px-4 py-3.5" style={{ background: '#fafafa', borderBottom: '1px solid #eee' }}>
                   <div>
@@ -365,7 +442,7 @@ export default function PostDetailPage() {
                     </div>
                   </div>
                 ))}
-              </div>
+              </motion.div>
             )
           })()}
 
@@ -679,7 +756,7 @@ export default function PostDetailPage() {
       <PostOptionsSheet open={optionsOpen} onClose={() => setOptionsOpen(false)} />
 
       {/* ── Unlock sheet ── */}
-      <UnlockSheet target={unlockTarget} onClose={() => setUnlockTarget(null)} />
+      <UnlockSheet target={unlockTarget} onClose={() => setUnlockTarget(null)} onUnlocked={handleUnlocked} />
 
       {/* ── Clarify-or-Unlock sheet ── */}
       <AnimatePresence>
