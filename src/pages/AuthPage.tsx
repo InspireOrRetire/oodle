@@ -60,7 +60,7 @@ export default function AuthPage() {
         // navigation handled by the useEffect above once user is set
       } else {
         if (password.length < 6) { setError('Password must be 6+ characters'); setLoading(false); return }
-        await signUp(email, password, 'fan')
+        await signUp(email, password, 'creator')
         setDone(true)
       }
     } catch (e: unknown) {

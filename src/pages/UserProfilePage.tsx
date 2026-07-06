@@ -423,7 +423,7 @@ function ProfilePostCard({ post, profile, navigate }: { post: PostRow; profile: 
 export default function UserProfilePage() {
   const { username } = useParams<{ username: string }>()
   const navigate = useNavigate()
-  const { user: currentUser } = useAuth()
+  const { user: currentUser, profile: myOwnProfile } = useAuth()
 
   const [profile, setProfile]   = useState<UserRow | null>(null)
   const [posts, setPosts]       = useState<PostRow[]>([])
@@ -528,6 +528,11 @@ export default function UserProfilePage() {
 
     return () => { cancelled = true }
   }, [username])
+
+  // Early redirect: own username in URL before profile query resolves
+  if (currentUser && myOwnProfile?.username === username) {
+    return <Navigate to="/profile" replace />
+  }
 
   // ── Loading skeleton ──
   if (loading) {
