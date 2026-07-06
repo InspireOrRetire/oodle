@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, Navigate } from 'react-router-dom'
 import { ArrowLeft, MoreHorizontal, MapPin, Search, X, Lock, Bookmark, Share2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
@@ -555,6 +555,11 @@ export default function UserProfilePage() {
         </div>
       </div>
     )
+  }
+
+  // Redirect to own profile page when viewing own /u/:username
+  if (currentUser && profile && currentUser.id === profile.id) {
+    return <Navigate to="/profile" replace />
   }
 
   // ── Not found ──
