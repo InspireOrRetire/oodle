@@ -474,7 +474,7 @@ export default function NewPostSheet({
           <motion.div key="np-sh"
             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 36, stiffness: 400 }}
-            style={{ borderRadius: '22px 22px 0 0', height: '92vh' }}
+            style={{ borderRadius: '22px 22px 0 0', height: 'min(92dvh, calc(100dvh - env(safe-area-inset-top, 0px) - 10px))' }}
             className="fixed bottom-0 left-0 right-0 z-[51] bg-white flex flex-col"
             onClick={e => e.stopPropagation()}
           >
