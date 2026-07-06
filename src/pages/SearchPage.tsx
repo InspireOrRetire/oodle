@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Search, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { searchCreators } from '../services/feedService'
+import { useAuth } from '../contexts/AuthContext'
 
 interface Creator {
   id: string
@@ -15,6 +16,7 @@ interface Creator {
 
 export default function SearchPage() {
   const navigate = useNavigate()
+  const { user: currentUser, profile: myProfile } = useAuth()
   const [query, setQuery]     = useState('')
   const [results, setResults] = useState<Creator[]>([])
   const [loading, setLoading] = useState(false)
@@ -28,11 +30,31 @@ export default function SearchPage() {
     if (!q.trim()) { setResults([]); return }
     setLoading(true)
     try {
-      const data = await searchCreators(q)
-      setResults(data as Creator[])
+      const data = await searchCreators(q) as Creator[]
+      // Always surface own profile first if it matches the query
+      if (currentUser && myProfile) {
+        const qLow = q.toLowerCase()
+        const selfMatches =
+          myProfile.display_name?.toLowerCase().includes(qLow) ||
+          myProfile.username?.toLowerCase().includes(qLow)
+        if (selfMatches) {
+          const withoutSelf = data.filter(r => r.id !== currentUser.id)
+          const self: Creator = {
+            id:              currentUser.id,
+            username:        myProfile.username,
+            display_name:    myProfile.display_name,
+            avatar_url:      myProfile.avatar_url,
+            followers_count: (myProfile as any).followers_count ?? 0,
+            role:            (myProfile as any).role ?? 'creator',
+          }
+          setResults([self, ...withoutSelf])
+          return
+        }
+      }
+      setResults(data)
     } catch (e) { console.error(e) }
     finally { setLoading(false) }
-  }, [])
+  }, [currentUser, myProfile])
 
   useEffect(() => {
     const t = setTimeout(() => search(query), 280)
@@ -88,7 +110,7 @@ export default function SearchPage() {
         ) : (
           <motion.div key="results" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             {results.map(c => (
-              <button key={c.id} onClick={() => navigate(`/u/${c.username}`)}
+              <button key={c.id} onClick={() => navigate(currentUser && c.id === currentUser.id ? '/profile' : `/u/${c.username}`)}
                 className="w-full flex items-center gap-3 px-4 py-3 active:bg-gray-50 transition-colors"
                 style={{ borderBottom: '0.5px solid #f5f5f7' }}>
                 {c.avatar_url ? (
