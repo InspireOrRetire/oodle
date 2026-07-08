@@ -7,6 +7,9 @@ import {
 } from 'lucide-react'
 import TokenKeypad from './TokenKeypad'
 import { supabase } from '../../lib/supabase'
+import { saveUnlockConfigs } from '../../lib/unlock/engine'
+import type { RelationshipUnlockType, TransactionUnlockType } from '../../lib/unlock/types'
+import { RELATIONSHIP_TYPES, TRANSACTION_TYPES, getUnlockMeta } from '../../lib/unlock/registry'
 
 const LocationPickerSheet = lazy(() => import('../UI/LocationPickerSheet'))
 
@@ -151,6 +154,11 @@ export default function NewPostSheet({
   const [listOpen,      setListOpen]     = useState(false)
   const [listItems,     setListItems]    = useState<ListRow[]>([{ type: 'line', text: '' }, { type: 'line', text: '' }, { type: 'line', text: '' }])
 
+  // ── Unlock Requirements state ──────────────────────────────────────────────────
+  const [unlockRel,       setUnlockRel]       = useState<RelationshipUnlockType[]>([])
+  const [unlockTx,        setUnlockTx]        = useState<TransactionUnlockType | null>(null)
+  const [unlockQuestions, setUnlockQuestions] = useState<{ id: string; text: string }[]>([{ id: 'q0', text: '' }])
+
   // questions-mode media
   const [qImages, setQImages] = useState<{ file: File; preview: string }[]>([])
   const [qVideo,  setQVideo]  = useState<{ file: File; preview: string } | null>(null)
@@ -226,6 +234,7 @@ export default function NewPostSheet({
     setLocLoading(false); setLocManual(false); setLocText('')
     setListOpen(false); setListItems([{ type: 'line', text: '' }, { type: 'line', text: '' }, { type: 'line', text: '' }])
     setQImages([]); setQVideo(null); setQGif(null)
+    setUnlockRel([]); setUnlockTx(null); setUnlockQuestions([{ id: 'q0', text: '' }])
   }
   if (!open && prevOpen) setPrevOpen(false)
 
@@ -299,12 +308,16 @@ export default function NewPostSheet({
 
       // Insert the post immediately with empty image_urls so the sheet
       // closes fast. Images are uploaded in the background and patch the row.
+      // When a transaction unlock is selected, price is stored in unlock_configs
+      // (except cash which also writes posts.price for the purchase edge function)
+      const effectivePrice = !unlockTx || unlockTx === 'cash' ? priceNum : 0
+
       const insertPayload: Record<string, unknown> = {
         id:         postId,
         creator_id: userId,
         caption:    caption.trim() || null,
         image_urls: [],
-        price:      priceNum || null,
+        price:      effectivePrice || null,
         post_type:  isAnswerMode ? 'type2' : 'type1',
       }
       if (postSubtype !== 'none') {
@@ -319,6 +332,22 @@ export default function NewPostSheet({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error: insErr } = await (supabase as any).from('posts').insert(insertPayload)
       if (insErr) throw new Error(insErr.message ?? 'Failed to create post')
+
+      // Save unlock configs when the creator has configured the new unlock system
+      if (unlockTx) {
+        const txConfig: Record<string, unknown> = unlockTx === 'cash'
+          ? { amount: priceNum }
+          : unlockTx === 'questionnaire'
+            ? { questions: unlockQuestions.filter(q => q.text.trim()).map(q => ({ id: q.id, text: q.text.trim() })) }
+            : {}
+
+        const configsToSave = [
+          { unlock_type: unlockTx, unlock_class: 'transaction' as const, config: txConfig },
+          ...unlockRel.map(r => ({ unlock_type: r, unlock_class: 'relationship' as const, config: {} })),
+        ]
+        // Fire-and-forget — post is already inserted; configs are non-blocking
+        saveUnlockConfigs(postId, configsToSave).catch(e => console.warn('[saveUnlockConfigs] failed:', e))
+      }
 
       // Close immediately — user sees the post in feed right away
       onPosted?.()
@@ -687,6 +716,107 @@ export default function NewPostSheet({
                                 <div style={{ color: tile.active ? '#111' : '#b0b0b0' }}>{tile.icon}</div>
                               </button>
                             ))}
+                          </div>
+
+                          {/* ── Unlock Requirements ─────────────────────────────────── */}
+                          <div className="mb-4 rounded-[14px] px-4 py-3" style={{ border: '1.5px dashed #d0d0d0', background: '#fafafa' }}>
+                            <p className="text-[11px] font-semibold uppercase tracking-wide mb-3" style={{ color: '#888' }}>Unlock Requirements</p>
+
+                            {/* Transaction type — radio, single-select */}
+                            <p className="text-[10px] font-semibold uppercase tracking-wide mb-2" style={{ color: '#bbb' }}>Access type</p>
+                            <div className="flex flex-wrap gap-1.5 mb-0">
+                              {TRANSACTION_TYPES.map(t => {
+                                const active = unlockTx === t
+                                return (
+                                  <button
+                                    key={t}
+                                    onClick={() => setUnlockTx(prev => prev === t ? null : t)}
+                                    className="rounded-full px-3 py-1.5 text-[11px] font-semibold tracking-tight active:opacity-60 transition-all"
+                                    style={{
+                                      background: active ? '#111' : '#f0f0f0',
+                                      color:      active ? '#fff' : '#555',
+                                      border:     active ? 'none' : '0.5px solid #ddd',
+                                    }}
+                                  >
+                                    {getUnlockMeta(t).label}
+                                  </button>
+                                )
+                              })}
+                            </div>
+
+                            {/* Cash note — price stepper above handles the amount */}
+                            {unlockTx === 'cash' && (
+                              <p className="mt-2 text-[10px]" style={{ color: '#bbb' }}>
+                                Set amount with the price field above.
+                              </p>
+                            )}
+
+                            {/* Questionnaire builder */}
+                            {unlockTx === 'questionnaire' && (
+                              <div className="mt-3 rounded-[12px] overflow-hidden" style={{ border: '1px solid #e8e8e8' }}>
+                                <div className="px-3 pt-2.5 pb-1.5" style={{ borderBottom: '1px solid #eee' }}>
+                                  <p className="text-[10px] uppercase tracking-wide font-bold" style={{ color: '#aaa' }}>Questions</p>
+                                </div>
+                                <div className="px-3 py-2">
+                                  {unlockQuestions.map((q, i) => (
+                                    <div key={q.id} className="flex items-start gap-2 mb-2">
+                                      <span className="text-[12px] font-bold mt-2" style={{ color: '#bbb', minWidth: 16 }}>{i + 1}.</span>
+                                      <input
+                                        type="text"
+                                        value={q.text}
+                                        onChange={e => setUnlockQuestions(prev => prev.map((qq, ii) => ii === i ? { ...qq, text: e.target.value } : qq))}
+                                        placeholder={`Question ${i + 1}`}
+                                        className="flex-1 text-[14px] text-[#111] bg-transparent outline-none placeholder-[#ccc] py-1.5"
+                                      />
+                                      {unlockQuestions.length > 1 && (
+                                        <button onClick={() => setUnlockQuestions(prev => prev.filter((_, ii) => ii !== i))} className="active:opacity-50 mt-2">
+                                          <X style={{ width: 12, height: 12, color: '#ccc', strokeWidth: 2 }} />
+                                        </button>
+                                      )}
+                                    </div>
+                                  ))}
+                                  <button
+                                    onClick={() => setUnlockQuestions(prev => [...prev, { id: `q${Date.now()}`, text: '' }])}
+                                    className="flex items-center gap-1.5 active:opacity-60"
+                                  >
+                                    <Plus style={{ width: 13, height: 13, color: '#888', strokeWidth: 2.5 }} />
+                                    <span className="text-[12px] font-semibold" style={{ color: '#888' }}>Add question</span>
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Relationship unlocks — multi-select, optional, only valid when a transaction type is selected */}
+                            {unlockTx && (
+                              <div className="mt-3">
+                                <p className="text-[10px] font-semibold uppercase tracking-wide mb-2" style={{ color: '#bbb' }}>Also collect (optional)</p>
+                                <div className="flex gap-1.5 flex-wrap">
+                                  {RELATIONSHIP_TYPES.map(t => {
+                                    const active = unlockRel.includes(t)
+                                    return (
+                                      <button
+                                        key={t}
+                                        onClick={() => setUnlockRel(prev => active ? prev.filter(r => r !== t) : [...prev, t])}
+                                        className="rounded-full px-3 py-1.5 text-[11px] font-semibold tracking-tight active:opacity-60 transition-all"
+                                        style={{
+                                          background: active ? '#111' : '#f0f0f0',
+                                          color:      active ? '#fff' : '#555',
+                                          border:     active ? 'none' : '0.5px solid #ddd',
+                                        }}
+                                      >
+                                        {getUnlockMeta(t).label}
+                                      </button>
+                                    )
+                                  })}
+                                </div>
+                                {/* TODO: LEGAL REVIEW — CAN-SPAM / TCPA consent copy */}
+                                {(unlockRel.includes('email') || unlockRel.includes('sms')) && (
+                                  <p className="mt-2 text-[10px] leading-relaxed" style={{ color: '#bbb' }}>
+                                    By unlocking, users consent to receive communications from this creator. Unsubscribe at any time.
+                                  </p>
+                                )}
+                              </div>
+                            )}
                           </div>
 
                           {/* ── Recipe builder ─────────────────────────────────────── */}

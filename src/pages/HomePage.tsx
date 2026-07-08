@@ -2,6 +2,8 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import UnlockSheet, { type UnlockTarget } from '../components/Post/UnlockSheet'
 import CardOptionsSheet from '../components/Post/PostOptionsSheet'
 import ClarifyOrUnlockSheet, { type ClarifyTarget } from '../components/Post/ClarifyOrUnlockSheet'
+import UnlockChips from '../components/Unlock/UnlockChips'
+import UnlockModal from '../components/Unlock/UnlockModal'
 import { cartCountText, cartService } from '../services/cartService'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
@@ -358,8 +360,17 @@ function FeedCard({
                     <span className="text-[12px] font-medium" style={{ color: saved ? '#111' : '#555' }}>{saved ? 'Saved' : 'Save'}</span>
                   </button>
                 </div>
-                {/* Price pinned to far right — Edit on own posts, Lock on others */}
-                {item.price && item.price > 0 && (
+                {/* Unlock chips (new system) or price pill (legacy) */}
+                {item.unlock_configs?.length ? (
+                  <div className="absolute inset-y-0 right-0 flex items-center">
+                    <UnlockChips
+                      configs={item.unlock_configs}
+                      isOwner={item.creator.id === myUserId}
+                      onTap={() => onUnlock(item)}
+                      onEdit={() => onEdit?.()}
+                    />
+                  </div>
+                ) : item.price && item.price > 0 ? (
                   <div className="absolute inset-y-0 right-0 flex items-center">
                     {item.creator.id === myUserId ? (
                       <button
@@ -379,7 +390,7 @@ function FeedCard({
                       </button>
                     )}
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
           </div>
@@ -1454,6 +1465,7 @@ export default function HomePage() {
       })
   }, [homeUser?.id])
   const [unlockTarget,    setUnlockTarget]    = useState<UnlockTarget | null>(null)
+  const [unlockModalPost, setUnlockModalPost] = useState<FeedItem | null>(null)
   const [askItem,         setAskItem]         = useState<FeedItem | null>(null)
   const [askSheetKey,     setAskSheetKey]     = useState(0)
   const [askClarify,      setAskClarify]      = useState(false)
@@ -1968,7 +1980,13 @@ export default function HomePage() {
                 onLike={() => toggleLike(item.id)}
                 onSaveToggle={() => setSaveTarget(item.id)}
                 onFollow={handleFollow}
-                onUnlock={feedItem => setUnlockTarget({ creator: feedItem.creator, question: feedItem.question, price: feedItem.price ?? 0, postId: feedItem.id })}
+                onUnlock={feedItem => {
+                  if (feedItem.unlock_configs?.length) {
+                    setUnlockModalPost(feedItem)
+                  } else {
+                    setUnlockTarget({ creator: feedItem.creator, question: feedItem.question, price: feedItem.price ?? 0, postId: feedItem.id })
+                  }
+                }}
                 onProfile={username => navigate(`/u/${username}`)}
                 onAsk={() => {
                   iosKbRef.current?.focus()
@@ -1998,8 +2016,23 @@ export default function HomePage() {
 
       {/* Search overlay moved outside transformed div — see below */}
 
-      {/* ── Unlock sheet ── */}
+      {/* ── Unlock sheet (legacy — posts without unlock_configs) ── */}
       <UnlockSheet target={unlockTarget} onClose={() => setUnlockTarget(null)} />
+
+      {/* ── Unlock modal (new system — posts with unlock_configs) ── */}
+      {unlockModalPost && (
+        <UnlockModal
+          open={!!unlockModalPost}
+          configs={unlockModalPost.unlock_configs ?? []}
+          postId={unlockModalPost.id}
+          creatorId={unlockModalPost.creator.id ?? ''}
+          creatorName={unlockModalPost.creator.display_name}
+          creatorAvatar={unlockModalPost.creator.avatar_url}
+          question={unlockModalPost.question}
+          onClose={() => setUnlockModalPost(null)}
+          onUnlocked={() => setUnlockModalPost(null)}
+        />
+      )}
 
       {/* ── Card options sheet ── */}
       <CardOptionsSheet
