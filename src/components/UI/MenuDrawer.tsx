@@ -187,20 +187,18 @@ export default function MenuDrawer({
                       <ArrowLeft className="w-4 h-4 rotate-180 flex-shrink-0" style={{ color: '#ccc' }} strokeWidth={2} />
                     </button>
 
-                    {/* Audience — creator only, opens inline sub-view */}
-                    {isCreator && (
-                      <button
-                        onClick={() => setDrawerView('audience')}
-                        className="w-full flex items-center gap-3 px-3 py-3 rounded-[12px] active:bg-[#f5f5f7] transition-colors"
-                      >
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                          style={{ background: '#f5f5f7', color: '#555' }}>
-                          <Users style={{ width: 17, height: 17 }} strokeWidth={1.75} />
-                        </div>
-                        <span className="flex-1 text-[15px] font-medium text-[#111] text-left">Audience</span>
-                        <ArrowLeft className="w-4 h-4 rotate-180 flex-shrink-0" style={{ color: '#ccc' }} strokeWidth={2} />
-                      </button>
-                    )}
+                    {/* Audience — opens inline sub-view */}
+                    <button
+                      onClick={() => setDrawerView('audience')}
+                      className="w-full flex items-center gap-3 px-3 py-3 rounded-[12px] active:bg-[#f5f5f7] transition-colors"
+                    >
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                        style={{ background: '#f5f5f7', color: '#555' }}>
+                        <Users style={{ width: 17, height: 17 }} strokeWidth={1.75} />
+                      </div>
+                      <span className="flex-1 text-[15px] font-medium text-[#111] text-left">Audience</span>
+                      <ArrowLeft className="w-4 h-4 rotate-180 flex-shrink-0" style={{ color: '#ccc' }} strokeWidth={2} />
+                    </button>
 
                     {/* Other library items */}
                     {[
