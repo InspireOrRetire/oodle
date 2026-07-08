@@ -2,24 +2,40 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Bookmark, Bell, MessageCircle, ArrowLeft, DollarSign, ShoppingCart,
-  Flag, AlignLeft, Plus,
+  Flag, AlignLeft, Plus, Users,
 } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { oo } from '../../lib/oo'
+import { supabase } from '../../lib/supabase'
 import { notifMeta, type AppNotification } from '../../services/notificationService'
 import type { ThreadWithParticipants } from '../../lib/database.types'
 import type { LocalAskedQuestion } from '../../services/myQuestionsStore'
 import type { SavedCollection, SavedItem } from '../../services/savedService'
 
+type DrawerView = 'menu' | 'my-questions' | 'notifications' | 'saved' | 'audience'
+
+interface AudienceContact {
+  id:                    string
+  user_id:               string
+  email:                 string | null
+  phone:                 string | null
+  date_connected:        string
+  captured_from_post_id: string | null
+  user: { username: string; display_name: string | null; avatar_url: string | null } | null
+  post: { caption: string | null } | null
+}
+
 interface MenuDrawerProps {
   menuOpen: boolean
-  drawerView: 'menu' | 'my-questions' | 'notifications' | 'saved'
-  setDrawerView: (v: 'menu' | 'my-questions' | 'notifications' | 'saved') => void
+  drawerView: DrawerView
+  setDrawerView: (v: DrawerView) => void
   closeMenu: () => void
   openSaved: () => void
   openMyQuestions: () => void
   openNotifications: () => void
   unreadCount: number
   cartCount: number
+  isCreator?: boolean
   activeProfile: { id: string; avatar_url: string | null; display_name: string; username: string }
   myQThreads: ThreadWithParticipants[]
   myQLoading: boolean
@@ -41,7 +57,7 @@ interface MenuDrawerProps {
 export default function MenuDrawer({
   menuOpen, drawerView, setDrawerView, closeMenu,
   openSaved, openMyQuestions, openNotifications,
-  unreadCount, cartCount, activeProfile,
+  unreadCount, cartCount, isCreator, activeProfile,
   myQThreads, myQLoading, localAskedQs,
   notifs, notifsLoading,
   savedCollections, savedPanelItems, savedLoading,
@@ -49,6 +65,29 @@ export default function MenuDrawer({
   handleSelectCollection, handleCreateCollection,
 }: MenuDrawerProps) {
   const navigate = useNavigate()
+
+  // ── Audience data ─────────────────────────────────────────────────────────────
+  const [audience,        setAudience]        = useState<AudienceContact[]>([])
+  const [audienceLoading, setAudienceLoading] = useState(false)
+
+  useEffect(() => {
+    if (drawerView !== 'audience' || !activeProfile.id) return
+    setAudienceLoading(true)
+    ;(supabase as any)
+      .from('audience_contacts')
+      .select(`
+        id, user_id, email, phone, date_connected, captured_from_post_id,
+        user:users!user_id ( username, display_name, avatar_url ),
+        post:posts!captured_from_post_id ( caption )
+      `)
+      .eq('creator_id', activeProfile.id)
+      .order('date_connected', { ascending: false })
+      .limit(100)
+      .then(({ data }: { data: AudienceContact[] | null }) => {
+        setAudience(data ?? [])
+        setAudienceLoading(false)
+      })
+  }, [drawerView, activeProfile.id])
 
   return (
     <AnimatePresence>
@@ -147,6 +186,21 @@ export default function MenuDrawer({
                       <span className="flex-1 text-[15px] font-medium text-[#111] text-left">My questions</span>
                       <ArrowLeft className="w-4 h-4 rotate-180 flex-shrink-0" style={{ color: '#ccc' }} strokeWidth={2} />
                     </button>
+
+                    {/* Audience — creator only, opens inline sub-view */}
+                    {isCreator && (
+                      <button
+                        onClick={() => setDrawerView('audience')}
+                        className="w-full flex items-center gap-3 px-3 py-3 rounded-[12px] active:bg-[#f5f5f7] transition-colors"
+                      >
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                          style={{ background: '#f5f5f7', color: '#555' }}>
+                          <Users style={{ width: 17, height: 17 }} strokeWidth={1.75} />
+                        </div>
+                        <span className="flex-1 text-[15px] font-medium text-[#111] text-left">Audience</span>
+                        <ArrowLeft className="w-4 h-4 rotate-180 flex-shrink-0" style={{ color: '#ccc' }} strokeWidth={2} />
+                      </button>
+                    )}
 
                     {/* Other library items */}
                     {[
@@ -777,6 +831,130 @@ export default function MenuDrawer({
                                 </p>
                               </div>
                             </button>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* ── VIEW: Audience ── */}
+              {drawerView === 'audience' && (
+                <motion.div
+                  key="menu-audience"
+                  initial={{ x: '100%', opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: '100%', opacity: 0 }}
+                  transition={{ type: 'spring', stiffness: 380, damping: 38 }}
+                  className="flex flex-col flex-1 overflow-hidden"
+                >
+                  {/* Header */}
+                  <div className="flex items-center gap-3 px-4 pt-14 pb-4 flex-shrink-0"
+                    style={{ borderBottom: '0.5px solid #f0f0f0' }}>
+                    <button
+                      onClick={() => setDrawerView('menu')}
+                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{ background: '#f5f5f7' }}
+                    >
+                      <ArrowLeft style={{ width: 15, height: 15, color: '#555' }} strokeWidth={2.5} />
+                    </button>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-[18px] font-bold text-[#111]">Audience</span>
+                      {!audienceLoading && audience.length > 0 && (
+                        <span className="ml-2 text-[13px]" style={{ color: '#aaa' }}>{audience.length}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Contact list */}
+                  <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+                    {audienceLoading ? (
+                      <div className="px-4 pt-4 space-y-3">
+                        {[0,1,2,3].map(i => (
+                          <div key={i} className="rounded-[14px] p-3.5 animate-pulse" style={{ background: '#f5f5f7' }}>
+                            <div className="flex items-center gap-2.5 mb-2">
+                              <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0" />
+                              <div className="flex-1 space-y-1.5">
+                                <div className="h-2.5 bg-gray-200 rounded w-28" />
+                                <div className="h-2 bg-gray-200 rounded w-20" />
+                              </div>
+                            </div>
+                            <div className="flex gap-1.5">
+                              <div className="h-5 w-24 bg-gray-200 rounded-full" />
+                              <div className="h-5 w-20 bg-gray-200 rounded-full" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : audience.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center h-full px-8 text-center">
+                        <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4"
+                          style={{ background: '#f5f5f7' }}>
+                          <Users style={{ width: 24, height: 24, color: '#bbb' }} strokeWidth={1.5} />
+                        </div>
+                        <p className="text-[15px] font-semibold text-[#111] mb-1">No contacts yet</p>
+                        <p className="text-[13px] leading-snug" style={{ color: '#aaa' }}>
+                          When fans unlock your posts with email, phone, or follow — they'll appear here.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="px-4 pt-3 pb-8 space-y-2.5">
+                        {audience.map(contact => {
+                          const name = contact.user?.display_name || contact.user?.username || 'Fan'
+                          const handle = contact.user?.username ? `@${contact.user.username}` : null
+                          const avatar = contact.user?.avatar_url ?? null
+                          const postCaption = contact.post?.caption
+                          const dateStr = (() => {
+                            const d = new Date(contact.date_connected)
+                            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                          })()
+
+                          return (
+                            <div
+                              key={contact.id}
+                              className="rounded-[14px] px-3.5 py-3"
+                              style={{ border: '0.5px solid #ebebeb' }}
+                            >
+                              {/* Name + date row */}
+                              <div className="flex items-center gap-2.5 mb-2">
+                                {avatar
+                                  ? <img src={avatar} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                                  : <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white text-[12px] font-bold"
+                                      style={{ background: '#555' }}>
+                                      {name[0]?.toUpperCase() ?? '?'}
+                                    </div>
+                                }
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-[13px] font-semibold text-[#111] truncate leading-tight">{name}</p>
+                                  {handle && <p className="text-[11px] truncate leading-tight" style={{ color: '#aaa' }}>{handle}</p>}
+                                </div>
+                                <span className="text-[10px] flex-shrink-0" style={{ color: '#bbb' }}>{dateStr}</span>
+                              </div>
+
+                              {/* Contact detail chips */}
+                              <div className="flex flex-wrap gap-1.5 mb-2">
+                                {contact.email && (
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-medium"
+                                    style={{ background: '#f0f0f0', color: '#444' }}>
+                                    {contact.email}
+                                  </span>
+                                )}
+                                {contact.phone && (
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-medium"
+                                    style={{ background: '#f0f0f0', color: '#444' }}>
+                                    {contact.phone}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Source post */}
+                              {postCaption && (
+                                <p className="text-[11px] leading-snug line-clamp-1" style={{ color: '#aaa' }}>
+                                  From: {postCaption}
+                                </p>
+                              )}
+                            </div>
                           )
                         })}
                       </div>
