@@ -345,8 +345,8 @@ export default function NewPostSheet({
           { unlock_type: unlockTx, unlock_class: 'transaction' as const, config: txConfig },
           ...unlockRel.map(r => ({ unlock_type: r, unlock_class: 'relationship' as const, config: {} })),
         ]
-        // Fire-and-forget — post is already inserted; configs are non-blocking
-        saveUnlockConfigs(postId, configsToSave).catch(e => console.warn('[saveUnlockConfigs] failed:', e))
+        // Await before onPosted so feed refresh sees configs already in DB
+        await saveUnlockConfigs(postId, configsToSave)
       }
 
       // Close immediately — user sees the post in feed right away
