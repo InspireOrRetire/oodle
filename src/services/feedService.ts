@@ -7,6 +7,7 @@
 import { supabase } from '../lib/supabase'
 import { composeFeed, type ComposedPost } from '../lib/feedComposer'
 import { formatDistanceToNow } from '../lib/time'
+import type { UnlockConfig } from '../lib/unlock/types'
 
 // ── FeedItem — the shape FeedCard expects ─────────────────────────────────────
 // Defined here so feedService owns the adapter; HomePage imports this type.
@@ -89,6 +90,7 @@ export interface FeedItem {
   likes:            number
   comments:         number
   saves:            number
+  unlock_configs?:  UnlockConfig[]
   _slot?:           'followed' | 'discovery'
   _categories?:     string[]
 }
@@ -142,12 +144,33 @@ export function composedPostToFeedItem(cp: ComposedPost): FeedItem {
     post_subtype:     (cp as any).post_subtype  ?? undefined,
     structured_data:  (cp as any).structured_data ?? undefined,
     isLocked,
-    likes:       0,
-    comments:    cp.question_count,
-    saves:       0,
-    _slot:       cp._slot,
-    _categories: cp.categories,
+    likes:          0,
+    comments:       cp.question_count,
+    saves:          0,
+    unlock_configs: (cp as any).unlock_configs ?? undefined,
+    _slot:          cp._slot,
+    _categories:    cp.categories,
   }
+}
+
+// ── Batch-attach unlock_configs to a feed array ───────────────────────────────
+async function attachUnlockConfigs<T extends { id: string }>(
+  feed: T[],
+): Promise<T[]> {
+  if (!feed.length) return feed
+  const { data: cfgs } = await (supabase as any)
+    .from('unlock_configs')
+    .select('*')
+    .in('post_id', feed.map(p => p.id))
+  if (!cfgs?.length) return feed
+  const map: Record<string, UnlockConfig[]> = {}
+  for (const c of cfgs) {
+    (map[c.post_id] ??= []).push(c as UnlockConfig)
+  }
+  for (const arr of Object.values(map)) {
+    arr.sort((a, b) => a.sort_order - b.sort_order)
+  }
+  return feed.map(p => ({ ...p, unlock_configs: map[p.id] ?? [] }))
 }
 
 // ── incrementPostView ─────────────────────────────────────────────────────────
@@ -190,7 +213,7 @@ export async function fetchExploreFeed(): Promise<ComposedPost[]> {
   if (error || !rawData) return []
   const data = rawData as PostRow013[]
 
-  const mapped = data.map(post => {
+  const mapped: ComposedPost[] = data.map(post => {
     const c = post.creator
 
     return {
@@ -216,7 +239,7 @@ export async function fetchExploreFeed(): Promise<ComposedPost[]> {
     }
   })
 
-  return mapped
+  return attachUnlockConfigs(mapped)
 }
 
 // ── fetchComposedFeed ─────────────────────────────────────────────────────────
@@ -397,11 +420,11 @@ export async function fetchComposedFeed(userId: string): Promise<ComposedPost[]>
           is_purchased:          purchasedIds.has(p.id),
           _slot:                 'discovery' as const,
         }))
-      return [...composed, ...supplement]
+      return attachUnlockConfigs([...composed, ...supplement])
     }
   }
 
-  return composed
+  return attachUnlockConfigs(composed)
 }
 
 // ── fetchPostById ─────────────────────────────────────────────────────────────
