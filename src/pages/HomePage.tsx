@@ -1383,7 +1383,7 @@ export default function HomePage() {
   const navigate  = useNavigate()
   const [searchOpen, setSearchOpen] = useState(false)
   const [menuOpen,          setMenuOpen]          = useState(false)
-  const [drawerView,        setDrawerView]        = useState<'menu' | 'my-questions' | 'notifications' | 'saved'>('menu')
+  const [drawerView,        setDrawerView]        = useState<'menu' | 'my-questions' | 'notifications' | 'saved' | 'audience'>('menu')
   const [myQThreads,        setMyQThreads]        = useState<ThreadWithParticipants[]>([])
   const [myQLoading,        setMyQLoading]        = useState(false)
   const [localAskedQs,      setLocalAskedQs]      = useState<LocalAskedQuestion[]>(() => myQuestionsStore.getAll())
@@ -1848,6 +1848,7 @@ export default function HomePage() {
         openNotifications={openNotifications}
         unreadCount={unreadCount}
         cartCount={cartCount}
+        isCreator={realProfile?.role === 'creator'}
         activeProfile={activeProfile}
         myQThreads={myQThreads}
         myQLoading={myQLoading}
