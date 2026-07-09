@@ -10,6 +10,7 @@ import { supabase } from '../../lib/supabase'
 import { saveUnlockConfigs } from '../../lib/unlock/engine'
 import type { RelationshipUnlockType, TransactionUnlockType } from '../../lib/unlock/types'
 import { RELATIONSHIP_TYPES, TRANSACTION_TYPES, getUnlockMeta } from '../../lib/unlock/registry'
+import TokenIcon from '../Unlock/TokenIcon'
 
 const LocationPickerSheet = lazy(() => import('../UI/LocationPickerSheet'))
 
@@ -693,8 +694,8 @@ export default function NewPostSheet({
                                 <span className="font-bold leading-none" style={{ fontSize: 28, color: Number(price) > 0 ? '#111' : '#ccc' }}>
                                   {price || '0'}
                                 </span>
-                                <span className="text-[11px] font-semibold" style={{ color: '#aaa', marginTop: 1 }}>
-                                  {Number(price) > 0 ? '$?' : 'free'}
+                                <span style={{ marginTop: 2 }}>
+                                  {Number(price) > 0 ? <TokenIcon size={16} /> : <span className="text-[11px] font-semibold" style={{ color: '#aaa' }}>free</span>}
                                 </span>
                               </button>
                               <button

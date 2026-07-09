@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import TokenIcon from './TokenIcon'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, ArrowLeft } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
@@ -211,15 +212,8 @@ export default function UnlockModal({
       return (
         <div key={s.config.id} className="py-2">
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              {/* Amber token */}
-              <div className="flex items-center justify-center rounded-full flex-shrink-0"
-                style={{
-                  width: 20, height: 20,
-                  background: '#f5c842',
-                }}>
-                <span style={{ fontSize: 9, fontWeight: 700, color: '#7a4a00', lineHeight: 1, letterSpacing: '-0.5px' }}>$?</span>
-              </div>
+            <div className="flex items-center gap-1">
+              <TokenIcon size={20} />
               <span className="text-[20px] font-bold text-[#111]">{amt}</span>
             </div>
             <span className="text-[13px]" style={{ color: '#888' }}>
