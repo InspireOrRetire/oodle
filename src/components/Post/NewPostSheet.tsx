@@ -298,7 +298,6 @@ export default function NewPostSheet({
 
   async function handlePost() {
     if (!canPost || !userId) return
-    setPosted(true)
     setPostError(null)
 
     try {
@@ -350,9 +349,8 @@ export default function NewPostSheet({
         await saveUnlockConfigs(postId, configsToSave)
       }
 
-      // Close immediately — user sees the post in feed right away
       onPosted?.()
-      setTimeout(onClose, 800)
+      onClose()
 
       // Upload media in the background and patch image_urls when done
       const hasMedia = imgList.length > 0 || vidFile || pdfFile
@@ -397,7 +395,6 @@ export default function NewPostSheet({
 
   async function handleSave() {
     if (!editPost || !canPost || !userId) return
-    setPosted(true)
     setPostError(null)
     try {
       const priceNum = isAnswerMode ? (parseFloat(price) || 0) : 0
@@ -438,11 +435,10 @@ export default function NewPostSheet({
       }
 
       onPosted?.()
-      setTimeout(onClose, 800)
+      onClose()
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Something went wrong. Please try again.'
       setPostError(msg)
-      setPosted(false)
     }
   }
 
