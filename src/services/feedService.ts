@@ -93,6 +93,11 @@ export interface FeedItem {
   unlock_configs?:  UnlockConfig[]
   _slot?:           'followed' | 'discovery'
   _categories?:     string[]
+  // Repost fields
+  feed_key?:       string   // unique React key for reposts (rp_{repost_id}); falls back to id
+  is_repost?:      boolean
+  repost_id?:      string
+  repost_caption?: string
 }
 
 // ── Adapter: ComposedPost → FeedItem ─────────────────────────────────────────
@@ -495,6 +500,138 @@ export async function fetchCreatorProfile(username: string, currentUserId: strin
     isFollowing: !!follow,
     posts: posts ?? [],
   }
+}
+
+// ── Repost constants ─────────────────────────────────────────────────────────
+
+export const REPOST_COOLDOWN_DAYS = 7
+export const DAILY_REPOST_LIMIT   = 3
+
+// ── getRepostStatus ───────────────────────────────────────────────────────────
+// Returns whether the user can repost a specific post right now.
+
+export async function getRepostStatus(userId: string, postId: string): Promise<{
+  canRepost:     boolean
+  daysRemaining: number
+  dailyLimitHit: boolean
+}> {
+  // Most-recent repost of this post by this user
+  const { data: recent } = await (supabase as any)
+    .from('reposts')
+    .select('created_at')
+    .eq('creator_id', userId)
+    .eq('original_post_id', postId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (recent) {
+    const daysSince = (Date.now() - new Date(recent.created_at).getTime()) / 86_400_000
+    if (daysSince < REPOST_COOLDOWN_DAYS) {
+      return {
+        canRepost:     false,
+        daysRemaining: Math.ceil(REPOST_COOLDOWN_DAYS - daysSince),
+        dailyLimitHit: false,
+      }
+    }
+  }
+
+  // Daily limit check
+  const startOfDay = new Date()
+  startOfDay.setHours(0, 0, 0, 0)
+  const { count } = await (supabase as any)
+    .from('reposts')
+    .select('id', { count: 'exact', head: true })
+    .eq('creator_id', userId)
+    .gte('created_at', startOfDay.toISOString())
+
+  if ((count ?? 0) >= DAILY_REPOST_LIMIT) {
+    return { canRepost: false, daysRemaining: 0, dailyLimitHit: true }
+  }
+
+  return { canRepost: true, daysRemaining: 0, dailyLimitHit: false }
+}
+
+// ── createRepost ──────────────────────────────────────────────────────────────
+
+export async function createRepost(
+  userId:  string,
+  postId:  string,
+  caption: string | null,
+): Promise<void> {
+  const { error } = await (supabase as any)
+    .from('reposts')
+    .insert({ creator_id: userId, original_post_id: postId, caption: caption || null })
+  if (error) throw error
+}
+
+// ── fetchOwnRepostsAsFeedItems ────────────────────────────────────────────────
+// Returns the current user's reposts as FeedItems ready for the feed.
+// The FeedItem.id is the ORIGINAL post id (so navigation, likes, saves work
+// against the original); feed_key is unique so React keys don't clash.
+
+export async function fetchOwnRepostsAsFeedItems(userId: string): Promise<FeedItem[]> {
+  const { data } = await (supabase as any)
+    .from('reposts')
+    .select(`
+      id, caption, created_at,
+      original_post:posts!original_post_id (
+        id, creator_id, caption, image_urls, price,
+        post_type, fixed_price, views,
+        post_subtype, structured_data,
+        location_address, question_count,
+        users!creator_id (
+          username, display_name, avatar_url, response_rate
+        )
+      )
+    `)
+    .eq('creator_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(20)
+
+  if (!data?.length) return []
+
+  return (data as any[])
+    .filter((r: any) => r.original_post)
+    .map((r: any): FeedItem => {
+      const p  = r.original_post
+      const c  = p.users
+      const dn = c?.display_name ?? c?.username ?? ''
+      const isLocked = (p.price !== null && p.price > 0)
+
+      return {
+        id:              p.id,
+        feed_key:        `rp_${r.id}`,
+        is_repost:       true,
+        repost_id:       r.id,
+        repost_caption:  r.caption ?? undefined,
+        creator: {
+          id:            p.creator_id,
+          username:      c?.username      ?? '',
+          display_name:  dn,
+          avatar_url:    c?.avatar_url    ?? undefined,
+          color:         colorFor(p.creator_id),
+          initials:      initials(dn || c?.username || ''),
+          verified:      false,
+          response_rate: c?.response_rate ?? null,
+        },
+        time_ago:         formatDistanceToNow(r.created_at),
+        views:            p.views ?? 0,
+        type:             'post' as const,
+        post_type:        (p.post_type ?? 'type1') as 'type1' | 'type2',
+        text:             p.caption        ?? undefined,
+        images:           p.image_urls     ?? [],
+        price:            p.price          ?? undefined,
+        fixed_price:      p.fixed_price    ?? undefined,
+        location_address: p.location_address ?? undefined,
+        post_subtype:     p.post_subtype   ?? undefined,
+        structured_data:  p.structured_data ?? undefined,
+        isLocked,
+        likes:    0,
+        comments: p.question_count ?? 0,
+        saves:    0,
+      }
+    })
 }
 
 // ── searchCreators ────────────────────────────────────────────────────────────
