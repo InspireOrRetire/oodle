@@ -4,6 +4,7 @@ import ImageLightbox from './ImageLightbox'
 interface Props {
   images: string[]
   aspectRatio?: 'square' | 'vertical'
+  onImageClick?: (index: number) => void
 }
 
 function Img({ src, alt = '', onClick }: { src: string; alt?: string; onClick?: () => void }) {
@@ -23,12 +24,14 @@ function Img({ src, alt = '', onClick }: { src: string; alt?: string; onClick?: 
   )
 }
 
-export default function PostMediaCarousel({ images, aspectRatio = 'vertical' }: Props) {
+export default function PostMediaCarousel({ images, aspectRatio = 'vertical', onImageClick }: Props) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const count = images.length
   if (count === 0) return null
 
-  function open(i: number) { setLightboxIndex(i) }
+  function open(i: number) {
+    if (onImageClick) { onImageClick(i) } else { setLightboxIndex(i) }
+  }
   function close() { setLightboxIndex(null) }
 
   return (

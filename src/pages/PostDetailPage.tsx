@@ -6,6 +6,7 @@ import type { FeedItem, RecipeData, ItineraryData } from '../services/feedServic
 import { fetchPostById, composedPostToFeedItem, incrementPostView } from '../services/feedService'
 import VerifiedBadge from '../components/prsnc/VerifiedBadge'
 import PostMediaCarousel from '../components/Post/PostMediaCarousel'
+import ImageLightbox from '../components/Post/ImageLightbox'
 import UnlockSheet, { type UnlockTarget } from '../components/Post/UnlockSheet'
 import ClarifyOrUnlockSheet, { type ClarifyTarget } from '../components/Post/ClarifyOrUnlockSheet'
 import TokenIcon from '../components/Unlock/TokenIcon'
@@ -64,9 +65,13 @@ export default function PostDetailPage() {
   const [optionsOpen, setOptionsOpen] = useState(false)
   const [pdfLoading, setPdfLoading] = useState(false)
   const [justUnlocked, setJustUnlocked] = useState(false)
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(() => {
+    const s = location.state as { lightboxIndex?: number } | null
+    return s?.lightboxIndex ?? null
+  })
 
   // Prefer item passed via navigation state (no reload flash)
-  const navState = location.state as { item?: FeedItem; focusedReplyIndex?: number } | null
+  const navState = location.state as { item?: FeedItem; focusedReplyIndex?: number; lightboxIndex?: number } | null
   const [fetchedItem,   setFetchedItem]   = useState<FeedItem | null>(null)
   const [unlockedItem,  setUnlockedItem]  = useState<FeedItem | null>(null)
 
@@ -312,8 +317,11 @@ export default function PostDetailPage() {
           {/* Media */}
           {item.images && item.images.length > 0 && (
             <div className="mb-3 rounded-[16px] overflow-hidden">
-              <PostMediaCarousel images={item.images} aspectRatio="vertical" />
+              <PostMediaCarousel images={item.images} aspectRatio="vertical" onImageClick={setLightboxIdx} />
             </div>
+          )}
+          {lightboxIdx !== null && item.images && (
+            <ImageLightbox images={item.images} initialIndex={lightboxIdx} onClose={() => setLightboxIdx(null)} />
           )}
 
           {/* Location */}
