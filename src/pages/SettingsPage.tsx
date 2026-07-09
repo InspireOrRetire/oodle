@@ -9,6 +9,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
+import TokenIcon from '../components/Unlock/TokenIcon'
 
 // ─── Toast ─────────────────────────────────────────────────────────────────────
 
@@ -985,10 +986,7 @@ function BuyTokensSheet({ open, onClose, onPurchased }: { open: boolean; onClose
                         <button key={p.id} onClick={() => setSelected(p)}
                           className="w-full flex items-center gap-3 rounded-[14px] px-4 py-3 text-left transition-all"
                           style={{ border: sel ? '1.5px solid #111' : '1px solid #ebebeb', background: sel ? '#111' : 'white' }}>
-                          <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                            style={{ background: '#111' }}>
-                            <span style={{ fontWeight: 800, color: 'white', fontSize: 13 }}>$?</span>
-                          </div>
+                          <TokenIcon size={36} />
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
                               <span className="text-[15px] font-bold" style={{ color: sel ? 'white' : '#111' }}>
@@ -1125,7 +1123,7 @@ function AnswerDetailSheet({ entry, onClose }: { entry: PurchaseEntry | null; on
               {/* Meta row */}
               <div className="flex items-center justify-between pt-4" style={{ borderTop: '0.5px solid #f2f2f2' }}>
                 <div className="flex items-center gap-1.5">
-                  <span style={{ fontWeight: 700, color: '#111', fontSize: 11, lineHeight: 1 }}>$?</span>
+                  <TokenIcon size={14} />
                   <span className="text-[11px]" style={{ color: '#bbb' }}>${entry.price.toFixed(2)}</span>
                 </div>
                 <span className="text-[11px]" style={{ color: '#bbb' }}>
@@ -1188,7 +1186,7 @@ function MyAnswersSheet({ open, onClose }: { open: boolean; onClose: () => void 
               {/* Tokens paid + timestamp */}
               <div className="flex items-center justify-between mt-2 pl-[42px]">
                 <div className="flex items-center gap-1">
-                  <span style={{ fontWeight: 700, color: '#111', fontSize: 11, lineHeight: 1 }}>$?</span>
+                  <TokenIcon size={14} />
                   <span className="text-[10px]" style={{ color: '#bbb' }}>
                     ${t.price.toFixed(2)}
                   </span>
@@ -1351,7 +1349,7 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-[9px] flex items-center justify-center" style={{ background: '#fff8ed' }}>
-                <span style={{ fontWeight: 700, color: '#111', fontSize: 15, lineHeight: 1 }}>$?</span>
+                <TokenIcon size={22} />
               </div>
               <p className="text-[14px] font-medium text-[#111]">Balance</p>
             </div>
@@ -1368,7 +1366,7 @@ export default function SettingsPage() {
             className="w-full rounded-[12px] py-3 flex items-center justify-center gap-2 active:opacity-70 transition-opacity"
             style={{ background: '#111' }}
           >
-            <span style={{ fontWeight: 700, color: '#111', fontSize: 15, lineHeight: 1 }}>$?</span>
+            <TokenIcon size={18} />
             <span style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>Add balance</span>
           </button>
         </div>

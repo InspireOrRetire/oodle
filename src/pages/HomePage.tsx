@@ -4,6 +4,7 @@ import CardOptionsSheet from '../components/Post/PostOptionsSheet'
 import ClarifyOrUnlockSheet, { type ClarifyTarget } from '../components/Post/ClarifyOrUnlockSheet'
 import UnlockChips from '../components/Unlock/UnlockChips'
 import UnlockModal from '../components/Unlock/UnlockModal'
+import TokenIcon from '../components/Unlock/TokenIcon'
 import { cartCountText, cartService } from '../services/cartService'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
@@ -765,7 +766,7 @@ function AskTypePicker({
                 <div className="flex items-start gap-3">
                   <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
                     style={{ background: 'rgba(255,255,255,0.15)' }}>
-                    <span className="text-[13px] font-bold text-white">$?</span>
+                    <TokenIcon size={18} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[15px] font-semibold text-white mb-0.5">Ask something new</p>

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Share2, Menu, Plus, Minus, MoreHorizontal, Link,  Bookmark, Check, ArrowLeft, Mail, Heart, MessageCircle, ChevronUp, ChevronDown, Copy, AtSign, Camera, ChevronRight as ChevronRightIcon, Image, Video, MapPin, List, Type, FileText, X, Search, Lock, ShoppingCart, Pencil } from 'lucide-react'
 import { oo } from '../lib/oo'
+import TokenIcon from '../components/Unlock/TokenIcon'
 // Plain number for card price pills — no $? prefix on timeline cards
 const cp = (n: number) => n % 1 === 0 ? String(n) : n.toFixed(2)
 import { QRCodeSVG } from 'qrcode.react'
@@ -360,9 +361,7 @@ function ThreadItem({
               style={{ ...pillBase, width: 88, background: '#111', gap: 5, paddingLeft: 10, paddingRight: 14 }}
               onClick={() => { snap(0); onUnlock(thread) }}
             >
-              <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontWeight: 800, color: '#111', fontSize: 9 }}>$?</span>
-              </div>
+              <TokenIcon size={20} />
               <span style={{ fontSize: 14, fontWeight: 600, color: 'white', fontFamily: 'DM Mono, monospace' }}>
                 {cp(thread.price)}
               </span>
@@ -1007,10 +1006,7 @@ function PurchaseSheet({
                                 border:     selected ? '1.5px solid #111' : '1px solid #ebebeb',
                                 background: selected ? '#111' : 'white',
                               }}>
-                              <div className="flex items-center justify-center rounded-full flex-shrink-0"
-                                style={{ width: 40, height: 40, background: '#111' }}>
-                                <span style={{ fontWeight: 800, color: 'white', fontSize: 13 }}>$?</span>
-                              </div>
+                              <TokenIcon size={40} />
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-0.5">
                                   <span className="text-[16px] font-bold"

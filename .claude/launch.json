@@ -5,7 +5,15 @@
       "name": "Oodle Dev (Vite)",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
-      "port": 3000
+      "port": 3000,
+      "cwd": "/Users/donlike/Developer/oodle"
+    },
+    {
+      "name": "Oodle Dev Fork (port 3001)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:fork"],
+      "port": 3001,
+      "cwd": "/Users/donlike/Developer/oodle"
     },
     {
       "name": "Oodle Preview (Vite build preview)",

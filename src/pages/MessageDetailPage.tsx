@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { oo } from '../lib/oo'
+import TokenIcon from '../components/Unlock/TokenIcon'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, MapPin, Square, Plus, Star,  X, Camera, Video, FileText, Lock, AlignLeft, Type, Search, ChevronUp, ChevronDown, Flag } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -1537,7 +1538,7 @@ export default function MessageDetailPage() {
                       {/* Stepper pill */}
                       <div className="flex items-center gap-1.5 rounded-full pl-2.5 pr-1.5 py-1.5"
                         style={{ background: '#111' }}>
-                        <span style={{ fontWeight: 800, color: 'white', fontSize: 9 }}>$?</span>
+                        <TokenIcon size={16} />
                         {/* Down arrow — only when price > 0 */}
                         {answerPrice > 0 && (
                           <button
@@ -1623,7 +1624,7 @@ export default function MessageDetailPage() {
                   className="w-full flex items-center justify-center gap-2 py-3 rounded-[14px] transition-all disabled:opacity-30"
                   style={{ background: '#111' }}
                 >
-                  <span style={{ fontWeight: 800, color: 'white', fontSize: 12 }}>$?</span>
+                  <TokenIcon size={18} />
                   <span className="text-[14px] font-bold text-white">Send answer</span>
                 </button>
 
