@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Delete } from 'lucide-react'
+import TokenIcon from '../Unlock/TokenIcon'
 
 interface Props {
   open:         boolean
@@ -78,10 +79,13 @@ export default function TokenKeypad({ open, initialValue, onClose }: Props) {
 
             {/* Amount display */}
             <div className="flex flex-col items-center pt-5 pb-5">
-              <p className="font-bold leading-none"
-                style={{ fontSize: 72, color: numVal > 0 ? 'white' : 'rgba(255,255,255,0.2)' }}>
-                {display || '0'}
-              </p>
+              <div className="flex items-center gap-3">
+                <TokenIcon size={44} />
+                <p className="font-bold leading-none"
+                  style={{ fontSize: 72, color: numVal > 0 ? 'white' : 'rgba(255,255,255,0.2)' }}>
+                  {display || '0'}
+                </p>
+              </div>
               <p className="text-[13px] mt-2" style={{ color: 'rgba(255,255,255,0.38)' }}>
                 {numVal > 0 ? `You keep $? ${earnings}` : 'Set a price in tokens'}
               </p>
