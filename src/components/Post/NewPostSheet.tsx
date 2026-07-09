@@ -546,19 +546,21 @@ export default function NewPostSheet({
                   className="flex-1 flex flex-col overflow-hidden">
                   <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4">
 
-                    {/* Mode toggle */}
-                    <div className="flex gap-1.5 mb-4 p-1 rounded-[14px]" style={{ background: '#f5f5f5', border: '1px solid rgba(0,0,0,0.06)' }}>
-                      {([{ key: 'questions', label: 'Ask me anything' }, { key: 'answer', label: 'Sell an answer' }] as { key: PostMode; label: string }[]).map(opt => (
-                        <button key={opt.key} onClick={() => setMode(opt.key)}
-                          className="flex-1 py-[9px] px-3 rounded-[10px] text-[13px] font-semibold transition-all"
-                          style={mode === opt.key ? { background: '#111', color: '#fff' } : { background: 'transparent', color: '#999' }}>
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
+                    {/* Mode toggle — hidden when editing existing post */}
+                    {!editPost && (
+                      <div className="flex gap-1.5 mb-4 p-1 rounded-[14px]" style={{ background: '#f5f5f5', border: '1px solid rgba(0,0,0,0.06)' }}>
+                        {([{ key: 'questions', label: 'Ask me anything' }, { key: 'answer', label: 'Sell an answer' }] as { key: PostMode; label: string }[]).map(opt => (
+                          <button key={opt.key} onClick={() => setMode(opt.key)}
+                            className="flex-1 py-[9px] px-3 rounded-[10px] text-[13px] font-semibold transition-all"
+                            style={mode === opt.key ? { background: '#111', color: '#fff' } : { background: 'transparent', color: '#999' }}>
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
 
-                    {/* Subtype picker — only in answer mode */}
-                    {isAnswerMode && (
+                    {/* Subtype picker — only in answer mode, hidden when editing */}
+                    {isAnswerMode && !editPost && (
                       <div className="flex gap-2 mb-4">
                         {([
                           { key: 'none',      label: 'General',    icon: null },
@@ -577,8 +579,8 @@ export default function NewPostSheet({
                       </div>
                     )}
 
-                    {/* Composer row */}
-                    <div className="flex gap-3">
+                    {/* Composer row — hidden when editing (cost/unlock only) */}
+                    {!editPost && <div className="flex gap-3">
                       <div className="flex flex-col items-center flex-shrink-0" style={{ width: 38 }}>
                         <AvatarEl />
                       </div>
@@ -656,12 +658,12 @@ export default function NewPostSheet({
                           </>
                         )}
                       </div>
-                    </div>
+                    </div>}
 
 
-                    {/* Answer mode: price + tiles + panels */}
+                    {/* Answer mode: price + tiles + panels (always shown when editing) */}
                     <AnimatePresence>
-                      {isAnswerMode && (
+                      {(isAnswerMode || !!editPost) && (
                         <motion.div key="answer-body"
                           initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }}
                           transition={{ type: 'spring', stiffness: 340, damping: 28 }}>

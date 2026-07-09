@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { ArrowLeft, MoreHorizontal, MapPin, Check, MessageCircle, X as XIcon, Lock, Bookmark, Eye, PencilLine, Download, Share2 } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, MapPin, Check, MessageCircle, Lock, Bookmark, Eye, Download, Share2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { FeedItem, RecipeData, ItineraryData } from '../services/feedService'
 import { fetchPostById, composedPostToFeedItem, incrementPostView } from '../services/feedService'
@@ -19,6 +19,8 @@ import { savePost, unsavePost } from '../services/savedService'
 import { shareOrDownloadPDF } from '../lib/generateAnswerPDF'
 import { supabase } from '../lib/supabase'
 import PostOptionsSheet from '../components/Post/PostOptionsSheet'
+import UnlockChips from '../components/Unlock/UnlockChips'
+import NewPostSheet from '../components/Post/NewPostSheet'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -63,6 +65,7 @@ export default function PostDetailPage() {
   const iosKbRef = useRef<HTMLInputElement>(null)
   const [isSaved, setIsSaved] = useState(false)
   const [optionsOpen, setOptionsOpen] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
   const [pdfLoading, setPdfLoading] = useState(false)
   const [justUnlocked, setJustUnlocked] = useState(false)
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(() => {
@@ -508,7 +511,7 @@ export default function PostDetailPage() {
 
             {user?.id === item.creator.id ? (
               /* ── Own post: stats + edit ── */
-              <div className="flex items-center justify-between" style={{ minHeight: 40 }}>
+              <div className="relative flex items-center py-2.5" style={{ borderTop: '0.5px solid #f5f5f7', minHeight: 40 }}>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1.5">
                     <Eye style={{ width: 13, height: 13, color: '#aaa' }} strokeWidth={1.75} />
@@ -519,13 +522,24 @@ export default function PostDetailPage() {
                     <span className="text-[12px]" style={{ color: '#aaa' }}>{item.comments ?? 0} {item.comments === 1 ? 'question' : 'questions'}</span>
                   </div>
                 </div>
-                <button
-                  onClick={() => navigate(`/post/${item.id}/edit`)}
-                  className="flex items-center gap-1.5 active:opacity-70 transition-opacity"
-                >
-                  <PencilLine style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
-                  <span className="text-[12px] font-medium" style={{ color: '#555' }}>Edit</span>
-                </button>
+                <div className="absolute inset-y-0 right-0 flex items-center">
+                  {item.unlock_configs?.length ? (
+                    <UnlockChips
+                      configs={item.unlock_configs}
+                      isOwner
+                      onTap={() => {}}
+                      onEdit={() => setEditOpen(true)}
+                    />
+                  ) : (
+                    <button
+                      onClick={() => setEditOpen(true)}
+                      className="inline-flex items-center gap-1 active:opacity-75 transition-opacity"
+                    >
+                      <TokenIcon size={16} />
+                      <span className="text-[12px] font-semibold text-[#111] tracking-tight">Edit</span>
+                    </button>
+                  )}
+                </div>
               </div>
             ) : (
               /* ── Others' post: Share / Ask / Save ── */
@@ -761,6 +775,27 @@ export default function PostDetailPage() {
           )}
         </div>
       </div>
+
+      {/* ── Edit cost/unlock sheet ── */}
+      {item && user && (
+        <NewPostSheet
+          open={editOpen}
+          avatarUrl={user.user_metadata?.avatar_url}
+          username={user.user_metadata?.username ?? ''}
+          userId={user.id}
+          onClose={() => setEditOpen(false)}
+          onPosted={() => { setEditOpen(false); fetchPostById(postId!, user.id).then(d => d && setFetchedItem(composedPostToFeedItem(d))) }}
+          editPost={{
+            id:              item.id,
+            caption:         item.text,
+            price:           item.price,
+            post_type:       item.post_type as 'type1' | 'type2' | undefined,
+            images:          item.images,
+            post_subtype:    item.post_subtype as 'recipe' | 'itinerary' | undefined,
+            structured_data: item.structured_data as Record<string, unknown> | undefined,
+          }}
+        />
+      )}
 
       {/* ── Post options sheet ── */}
       <PostOptionsSheet open={optionsOpen} onClose={() => setOptionsOpen(false)} />
