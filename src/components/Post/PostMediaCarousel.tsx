@@ -9,7 +9,7 @@ interface Props {
 function Img({ src, alt = '', onClick }: { src: string; alt?: string; onClick?: () => void }) {
   const [errored, setErrored] = useState(false)
   return errored ? (
-    <div className="w-full h-full bg-[#e8e8ec]" onClick={onClick} />
+    <div className="w-full h-full bg-[#e8e8ec]" onClick={e => { e.stopPropagation(); onClick?.() }} />
   ) : (
     <img
       src={src}
@@ -17,7 +17,7 @@ function Img({ src, alt = '', onClick }: { src: string; alt?: string; onClick?: 
       className="w-full h-full object-cover"
       draggable={false}
       onError={() => setErrored(true)}
-      onClick={onClick}
+      onClick={e => { e.stopPropagation(); onClick?.() }}
       style={{ cursor: 'pointer' }}
     />
   )
@@ -90,7 +90,7 @@ export default function PostMediaCarousel({ images, aspectRatio = 'vertical' }: 
                 <div
                   className="absolute inset-0 flex items-center justify-center"
                   style={{ background: 'rgba(0,0,0,0.42)', cursor: 'pointer' }}
-                  onClick={() => open(2)}
+                  onClick={e => { e.stopPropagation(); open(2) }}
                 >
                   <span className="text-white font-semibold" style={{ fontSize: 20 }}>+{extra}</span>
                 </div>

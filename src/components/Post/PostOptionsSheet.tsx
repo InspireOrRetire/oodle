@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useState } from 'react'
-import { Link2, Bookmark, EyeOff, UserX, UserMinus, UserPlus, AlertCircle, PinOff, Archive, ShoppingCart, Trash2 } from 'lucide-react'
+import { Link2, Bookmark, EyeOff, UserX, UserMinus, UserPlus, AlertCircle, PinOff, Archive, ShoppingCart, Trash2, Repeat2 } from 'lucide-react'
 
 interface Props {
   open: boolean
@@ -8,6 +8,7 @@ interface Props {
   // Owner mode
   isOwn?: boolean
   isHidingPurchases?: boolean
+  onRepost?: () => void
   onDelete?: () => void
   onArchive?: () => void
   onUnpin?: () => void
@@ -59,6 +60,7 @@ export default function PostOptionsSheet({
   onClose,
   isOwn,
   isHidingPurchases,
+  onRepost,
   onDelete,
   onArchive,
   onUnpin,
@@ -139,6 +141,7 @@ export default function PostOptionsSheet({
               <>
                 <Row label="Copy link"     icon={Link2}        onClick={handleCopyLink} />
                 <Row label={isSaved ? 'Unsave' : 'Save'} icon={Bookmark} onClick={handle(onSave)} />
+                <Row label="Repost"        icon={Repeat2}      onClick={handle(onRepost)} />
                 <Row label="Unpin"         icon={PinOff}       onClick={handle(onUnpin)} />
                 <Row label="Archive"       icon={Archive}      onClick={handle(onArchive)} />
                 <Row

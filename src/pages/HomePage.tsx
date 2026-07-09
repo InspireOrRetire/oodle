@@ -12,7 +12,7 @@ import {
   Search, X, Bell, MessageCircle, MessageCircleMore, Share2,
   Check, Plus, Bookmark, ArrowLeft,
   Camera, MapPin, Video,
-  Lock, MoreHorizontal, Pencil,
+  Lock, MoreHorizontal, Pencil, Repeat2,
 } from 'lucide-react'
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion'
 import PostMediaCarousel from '../components/Post/PostMediaCarousel'
@@ -21,7 +21,8 @@ import MenuDrawer from '../components/UI/MenuDrawer'
 import SaveSheet, { type SaveCollection } from '../components/UI/SaveSheet'
 import { useLayout } from '../contexts/LayoutContext'
 import { useAuth } from '../contexts/AuthContext'
-import { fetchComposedFeed, composedPostToFeedItem, searchCreators as searchCreatorsDB, type FeedItem, type FeedCreator, type RecipeData, type ItineraryData } from '../services/feedService'
+import { fetchComposedFeed, composedPostToFeedItem, fetchOwnRepostsAsFeedItems, searchCreators as searchCreatorsDB, type FeedItem, type FeedCreator, type RecipeData, type ItineraryData } from '../services/feedService'
+import RepostSheet from '../components/Post/RepostSheet'
 import { createThreadWithMedia } from '../services/threadService'
 import type { ThreadWithParticipants } from '../lib/database.types'
 import {
@@ -120,6 +121,7 @@ function FeedCard({
   onReplyTap,
   onOptions,
   onEdit,
+  onRepost,
 }: {
   item: FeedItem
   liked: boolean
@@ -137,6 +139,7 @@ function FeedCard({
   onReplyTap?: (replyIndex: number) => void
   onOptions?: () => void
   onEdit?: () => void
+  onRepost?: () => void
 }) {
   const x = useMotionValue(0)
   const heartScale = useMotionValue(1)
@@ -208,6 +211,17 @@ function FeedCard({
         style={{ x, background: 'white' }}
         className="relative px-4 pt-3"
       >
+
+        {/* Repost indicator — shown above content for repost entries */}
+        {item.is_repost && (
+          <div className="flex items-center gap-1.5 pb-2" style={{ color: '#888' }}>
+            <Repeat2 style={{ width: 12, height: 12 }} strokeWidth={1.8} />
+            <span className="text-[11px] font-medium">You reposted</span>
+          </div>
+        )}
+        {item.is_repost && item.repost_caption && (
+          <p className="text-[14px] text-[#111] leading-[1.55] pb-2">{item.repost_caption}</p>
+        )}
 
         {/* ── Post: caption + media + action row ── */}
         {isPost ? (
@@ -360,6 +374,16 @@ function FeedCard({
                     <Bookmark style={{ width: 12, height: 12, color: saved ? '#111' : '#555' }} strokeWidth={2} fill={saved ? '#111' : 'none'} />
                     <span className="text-[12px] font-medium" style={{ color: saved ? '#111' : '#555' }}>{saved ? 'Saved' : 'Save'}</span>
                   </button>
+                  {/* Repost — own posts only, not on repost entries themselves */}
+                  {item.creator.id === myUserId && !item.is_repost && (
+                    <button
+                      onClick={e => { e.stopPropagation(); onRepost?.() }}
+                      className="flex items-center gap-1.5 active:opacity-70 transition-opacity"
+                    >
+                      <Repeat2 style={{ width: 12, height: 12, color: '#555' }} strokeWidth={1.75} />
+                      <span className="text-[12px] font-medium" style={{ color: '#555' }}>Repost</span>
+                    </button>
+                  )}
                 </div>
                 {/* Unlock chips (new system) or price pill (legacy) */}
                 {item.unlock_configs?.length ? (
@@ -1473,6 +1497,7 @@ export default function HomePage() {
   const [askPickerItem,   setAskPickerItem]   = useState<FeedItem | null>(null)
   const [cardOptionsItem, setCardOptionsItem] = useState<FeedItem | null>(null)
   const [editPostItem,    setEditPostItem]    = useState<FeedItem | null>(null)
+  const [repostTarget,    setRepostTarget]    = useState<FeedItem | null>(null)
   const [homeQuestions, setHomeQuestions] = useState<Record<string, LocalQuestion[]>>({})
 
   // Hide nav bar whenever any bottom sheet is open; restore when all close
@@ -1554,12 +1579,15 @@ export default function HomePage() {
     // Hard timeout: never leave skeleton showing forever
     const timeout = setTimeout(() => { if (!cancelled) setFeedLoading(false) }, 6000)
     fetchComposedFeed(user.id)
-      .then(composed => {
-        if (!cancelled) {
-          clearTimeout(timeout)
-          const items = composed.map(composedPostToFeedItem)
-          setFeed(items)
-        }
+      .then(async composed => {
+        if (cancelled) return
+        clearTimeout(timeout)
+        const items = composed.map(composedPostToFeedItem)
+        // Merge in own reposts so they appear at the top with fresh timestamps
+        const repostItems = await fetchOwnRepostsAsFeedItems(user.id).catch(() => [] as FeedItem[])
+        // Deduplicate: if the original post is already in the feed, the repost
+        // entry still coexists (same id, different feed_key) — that's intentional.
+        setFeed([...repostItems, ...items])
       })
       .catch(err => {
         if (!cancelled) { clearTimeout(timeout); setFeed([]); setFeedError((err as Error).message ?? 'Failed to load feed') }
@@ -1972,7 +2000,7 @@ export default function HomePage() {
             )}
             {filteredFeed.map(item => (
               <FeedCard
-                key={item.id}
+                key={item.feed_key ?? item.id}
                 item={item}
                 liked={liked.has(item.id)}
                 saved={(savedItems[item.id]?.size ?? 0) > 0}
@@ -2004,6 +2032,7 @@ export default function HomePage() {
                 }}
                 onOptions={() => setCardOptionsItem(item)}
                 onEdit={() => setEditPostItem(item)}
+                onRepost={() => setRepostTarget(item)}
               />
             ))}
             <div className="py-10 flex justify-center">
@@ -2042,6 +2071,7 @@ export default function HomePage() {
         onClose={() => setCardOptionsItem(null)}
         isOwn={cardOptionsItem?.creator.id === user?.id}
         isFollowing={cardOptionsItem ? followedUsers.has(cardOptionsItem.creator.id) : false}
+        onRepost={() => { if (cardOptionsItem && !cardOptionsItem.is_repost) setRepostTarget(cardOptionsItem) }}
         onFollowToggle={() => {
           if (!cardOptionsItem) return
           const { id, username } = cardOptionsItem.creator
@@ -2072,6 +2102,14 @@ export default function HomePage() {
           const url = `${window.location.origin}/post/${cardOptionsItem.id}`
           window.open(`mailto:report@oodle.app?subject=Report post&body=Post URL: ${encodeURIComponent(url)}`, '_blank')
         }}
+      />
+
+      {/* ── Repost sheet ── */}
+      <RepostSheet
+        item={repostTarget}
+        userId={user?.id ?? ''}
+        onClose={() => setRepostTarget(null)}
+        onReposted={refreshFeed}
       />
 
       {/* ── Ask type picker (shown for priced posts) ── */}
