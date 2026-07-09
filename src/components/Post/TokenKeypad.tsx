@@ -87,7 +87,7 @@ export default function TokenKeypad({ open, initialValue, onClose }: Props) {
                 </p>
               </div>
               <p className="text-[13px] mt-2" style={{ color: 'rgba(255,255,255,0.38)' }}>
-                {numVal > 0 ? `You keep $? ${earnings}` : 'Set a price in tokens'}
+                {numVal > 0 ? `You keep USD ${earnings}` : 'Set a price in tokens'}
               </p>
             </div>
 
