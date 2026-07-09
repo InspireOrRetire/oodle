@@ -215,11 +215,10 @@ export default function UnlockModal({
               {/* Amber token */}
               <div className="flex items-center justify-center rounded-full flex-shrink-0"
                 style={{
-                  width: 28, height: 28,
-                  background: 'radial-gradient(circle at 38% 35%, #ffe08a, #d4920a)',
-                  boxShadow: '0 1px 3px rgba(180,120,0,0.35), inset 0 1px 0 rgba(255,255,200,0.4)',
+                  width: 20, height: 20,
+                  background: '#f5c842',
                 }}>
-                <span style={{ fontSize: 10, fontWeight: 700, color: '#7a4a00', lineHeight: 1, letterSpacing: '-0.5px' }}>$?</span>
+                <span style={{ fontSize: 9, fontWeight: 700, color: '#7a4a00', lineHeight: 1, letterSpacing: '-0.5px' }}>$?</span>
               </div>
               <span className="text-[20px] font-bold text-[#111]">{amt}</span>
             </div>
