@@ -207,19 +207,29 @@ export default function UnlockModal({
 
     // Incomplete — show capture UI
     if (t === 'cash') {
+      const amt = cashAmount % 1 === 0 ? cashAmount : cashAmount.toFixed(2)
       return (
         <div key={s.config.id} className="py-2">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[16px] font-bold text-[#111]">
-              $?{cashAmount % 1 === 0 ? cashAmount : cashAmount.toFixed(2)}
-            </span>
+            <div className="flex items-center gap-2">
+              {/* Amber token */}
+              <div className="flex items-center justify-center rounded-full flex-shrink-0"
+                style={{
+                  width: 28, height: 28,
+                  background: 'radial-gradient(circle at 38% 35%, #ffe08a, #d4920a)',
+                  boxShadow: '0 1px 3px rgba(180,120,0,0.35), inset 0 1px 0 rgba(255,255,200,0.4)',
+                }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: '#7a4a00', lineHeight: 1, letterSpacing: '-0.5px' }}>$?</span>
+              </div>
+              <span className="text-[20px] font-bold text-[#111]">{amt}</span>
+            </div>
             <span className="text-[13px]" style={{ color: '#888' }}>
-              Balance: ${balance % 1 === 0 ? balance : balance.toFixed(2)}
+              Balance: {balance % 1 === 0 ? balance : balance.toFixed(2)}
             </span>
           </div>
           {!hasBalance && (
             <p className="text-[12px] mb-2" style={{ color: '#e55' }}>
-              You need ${(cashAmount - balance).toFixed(2)} more — add balance below
+              You need {(cashAmount - balance).toFixed(2)} more — add balance below
             </p>
           )}
         </div>
