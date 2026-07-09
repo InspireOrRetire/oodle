@@ -79,8 +79,10 @@ export default function TokenKeypad({ open, initialValue, onClose }: Props) {
 
             {/* Amount display */}
             <div className="flex flex-col items-center pt-5 pb-5">
-              <div className="flex items-center gap-3">
-                <TokenIcon size={44} />
+              <div className="relative flex items-center justify-center">
+                <span className="absolute flex items-center" style={{ right: 'calc(100% + 6px)' }}>
+                  <TokenIcon size={22} />
+                </span>
                 <p className="font-bold leading-none"
                   style={{ fontSize: 72, color: numVal > 0 ? 'white' : 'rgba(255,255,255,0.2)' }}>
                   {display || '0'}
