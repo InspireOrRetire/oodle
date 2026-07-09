@@ -2613,7 +2613,7 @@ export default function ProfilePage() {
             style={{ background: '#f5f5f7' }}
             onClick={() => setCreatePostOpen(true)}
           >
-            <span className="text-[14px]" style={{ color: '#bbb' }}>Share your knowledge…</span>
+            <span className="text-[14px]" style={{ color: '#bbb' }}>Share</span>
           </button>
         </div>
 
