@@ -77,7 +77,7 @@ export default function ImageLightbox({ images, initialIndex = 0, onClose }: Pro
         transition={{ duration: 0.18 }}
         className="fixed inset-0"
         style={{ zIndex: 9999, background: 'black' }}
-        onClick={e => { e.stopPropagation(); onClose() }}
+        onClick={e => e.stopPropagation()}
       >
         {/* Dim layer tied to vertical drag */}
         <motion.div
@@ -132,13 +132,13 @@ export default function ImageLightbox({ images, initialIndex = 0, onClose }: Pro
           dragElastic={{ left: 0.04, right: 0.04, top: 0.3, bottom: 0.3 }}
           dragMomentum={false}
           onDragEnd={handleDragEnd}
-          onClick={e => { e.stopPropagation(); setUiVisible(v => !v) }}
         >
           {images.map((src, i) => (
             <div
               key={i}
               className="flex items-center justify-center flex-shrink-0"
               style={{ width: '100vw', height: '100vh' }}
+              onClick={e => { e.stopPropagation(); onClose() }}
             >
               <img
                 src={src}
@@ -151,6 +151,7 @@ export default function ImageLightbox({ images, initialIndex = 0, onClose }: Pro
                   userSelect: 'none',
                   WebkitUserSelect: 'none',
                 }}
+                onClick={e => { e.stopPropagation(); setUiVisible(v => !v) }}
               />
             </div>
           ))}
