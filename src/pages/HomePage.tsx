@@ -122,7 +122,6 @@ function FeedCard({
   onOptions,
   onEdit,
   onRepost,
-  onMediaClick,
 }: {
   item: FeedItem
   liked: boolean
@@ -141,7 +140,6 @@ function FeedCard({
   onOptions?: () => void
   onEdit?: () => void
   onRepost?: () => void
-  onMediaClick?: (index: number) => void
 }) {
   const x = useMotionValue(0)
   const heartScale = useMotionValue(1)
@@ -270,7 +268,7 @@ function FeedCard({
               {/* Media */}
               {item.images && item.images.length > 0 && (
                 <div className="mb-2.5">
-                  <PostMediaCarousel images={item.images} aspectRatio="vertical" onImageClick={onMediaClick} />
+                  <PostMediaCarousel images={item.images} aspectRatio="vertical" />
                 </div>
               )}
               {/* Location */}
@@ -485,7 +483,7 @@ function FeedCard({
                   )}
                   {item.images && item.images.length > 0 && (
                     <div className="mb-2">
-                      <PostMediaCarousel images={item.images} aspectRatio="vertical" onImageClick={onMediaClick} />
+                      <PostMediaCarousel images={item.images} aspectRatio="vertical" />
                     </div>
                   )}
                   {/* Location */}
@@ -2035,12 +2033,6 @@ export default function HomePage() {
                 onOptions={() => setCardOptionsItem(item)}
                 onEdit={() => setEditPostItem(item)}
                 onRepost={() => setRepostTarget(item)}
-                onMediaClick={(i) => {
-                  if (scrollContainerRef.current) {
-                    sessionStorage.setItem('home-scroll', String(scrollContainerRef.current.scrollTop))
-                  }
-                  navigate(`/post/${item.id}`, { state: { item, lightboxIndex: i } })
-                }}
               />
             ))}
             <div className="py-10 flex justify-center">
