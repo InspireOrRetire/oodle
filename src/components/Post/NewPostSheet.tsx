@@ -1,4 +1,5 @@
-import { useState, useRef, lazy, Suspense } from 'react'
+import { useState, useRef, lazy, Suspense, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   X, Check, Plus, Minus, Camera, MapPin, AlignLeft, FileText,
@@ -122,6 +123,15 @@ export default function NewPostSheet({
   const [caption,    setCaption]    = useState('')
   const [posted,     setPosted]     = useState(false)
   const [postError,  setPostError]  = useState<string | null>(null)
+  const [toast,      setToast]      = useState<string | null>(null)
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function fireToast(msg: string) {
+    if (toastTimer.current) clearTimeout(toastTimer.current)
+    setToast(msg)
+    toastTimer.current = setTimeout(() => setToast(null), 2200)
+  }
+  useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current) }, [])
   const [showPostOptions, setShowPostOptions] = useState(false)
 
   // ── Recipe state ─────────────────────────────────────────────────────────────
@@ -349,6 +359,7 @@ export default function NewPostSheet({
         await saveUnlockConfigs(postId, configsToSave)
       }
 
+      fireToast('Posted')
       onPosted?.()
       onClose()
 
@@ -434,6 +445,7 @@ export default function NewPostSheet({
         })().catch(e => console.warn('Background upload failed:', e))
       }
 
+      fireToast('Saved')
       onPosted?.()
       onClose()
     } catch (e: unknown) {
@@ -1179,6 +1191,34 @@ export default function NewPostSheet({
         onClose={val => { setPrice(val); setKeypadOpen(false) }}
       />
     </AnimatePresence>
+
+    {/* Success toast — portal so it survives sheet exit animation */}
+    {createPortal(
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            key="post-toast"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+            className="fixed left-1/2 flex items-center gap-2 px-4 py-2.5 rounded-full pointer-events-none"
+            style={{
+              bottom: 'calc(env(safe-area-inset-bottom) + 24px)',
+              transform: 'translateX(-50%)',
+              zIndex: 99999,
+              background: '#111',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.28)',
+            }}
+          >
+            <Check style={{ width: 14, height: 14, color: '#4cd964', strokeWidth: 2.8 }} />
+            <span className="text-[13px] font-semibold" style={{ color: 'white', letterSpacing: '-0.1px' }}>{toast}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>,
+      document.body
+    )}
+
     <Suspense fallback={null}>
       <LocationPickerSheet
         open={locPickerOpen}
