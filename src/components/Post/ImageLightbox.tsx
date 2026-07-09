@@ -77,6 +77,7 @@ export default function ImageLightbox({ images, initialIndex = 0, onClose }: Pro
         transition={{ duration: 0.18 }}
         className="fixed inset-0"
         style={{ zIndex: 9999, background: 'black' }}
+        onClick={e => e.stopPropagation()}
       >
         {/* Dim layer tied to vertical drag */}
         <motion.div
