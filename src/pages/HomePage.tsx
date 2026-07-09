@@ -1927,8 +1927,8 @@ export default function HomePage() {
       <div className="flex gap-2 px-4 py-2.5 bg-white" style={{ borderBottom: '0.5px solid #f0f0f0' }}>
         {([
           { key: 'all',       label: 'All' },
-          { key: 'recipe',    label: '🍴 Food' },
-          { key: 'itinerary', label: '🗺️ Travel' },
+          { key: 'recipe',    label: '🍴 Recipe' },
+          { key: 'itinerary', label: '🗺️ Itinerary' },
         ] as const).map(f => (
           <button key={f.key} onClick={() => setFeedFilter(f.key)}
             className="px-3.5 py-1.5 rounded-full text-[12px] font-semibold transition-all active:opacity-70"
