@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, ShoppingBag, Lock } from 'lucide-react'
+import TokenIcon from '../Unlock/TokenIcon'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { supabase } from '../../lib/supabase'
@@ -103,7 +104,7 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                       <div className="flex items-center justify-between mb-5">
                         <p className="text-[18px] font-bold text-[#111]">Order summary</p>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: '#f5f5f7' }}>
-                          <span style={{ fontWeight: 700, color: '#111', fontSize: 11, lineHeight: 1 }}>$?</span>
+                          <TokenIcon size={14} />
                           <span className="text-[12px] font-semibold text-[#111]">{count} answer{count !== 1 ? 's' : ''}</span>
                         </div>
                       </div>
@@ -119,7 +120,7 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                             </div>
                             <span className="flex items-center gap-1 rounded-full px-2.5 py-1.5 flex-shrink-0 text-[11px] font-semibold"
                               style={{ background: '#f5f5f5', color: '#111' }}>
-                              <span style={{ fontWeight: 700, color: '#111', fontSize: 11, lineHeight: 1 }}>$?</span>
+                              <TokenIcon size={14} />
                               {it.price}
                             </span>
                           </div>
@@ -131,7 +132,7 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-[13px]" style={{ color: '#888' }}>Total</span>
                           <span className="flex items-center gap-1 text-[15px] font-bold text-[#111]">
-                            <span style={{ fontWeight: 700, color: '#111', fontSize: 11, lineHeight: 1 }}>$?</span>
+                            <TokenIcon size={14} />
                             {total}
                           </span>
                         </div>
@@ -179,7 +180,7 @@ export default function CartCheckoutSheet({ open, items, onClose, onSuccess }: P
                             className="w-full rounded-[14px] py-[15px] flex items-center justify-center gap-2 active:opacity-80"
                             style={{ background: '#111' }}
                           >
-                            <span style={{ fontWeight: 700, color: '#111', fontSize: 15, lineHeight: 1 }}>$?</span>
+                            <TokenIcon size={18} />
                             <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>Add balance</span>
                           </button>
                         </div>

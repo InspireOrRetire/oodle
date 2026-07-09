@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check } from 'lucide-react'
+import TokenIcon from '../Unlock/TokenIcon'
 import { supabase } from '../../lib/supabase'
 import { oo } from '../../lib/oo'
 
@@ -154,10 +155,7 @@ export default function TopUpSheet({ onClose }: Props) {
                           background: sel ? '#111' : 'white',
                         }}
                       >
-                        <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                          style={{ background: '#111' }}>
-                          <span style={{ fontWeight: 800, color: 'white', fontSize: 13 }}>$?</span>
-                        </div>
+                        <TokenIcon size={36} />
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <span style={{ fontSize: 15, fontWeight: 700, color: sel ? 'white' : '#111' }}>

@@ -8,6 +8,7 @@ import VerifiedBadge from '../components/prsnc/VerifiedBadge'
 import PostMediaCarousel from '../components/Post/PostMediaCarousel'
 import UnlockSheet, { type UnlockTarget } from '../components/Post/UnlockSheet'
 import ClarifyOrUnlockSheet, { type ClarifyTarget } from '../components/Post/ClarifyOrUnlockSheet'
+import TokenIcon from '../components/Unlock/TokenIcon'
 import { cartCountText } from '../services/cartService'
 import { createThreadWithMedia } from '../services/threadService'
 import { myQuestionsStore } from '../services/myQuestionsStore'
@@ -723,7 +724,7 @@ export default function PostDetailPage() {
                 className="w-12 h-12 rounded-full flex items-center justify-center mb-3"
                 style={{ background: '#f5f5f5', border: '1px solid #e0e0e0' }}
               >
-                <span style={{ fontWeight: 800, color: '#111', fontSize: 16 }}>$?</span>
+                <TokenIcon size={20} />
               </div>
               <p className="text-[14px] font-semibold text-[#111] mb-1">Be the first to ask</p>
               <p className="text-[13px]" style={{ color: '#aaa' }}>

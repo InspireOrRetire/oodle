@@ -1,6 +1,7 @@
 import { Check } from 'lucide-react'
 import type { UnlockConfig, UnlockType } from '../../lib/unlock/types'
 import { getUnlockMeta } from '../../lib/unlock/registry'
+import TokenIcon from './TokenIcon'
 
 interface Props {
   configs:        UnlockConfig[]
@@ -64,8 +65,10 @@ export default function UnlockChips({
               border:     done ? '0.5px solid #c0c0c0' : '0.5px solid #ddd',
             }}
           >
-            {done && <Check style={{ width: 9, height: 9, strokeWidth: 2.5, color: '#777', flexShrink: 0 }} />}
-            {isOwner && !done ? `Edit · ${label}` : label}
+            {done
+              ? <Check style={{ width: 9, height: 9, strokeWidth: 2.5, color: '#777', flexShrink: 0 }} />
+              : <><TokenIcon size={16} />{isOwner && <span style={{ marginLeft: 3 }}>Edit</span>}</>
+            }
           </span>
         )
       })()}

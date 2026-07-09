@@ -10,6 +10,7 @@ import {
   FileText, Link as LinkIcon, MapPin, AlignLeft, Plus,
 } from 'lucide-react'
 import PriceSetterSheet from '../UI/PriceSetterSheet'
+import TokenIcon from '../Unlock/TokenIcon'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -460,7 +461,7 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
                     className="flex items-center gap-1.5 rounded-full px-3.5 py-2"
                     style={{ background: '#111' }}
                   >
-                    {price > 0 && <span style={{ fontWeight: 800, color: '#fff', fontSize: 11 }}>$?</span>}
+                    {price > 0 && <TokenIcon size={16} />}
                     <span className="text-[13px] font-semibold text-white">
                       {price === 0 ? 'Free' : `$?${price}`}
                     </span>

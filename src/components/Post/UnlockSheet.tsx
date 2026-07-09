@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, Check,  Lock } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { oo } from '../../lib/oo'
+import TokenIcon from '../Unlock/TokenIcon'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -197,13 +198,7 @@ export default function UnlockSheet({
 
                       {/* Price display */}
                       <div className="flex items-center end justify-center gap-2 mb-1">
-                        <span style={{
-                          fontSize: 12, fontWeight: 800, color: 'white', lineHeight: 1,
-                          background: '#f5c842',
-                          borderRadius: '50%',
-                          width: 32, height: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                          flexShrink: 0, letterSpacing: '-0.02em',
-                        }}>$?</span>
+                        <TokenIcon size={32} />
                         <span style={{ fontSize: 48, fontWeight: 700, color: '#111', lineHeight: 1 }}>{price.toFixed(2)}</span>
                       </div>
                       <p className="text-center text-[12px] mb-0.5" style={{ color: '#aaa' }}>
@@ -279,10 +274,7 @@ export default function UnlockSheet({
                             <button key={p.id} onClick={() => setPack(p)}
                               className="w-full flex items-center gap-3 rounded-[14px] px-4 py-3.5 text-left transition-all"
                               style={{ border: sel ? '1.5px solid #111' : '1px solid #ebebeb', background: sel ? '#111' : 'white' }}>
-                              <div className="flex items-center justify-center rounded-full flex-shrink-0"
-                                style={{ width: 40, height: 40, background: '#111' }}>
-                                <span style={{ fontWeight: 800, color: 'white', fontSize: 13 }}>$?</span>
-                              </div>
+                              <TokenIcon size={40} />
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-0.5">
                                   <span className="text-[16px] font-bold" style={{ color: sel ? 'white' : '#111' }}>

@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { supabase } from '../../lib/supabase'
 import { oo } from '../../lib/oo'
 import TopUpSheet from './TopUpSheet'
+import TokenIcon from '../Unlock/TokenIcon'
 
 interface Props { isOpen: boolean; onClose: () => void }
 
@@ -95,7 +96,7 @@ export default function MenuDrawer({ isOpen, onClose }: Props) {
               className="w-full flex items-center justify-between py-3 px-3 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <span className="font-bold text-[15px] text-gray-900">$?</span>
+                <TokenIcon size={20} />
                 <span className="text-[15px] text-gray-900">Balance</span>
               </div>
               <div className="flex items-center gap-1.5">
