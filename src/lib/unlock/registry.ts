@@ -39,7 +39,7 @@ const REGISTRY: Record<UnlockType, UnlockMeta> = {
     chipLabel: (c) => {
       const a = c.amount as number | undefined
       if (!a) return 'Cash'
-      return a % 1 === 0 ? `$${a}` : `$${a.toFixed(2)}`
+      return '$?'
     },
     validate: (c) => {
       const a = c.amount as number | undefined
