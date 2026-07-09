@@ -211,7 +211,7 @@ export default function UnlockModal({
         <div key={s.config.id} className="py-2">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[16px] font-bold text-[#111]">
-              Pay ${cashAmount % 1 === 0 ? cashAmount : cashAmount.toFixed(2)}
+              $?{cashAmount % 1 === 0 ? cashAmount : cashAmount.toFixed(2)}
             </span>
             <span className="text-[13px]" style={{ color: '#888' }}>
               Balance: ${balance % 1 === 0 ? balance : balance.toFixed(2)}
