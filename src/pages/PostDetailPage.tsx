@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { ArrowLeft, MoreHorizontal, MapPin, Check, MessageCircle, X as XIcon, Lock, Bookmark, Eye, PencilLine, Download } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, MapPin, Check, MessageCircle, X as XIcon, Lock, Bookmark, Eye, PencilLine, Download, Share2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { FeedItem, RecipeData, ItineraryData } from '../services/feedService'
 import { fetchPostById, composedPostToFeedItem, incrementPostView } from '../services/feedService'
@@ -223,6 +223,12 @@ export default function PostDetailPage() {
     ? allReplies.slice(focusedReplyIndex!, focusedReplyIndex! + 1)
     : allReplies
   const hasReplies = allReplies.length > 0
+
+  function handleShare() {
+    const url = `${window.location.origin}/post/${item?.id}`
+    if (navigator.share) { navigator.share({ url, title: item?.question ?? '' }).catch(() => {}) }
+    else { navigator.clipboard.writeText(url).catch(() => {}) }
+  }
 
   // ── Ask sheet open helper ─────────────────────────────────────────────────
   function openAsk() {
@@ -522,40 +528,36 @@ export default function PostDetailPage() {
                 </button>
               </div>
             ) : (
-              /* ── Others' post: Ask / Save / Price ── */
-              <>
-              <p className="text-[12px] mb-2" style={{ color: '#aaa' }}>
-                {isType2 && hasReplies
-                  ? 'Tap a question below to purchase that answer'
-                  : !hasReplies
-                    ? 'Be the first to ask a question'
-                    : 'Ask a question below'}
-              </p>
-              <div className="relative" style={{ minHeight: 40 }}>
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              /* ── Others' post: Share / Ask / Save ── */
+              <div className="relative flex items-center py-2.5" style={{ borderTop: '0.5px solid #f5f5f7', minHeight: 40 }}>
+                <div className="flex items-center gap-5">
+                  <button
+                    onClick={handleShare}
+                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity"
+                  >
+                    <Share2 style={{ width: 12, height: 12, color: '#555' }} strokeWidth={1.75} />
+                    <span className="text-[12px] font-medium" style={{ color: '#555' }}>Share</span>
+                  </button>
                   <button
                     onClick={openAsk}
-                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity pointer-events-auto"
+                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity"
                   >
                     <MessageCircle style={{ width: 13, height: 13, color: '#555' }} strokeWidth={1.75} />
                     <span className="text-[12px] font-medium" style={{ color: '#555' }}>Ask</span>
                   </button>
-                </div>
-                <div className="absolute inset-y-0 flex items-center pointer-events-none" style={{ left: 'calc(50% + 38px)' }}>
                   <button
                     onClick={toggleSave}
-                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity pointer-events-auto"
-                    style={isSaved ? { background: '#111', borderRadius: 99, padding: '4px 10px' } : {}}
+                    className="flex items-center gap-1.5 active:opacity-70 transition-opacity"
                   >
-                    <Bookmark style={{ width: 12, height: 12, color: isSaved ? 'white' : '#555' }} strokeWidth={2} fill={isSaved ? 'white' : 'none'} />
-                    <span className="text-[12px] font-semibold" style={{ color: isSaved ? 'white' : '#333' }}>{isSaved ? 'Saved' : 'Save'}</span>
+                    <Bookmark style={{ width: 12, height: 12, color: isSaved ? '#111' : '#555' }} strokeWidth={2} fill={isSaved ? '#111' : 'none'} />
+                    <span className="text-[12px] font-medium" style={{ color: isSaved ? '#111' : '#555' }}>{isSaved ? 'Saved' : 'Save'}</span>
                   </button>
                 </div>
                 {item.isLocked && price != null && price > 0 && (
-                  <div className="absolute inset-y-0 right-0 flex items-center pointer-events-none">
+                  <div className="absolute inset-y-0 right-0 flex items-center">
                     <button
                       onClick={() => setUnlockTarget({ creator: item.creator, question: item.question, price: price ?? 0, postId: item.id })}
-                      className="inline-flex items-center gap-1 active:opacity-75 transition-opacity pointer-events-auto"
+                      className="inline-flex items-center gap-1 active:opacity-75 transition-opacity"
                     >
                       <Lock style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
                       <span className="text-[12px] font-semibold text-[#111] tracking-tight">{price % 1 === 0 ? String(price) : price.toFixed(2)}</span>
@@ -563,7 +565,6 @@ export default function PostDetailPage() {
                   </div>
                 )}
               </div>
-              </>
             )}
           </div>
         )}
