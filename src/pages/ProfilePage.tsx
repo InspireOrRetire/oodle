@@ -503,10 +503,11 @@ function ThreadItem({
                       className="inline-flex items-center gap-1 active:opacity-75 transition-opacity"
                     >
                       {isOwner ? (
-                        <>
-                          <Pencil style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
-                          <span className="text-[12px] font-semibold text-[#111] tracking-tight">Edit · {cp(thread.price)}</span>
-                        </>
+                        <span className="inline-flex items-center gap-[4px] rounded-full px-2.5 py-[3px] text-[11px] font-semibold tracking-tight select-none"
+                          style={{ background: '#f0f0f0', color: '#111', border: '0.5px solid #ddd' }}>
+                          <TokenIcon size={16} />
+                          <span style={{ marginLeft: 3 }}>Edit</span>
+                        </span>
                       ) : (
                         <>
                           <Lock style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
@@ -593,15 +594,21 @@ function ThreadItem({
                         {!isPurchased && thread.price > 0 && (
                           <button
                             onClick={e => { e.stopPropagation(); isOwner ? onEditPrice?.() : onUnlock(thread) }}
-                            className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-75 transition-opacity"
-                            style={{ background: '#000', marginTop: 1 }}
+                            className="inline-flex items-center justify-center flex-shrink-0 active:opacity-75 transition-opacity"
+                            style={{ marginTop: 1 }}
                           >
-                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight">
-                              {isOwner
-                                ? <><Pencil style={{ width: 9, height: 9 }} strokeWidth={2.5} />Edit</>
-                                : <><Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{cp(thread.price)}</>
-                              }
-                            </span>
+                            {isOwner ? (
+                              <span className="inline-flex items-center gap-[4px] rounded-full px-2.5 py-[3px] text-[11px] font-semibold tracking-tight select-none"
+                                style={{ background: '#f0f0f0', color: '#111', border: '0.5px solid #ddd' }}>
+                                <TokenIcon size={16} />
+                                <span style={{ marginLeft: 3 }}>Edit</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight rounded-full px-3 py-1.5"
+                                style={{ background: '#000' }}>
+                                <Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{cp(thread.price)}
+                              </span>
+                            )}
                           </button>
                         )}
                       </div>
@@ -682,15 +689,21 @@ function ThreadItem({
                           {!isPurchased && thread.price > 0 && (
                             <button
                               onClick={e => { e.stopPropagation(); isOwner ? onEditPrice?.() : onUnlock(thread) }}
-                              className="inline-flex items-center justify-center flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-75 transition-opacity"
-                              style={{ background: '#000', marginTop: 1 }}
+                              className="inline-flex items-center justify-center flex-shrink-0 active:opacity-75 transition-opacity"
+                              style={{ marginTop: 1 }}
                             >
-                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight">
-                                {isOwner
-                                  ? <><Pencil style={{ width: 9, height: 9 }} strokeWidth={2.5} />Edit · {cp(thread.price)}</>
-                                  : <><Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{cp(thread.price)}</>
-                                }
-                              </span>
+                              {isOwner ? (
+                                <span className="inline-flex items-center gap-[4px] rounded-full px-2.5 py-[3px] text-[11px] font-semibold tracking-tight select-none"
+                                  style={{ background: '#f0f0f0', color: '#111', border: '0.5px solid #ddd' }}>
+                                  <TokenIcon size={16} />
+                                  <span style={{ marginLeft: 3 }}>Edit</span>
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight rounded-full px-3 py-1.5"
+                                  style={{ background: '#000' }}>
+                                  <Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{cp(thread.price)}
+                                </span>
+                              )}
                             </button>
                           )}
                         </div>
