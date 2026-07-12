@@ -2485,13 +2485,6 @@ export default function ProfilePage() {
               ) : (
                 <div className="w-[52px] h-[52px] rounded-full" style={{ background: '#e5e5ea' }} />
               )}
-              <div
-                className="absolute left-1/2 -translate-x-1/2 bg-[#111] rounded-[4px] px-[6px] py-[2px] flex items-center gap-[3px] whitespace-nowrap"
-                style={{ bottom: -11 }}
-              >
-                <div className="w-[5px] h-[5px] rounded-full flex-shrink-0" style={{ background: '#4cd964' }} />
-                <span className="text-[8px] text-white tracking-[0.04em]">active</span>
-              </div>
             </div>
 
             {/* Name / handle / bio / link */}
