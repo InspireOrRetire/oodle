@@ -2483,8 +2483,8 @@ export default function ProfilePage() {
                   className="w-[52px] h-[52px] rounded-full object-cover"
                 />
               ) : (
-                <div className="w-[52px] h-[52px] rounded-full bg-[#111] flex items-center justify-center">
-                  <span className="text-white text-[16px] font-medium tracking-tight">{initials}</span>
+                <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center" style={{ background: '#e5e5ea' }}>
+                  <span className="text-[16px] font-medium tracking-tight" style={{ color: '#8e8e93' }}>{initials}</span>
                 </div>
               )}
               <div
@@ -2605,7 +2605,7 @@ export default function ProfilePage() {
           <button className="flex-shrink-0" onClick={() => setCreatePostOpen(true)}>
             {activeProfile.avatar_url
               ? <img src={activeProfile.avatar_url} alt={activeProfile.username} className="w-9 h-9 rounded-full object-cover" />
-              : <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-semibold text-[13px]" style={{ background: '#111' }}>{initials[0]}</div>
+              : <div className="w-9 h-9 rounded-full flex items-center justify-center font-semibold text-[13px]" style={{ background: '#e5e5ea', color: '#8e8e93' }}>{initials[0]}</div>
             }
           </button>
           <button
