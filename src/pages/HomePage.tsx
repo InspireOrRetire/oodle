@@ -1908,9 +1908,11 @@ export default function HomePage() {
                 className="w-9 h-9 rounded-full object-cover" />
             : <div className="w-9 h-9 rounded-full flex items-center justify-center"
                 style={{ background: '#111' }}>
-                <span className="text-white font-semibold" style={{ fontSize: 13 }}>
-                  {(activeProfile.display_name?.[0] ?? '?')}
-                </span>
+                {activeProfile.display_name && activeProfile.display_name !== '?' && (
+                  <span className="text-white font-semibold" style={{ fontSize: 13 }}>
+                    {activeProfile.display_name[0]}
+                  </span>
+                )}
               </div>
           }
         </button>

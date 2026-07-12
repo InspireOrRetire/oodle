@@ -155,10 +155,12 @@ export default function Layout() {
                   <img src={profile.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <span style={{ fontSize: 11, fontWeight: 700, color: 'white' }}>
-                      {(profile?.display_name ?? profile?.username ?? '?')
-                        .split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()}
-                    </span>
+                    {profile && (
+                      <span style={{ fontSize: 11, fontWeight: 700, color: 'white' }}>
+                        {(profile.display_name ?? profile.username ?? '')
+                          .split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()}
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
