@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Share2, Menu, Plus, Minus, MoreHorizontal, Link,  Bookmark, Check, ArrowLeft, Mail, Heart, MessageCircle, ChevronUp, ChevronDown, Copy, AtSign, Camera, ChevronRight as ChevronRightIcon, Image, Video, MapPin, List, Type, FileText, X, Search, Lock, ShoppingCart, Pencil } from 'lucide-react'
 import { oo } from '../lib/oo'
 import TokenIcon from '../components/Unlock/TokenIcon'
+import UnlockChips from '../components/Unlock/UnlockChips'
 // Plain number for card price pills — no $? prefix on timeline cards
 const cp = (n: number) => n % 1 === 0 ? String(n) : n.toFixed(2)
 import { QRCodeSVG } from 'qrcode.react'
@@ -175,6 +176,7 @@ interface AnswerThread {
   images?: string[]
   post_subtype?:    'recipe' | 'itinerary'
   structured_data?: Record<string, unknown>
+  unlock_configs?:  { unlock_type: string; unlock_class: string; config: Record<string, unknown> }[]
   replies?: QAReply[]    // stacked Q&A replies — shown Threads-style
   creator?: {            // set from DB; fallback is generic placeholder
     display_name: string
@@ -498,6 +500,11 @@ function ThreadItem({
                     </div>
                   )}
                   {thread.price > 0 && (
+                    isOwner && thread.unlock_configs?.length ? (
+                      <div onClick={e => { e.stopPropagation(); onEditPrice?.() }}>
+                        <UnlockChips configs={thread.unlock_configs as any} isOwner onTap={() => {}} onEdit={onEditPrice} />
+                      </div>
+                    ) : (
                     <button
                       onClick={e => { e.stopPropagation(); isOwner ? onEditPrice?.() : onUnlock(thread) }}
                       className="inline-flex items-center gap-1 active:opacity-75 transition-opacity"
@@ -514,7 +521,7 @@ function ThreadItem({
                           <span className="text-[12px] font-semibold text-[#111] tracking-tight">{cp(thread.price)}</span>
                         </>
                       )}
-                    </button>
+                    </button>))
                   )}
                 </div>
               </div>
@@ -2276,7 +2283,7 @@ export default function ProfilePage() {
       const [postsResult, threadsResult] = await Promise.all([
         supabase
           .from('posts')
-          .select('id, caption, image_urls, price, post_subtype, structured_data, question_count, answer_count, created_at')
+          .select('id, caption, image_urls, price, post_subtype, structured_data, question_count, answer_count, created_at, unlock_configs ( unlock_type, unlock_class, config )')
           .eq('creator_id', uid)
           .order('created_at', { ascending: false })
           .limit(30),
@@ -2314,6 +2321,7 @@ export default function ProfilePage() {
         images:          p.image_urls ?? [],
         post_subtype:    (p as any).post_subtype  ?? undefined,
         structured_data: (p as any).structured_data ?? undefined,
+        unlock_configs:  (p as any).unlock_configs ?? [],
         creator:         creatorObj,
       }))
 
