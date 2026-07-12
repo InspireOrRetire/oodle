@@ -2483,9 +2483,7 @@ export default function ProfilePage() {
                   className="w-[52px] h-[52px] rounded-full object-cover"
                 />
               ) : (
-                <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center" style={{ background: '#e5e5ea' }}>
-                  <span className="text-[16px] font-medium tracking-tight" style={{ color: '#8e8e93' }}>{initials}</span>
-                </div>
+                <div className="w-[52px] h-[52px] rounded-full" style={{ background: '#e5e5ea' }} />
               )}
               <div
                 className="absolute left-1/2 -translate-x-1/2 bg-[#111] rounded-[4px] px-[6px] py-[2px] flex items-center gap-[3px] whitespace-nowrap"
