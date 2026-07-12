@@ -1907,7 +1907,7 @@ export default function HomePage() {
             ? <img src={activeProfile.avatar_url} alt={activeProfile.username}
                 className="w-9 h-9 rounded-full object-cover" />
             : <div className="w-9 h-9 rounded-full flex items-center justify-center"
-                style={{ background: '#111' }}>
+                style={{ background: activeProfile.display_name && activeProfile.display_name !== '?' ? '#111' : '#e5e5ea' }}>
                 {activeProfile.display_name && activeProfile.display_name !== '?' && (
                   <span className="text-white font-semibold" style={{ fontSize: 13 }}>
                     {activeProfile.display_name[0]}

@@ -145,7 +145,7 @@ export default function Layout() {
                   height: 32,
                   borderRadius: 9999,
                   overflow: 'hidden',
-                  background: '#111',
+                  background: profile ? '#111' : '#e5e5ea',
                   border: isActive('/profile') ? '2px solid #111' : '2px solid transparent',
                   boxSizing: 'border-box',
                   flexShrink: 0,
