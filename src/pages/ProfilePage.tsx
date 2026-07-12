@@ -2791,7 +2791,19 @@ export default function ProfilePage() {
         username={activeProfile.username}
         userId={user?.id ?? ''}
         onClose={() => setEditPostThread(null)}
-        onPosted={() => setEditPostThread(null)}
+        onPosted={() => {
+          if (editPostThread) {
+            supabase.from('posts').select('price, caption, post_subtype, structured_data').eq('id', editPostThread.id).single()
+              .then(({ data }) => {
+                if (data) setRealThreads(prev => prev.map(t =>
+                  t.id === editPostThread.id
+                    ? { ...t, price: data.price ?? 0, caption: data.caption ?? '', post_subtype: data.post_subtype, structured_data: data.structured_data }
+                    : t
+                ))
+              })
+          }
+          setEditPostThread(null)
+        }}
         editPost={editPostThread ? {
           id:             editPostThread.id,
           caption:        editPostThread.caption,
