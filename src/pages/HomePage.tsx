@@ -9,7 +9,7 @@ import { cartCountText, cartService } from '../services/cartService'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import {
-  Search, X, Bell, MessageCircle, MessageCircleMore, Share2,
+  Search, X, Bell, MessageCircle, Share2,
   Check, Plus, Bookmark, ArrowLeft,
   Camera, MapPin, Video,
   Lock, MoreHorizontal, Pencil, Repeat2,
@@ -1415,7 +1415,7 @@ export default function HomePage() {
   const [notifs,            setNotifs]            = useState<AppNotification[]>([])
   const [notifsLoading,     setNotifsLoading]     = useState(false)
   const [unreadCount,       setUnreadCount]       = useState(0)
-  const [dmUnreadCount,     setDmUnreadCount]     = useState(0)
+  const { setDmUnreadCount } = useLayout()
   const [savedCollections,  setSavedCollections]  = useState<SavedCollection[]>([])
   const [savedPanelItems,   setSavedPanelItems]   = useState<SavedItem[]>([])
   const [savedLoading,      setSavedLoading]      = useState(false)
@@ -1832,38 +1832,8 @@ export default function HomePage() {
             />
           </div>
 
-          {/* Right-side actions */}
-          <div className="flex items-center gap-2">
-            {/* Inbox button */}
-            <button
-              onClick={() => { setDmUnreadCount(0); navigate('/inbox') }}
-              className="w-[30px] h-[30px] flex items-center justify-center relative"
-            >
-              <MessageCircleMore style={{ width: 22, height: 22, color: '#111' }} strokeWidth={1.75} />
-              {dmUnreadCount > 0 && (
-                <span
-                  className="absolute flex items-center justify-center"
-                  style={{
-                    top: -2, right: -3,
-                    minWidth: dmUnreadCount > 9 ? 16 : 14,
-                    height: dmUnreadCount > 9 ? 16 : 14,
-                    borderRadius: 9999,
-                    background: '#e53e3e',
-                    fontSize: 9,
-                    fontWeight: 700,
-                    color: 'white',
-                    paddingLeft: dmUnreadCount > 9 ? 3 : 0,
-                    paddingRight: dmUnreadCount > 9 ? 3 : 0,
-                    lineHeight: 1,
-                    border: '1.5px solid white',
-                  }}
-                >
-                  {dmUnreadCount > 99 ? '99+' : dmUnreadCount}
-                </span>
-              )}
-            </button>
-
-          </div>
+          {/* Right-side actions — placeholder to balance hamburger on left */}
+          <div style={{ width: 30 }} />
         </div>
       </div>
 

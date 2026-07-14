@@ -6,10 +6,10 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion'
 import {
-  Camera, Video, Mic, Image as ImageIcon,  ChevronUp, X, Check,
+  Camera, Video, Mic, ChevronUp, X, Check, Paperclip,
   FileText, Link as LinkIcon, MapPin, AlignLeft, Plus,
 } from 'lucide-react'
-import PriceSetterSheet from '../UI/PriceSetterSheet'
+import TokenKeypad from '../Post/TokenKeypad'
 import TokenIcon from '../Unlock/TokenIcon'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -75,11 +75,9 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
   const [sent,       setSent]       = useState(false)
 
   // Media
-  const [photoFiles, setPhotoFiles] = useState<File[]>([])
-  const [videoFile,  setVideoFile]  = useState<File | null>(null)
-  const [pdfFile,    setPdfFile]    = useState<File | null>(null)
-  const [voiceBlob,  setVoiceBlob]  = useState<Blob | null>(null)
-  const [recording,  setRecording]  = useState(false)
+  const [attachFiles, setAttachFiles] = useState<File[]>([])
+  const [voiceBlob,   setVoiceBlob]   = useState<Blob | null>(null)
+  const [recording,   setRecording]   = useState(false)
 
   // Link
   const [linkOpen,   setLinkOpen]   = useState(false)
@@ -100,21 +98,22 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
   const [listItems, setListItems] = useState<string[]>(['', '', ''])
 
   // Refs
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const coverRef    = useRef<HTMLInputElement>(null)
-  const photoRef    = useRef<HTMLInputElement>(null)
-  const videoRef    = useRef<HTMLInputElement>(null)
-  const pdfRef      = useRef<HTMLInputElement>(null)
-  const mediaRecRef = useRef<MediaRecorder | null>(null)
-  const voiceChunks = useRef<Blob[]>([])
-  const iosKbRef    = useRef<HTMLInputElement>(null)
+  const textareaRef  = useRef<HTMLTextAreaElement>(null)
+  const coverRef     = useRef<HTMLInputElement>(null)
+  const attachRef    = useRef<HTMLInputElement>(null)
+  const mediaRecRef  = useRef<MediaRecorder | null>(null)
+  const voiceChunks  = useRef<Blob[]>([])
+  const iosKbRef     = useRef<HTMLInputElement>(null)
+  // Cache last valid question so exit animation can render while sheet slides away
+  const questionCache = useRef<AnswerQuestion | null>(null)
+  if (question) questionCache.current = question
+  const q = question ?? questionCache.current
 
   // Reset on open
   useEffect(() => {
     if (open) {
       setAnswerText(''); setCoverThumb(null)
-      setPhotoFiles([]); setVideoFile(null); setPdfFile(null)
-      setVoiceBlob(null); setRecording(false)
+      setAttachFiles([]); setVoiceBlob(null); setRecording(false)
       setSending(false); setSent(false); setPriceOpen(false)
       setPrice(defaultPrice ?? 0)
       setLinkOpen(false); setGatedLink('')
@@ -217,25 +216,21 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
 
   // ── Submit ───────────────────────────────────────────────────────────────
 
-  const hasLink     = gatedLink.trim().length > 0
-  const hasLocation = location !== null
-  const hasList     = listTitle.trim().length > 0 || listItems.some(t => t.trim())
-  const hasPhoto    = photoFiles.length > 0
-  const hasVideo    = videoFile !== null
-  const hasPdf      = pdfFile !== null
-  const hasVoice    = voiceBlob !== null || recording
+  const hasLink        = gatedLink.trim().length > 0
+  const hasLocation    = location !== null
+  const hasList        = listTitle.trim().length > 0 || listItems.some(t => t.trim())
+  const hasAttachments = attachFiles.length > 0
+  const hasVoice       = voiceBlob !== null || recording
 
-  const canSend = answerText.trim().length > 0 || hasPhoto || hasVideo || hasPdf || hasVoice || hasLink || hasLocation || hasList
+  const canSend = answerText.trim().length > 0 || hasAttachments || hasVoice || hasLink || hasLocation || hasList
 
   async function handleSend() {
     if (sending || sent) return
     setSending(true)
     try {
       const attachments: File[] = [
-        ...photoFiles,
-        ...(videoFile  ? [videoFile]  : []),
-        ...(pdfFile    ? [pdfFile]    : []),
-        ...(voiceBlob  ? [new File([voiceBlob], 'voice.webm', { type: 'audio/webm' })] : []),
+        ...attachFiles,
+        ...(voiceBlob ? [new File([voiceBlob], 'voice.webm', { type: 'audio/webm' })] : []),
       ]
       await onSubmit({
         answerText,
@@ -247,41 +242,17 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
         listItems:  hasList     ? listItems.filter(t => t.trim()) : undefined,
       })
       setSent(true)
-      setTimeout(() => close(), 1600)
+      setTimeout(() => close(), 1000)
     } catch {} finally { setSending(false) }
   }
 
-  // ── Media pills ──────────────────────────────────────────────────────────
+  // ── Structural pills (Link / Location / List) ────────────────────────────
 
   const PILLS = [
     {
-      key: 'photo',
-      label: hasPhoto ? `${photoFiles.length} photo${photoFiles.length > 1 ? 's' : ''}` : 'Photo',
-      icon: <ImageIcon style={{ width: 14, height: 14 }} strokeWidth={1.75} />,
-      active: hasPhoto,
-      onTap: () => { iosKbRef.current?.focus(); photoRef.current?.click() },
-      onRemove: () => setPhotoFiles([]),
-    },
-    {
-      key: 'video',
-      label: hasVideo ? (videoFile!.name.split('.')[0].slice(0, 12) || 'Video') : 'Video',
-      icon: <Video style={{ width: 14, height: 14 }} strokeWidth={1.75} />,
-      active: hasVideo,
-      onTap: () => { iosKbRef.current?.focus(); videoRef.current?.click() },
-      onRemove: () => setVideoFile(null),
-    },
-    {
-      key: 'pdf',
-      label: hasPdf ? (pdfFile!.name.slice(0, 12) || 'PDF') : 'PDF / Doc',
-      icon: <FileText style={{ width: 14, height: 14 }} strokeWidth={1.75} />,
-      active: hasPdf,
-      onTap: () => { iosKbRef.current?.focus(); pdfRef.current?.click() },
-      onRemove: () => setPdfFile(null),
-    },
-    {
       key: 'link',
-      label: hasLink ? 'Link ✓' : linkOpen ? 'Link' : 'Link',
-      icon: <LinkIcon style={{ width: 14, height: 14 }} strokeWidth={1.75} />,
+      label: hasLink ? 'Link ✓' : 'Link',
+      icon: <LinkIcon style={{ width: 13, height: 13 }} strokeWidth={1.75} />,
       active: hasLink || linkOpen,
       onTap: () => { setLinkOpen(v => !v); if (linkOpen && !hasLink) setGatedLink('') },
       onRemove: () => { setLinkOpen(false); setGatedLink('') },
@@ -289,7 +260,7 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
     {
       key: 'location',
       label: hasLocation ? location!.label.slice(0, 14) : locLoading ? 'Locating…' : 'Location',
-      icon: <MapPin style={{ width: 14, height: 14 }} strokeWidth={1.75} />,
+      icon: <MapPin style={{ width: 13, height: 13 }} strokeWidth={1.75} />,
       active: hasLocation || locLoading || locSearchOpen,
       onTap: () => {
         if (hasLocation) { setLocation(null); setLocSearchOpen(false) }
@@ -300,60 +271,35 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
     {
       key: 'list',
       label: listTitle.trim() ? listTitle.trim().slice(0, 14) : hasList ? `List · ${listItems.filter(t => t.trim()).length}` : 'List',
-      icon: <AlignLeft style={{ width: 14, height: 14 }} strokeWidth={1.75} />,
+      icon: <AlignLeft style={{ width: 13, height: 13 }} strokeWidth={1.75} />,
       active: listOpen || hasList,
       onTap: () => setListOpen(v => !v),
       onRemove: () => { setListOpen(false); setListTitle(''); setListItems(['', '', '']) },
     },
-    {
-      key: 'gif',
-      label: 'GIF',
-      icon: <span className="text-[11px] font-bold leading-none">GIF</span>,
-      active: false,
-      onTap: () => {},
-      onRemove: () => {},
-    },
-    {
-      key: 'voice',
-      label: recording ? 'Recording…' : hasVoice ? 'Voice ✓' : 'Voice',
-      icon: <Mic style={{ width: 14, height: 14 }} strokeWidth={1.75} />,
-      active: hasVoice || recording,
-      onTap: toggleVoice,
-      onRemove: () => setVoiceBlob(null),
-    },
   ]
 
-  if (!question) return null
+  if (!q) return null
 
   return (
     <>
-      {/* Ghost input for iOS keyboard */}
       <input ref={iosKbRef} aria-hidden="true" tabIndex={-1}
         style={{ position: 'fixed', top: -999, left: 0, width: 1, height: 1, opacity: 0, pointerEvents: 'none' }} />
-
-      {/* Hidden file inputs */}
       <input ref={coverRef} type="file" accept="image/*" className="hidden"
         onChange={e => setCoverThumb(e.target.files?.[0] ?? null)} />
-      <input ref={photoRef} type="file" accept="image/*" multiple className="hidden"
-        onChange={e => setPhotoFiles(Array.from(e.target.files ?? []))} />
-      <input ref={videoRef} type="file" accept="video/*" className="hidden"
-        onChange={e => setVideoFile(e.target.files?.[0] ?? null)} />
-      <input ref={pdfRef} type="file" accept=".pdf,.doc,.docx,application/pdf" className="hidden"
-        onChange={e => setPdfFile(e.target.files?.[0] ?? null)} />
+      <input ref={attachRef} type="file" accept="image/*,video/*,.pdf,.doc,.docx,application/pdf" multiple className="hidden"
+        onChange={e => setAttachFiles(prev => [...prev, ...Array.from(e.target.files ?? [])])} />
 
       <AnimatePresence>
         {open && (
           <>
-            {/* Backdrop */}
             <motion.div key="acs-bd"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               className="fixed inset-0 z-[70]"
-              style={{ background: 'rgba(0,0,0,0.5)' }}
+              style={{ background: 'rgba(0,0,0,0.45)' }}
               onClick={close}
             />
 
-            {/* Sheet */}
             <motion.div key="acs-sheet"
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 34, stiffness: 400 }}
@@ -366,179 +312,85 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
               className="fixed bottom-0 left-0 right-0 z-[71] bg-white flex flex-col overflow-hidden"
               onClick={e => e.stopPropagation()}
             >
-              {/* Drag handle */}
-              <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
-                <div className="w-10 h-[4px] rounded-full" style={{ background: '#e0e0e0' }} />
+              {/* Handle */}
+              <div className="flex justify-center pt-3 pb-2 flex-shrink-0">
+                <div className="w-9 h-[4px] rounded-full" style={{ background: '#e0e0e0' }} />
+              </div>
+
+              {/* Compact question reference */}
+              <div className="flex items-center gap-2.5 px-5 pb-3 flex-shrink-0">
+                <div className="w-[3px] rounded-full self-stretch flex-shrink-0" style={{ background: '#e0e0e0' }} />
+                <Av url={q.askerAvatarUrl} name={q.askerUsername} size={18} />
+                <p className="text-[13px] truncate" style={{ color: '#999' }}>
+                  <span className="font-semibold" style={{ color: '#555' }}>@{q.askerUsername}</span>
+                  {' · '}
+                  {q.text.length > 55 ? q.text.slice(0, 55) + '…' : q.text}
+                </p>
               </div>
 
               {/* Scrollable body */}
               <div className="flex-1 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
 
-                {/* ── 1. Question card ────────────────────────────────────── */}
-                <div className="px-4 pt-2 pb-3">
-                  <div className="rounded-[16px] px-4 py-4" style={{ background: '#F2F2F7' }}>
-                    <div className="flex items-center gap-2 mb-2.5">
-                      <Av url={question.askerAvatarUrl} name={question.askerUsername} size={22} />
-                      <span className="text-[13px] font-semibold text-gray-900">@{question.askerUsername}</span>
-                      <div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
-                    </div>
-                    <p className="text-[16px] text-gray-900 leading-snug">
-                      {question.text}
-                    </p>
-                    {question.media && (
-                      <div className="rounded-[10px] overflow-hidden mt-2.5">
-                        {question.media.type === 'image'
-                          ? <img src={question.media.url} alt="" className="w-full object-cover max-h-48" />
-                          : <video src={question.media.url} className="w-full max-h-48" controls />
-                        }
-                      </div>
-                    )}
-                  </div>
-                </div>
+                {/* Textarea — the hero */}
+                <textarea
+                  ref={textareaRef}
+                  autoFocus
+                  value={answerText}
+                  onChange={e => setAnswerText(e.target.value)}
+                  placeholder="Write your answer…"
+                  className="w-full px-5 text-[16px] text-[#111] placeholder-[#d0d0d0] outline-none resize-none leading-relaxed"
+                  style={{ minHeight: 160, paddingTop: 2 }}
+                />
 
-                {/* ── 2. Answer textarea ──────────────────────────────────── */}
-                <div className="px-4 pb-3">
-                  <textarea
-                    ref={textareaRef}
-                    autoFocus
-                    value={answerText}
-                    onChange={e => setAnswerText(e.target.value)}
-                    placeholder="Write your answer…"
-                    rows={4}
-                    className="w-full text-[15px] text-[#111] placeholder-[#c0c0c0] outline-none resize-none leading-relaxed"
-                    style={{ minHeight: 96 }}
-                  />
-                </div>
-
-                {/* ── 3. Cover thumbnail ──────────────────────────────────── */}
-                <button
-                  onClick={() => { iosKbRef.current?.focus(); coverRef.current?.click() }}
-                  className="w-full flex items-center gap-3 px-4 py-3 active:opacity-70 transition-opacity"
-                  style={{ borderTop: '0.5px solid #f0f0f0', borderBottom: '0.5px solid #f0f0f0' }}
-                >
-                  {coverThumb ? (
+                {/* Cover thumbnail chip */}
+                {coverThumb && (
+                  <div className="mx-5 mb-3 flex items-center gap-2.5 rounded-[14px] px-3 py-2.5"
+                    style={{ background: '#f5f5f7', border: '0.5px solid #eaeaea' }}>
                     <img src={URL.createObjectURL(coverThumb)} alt="Cover"
-                      className="w-10 h-10 rounded-[8px] object-cover flex-shrink-0" />
-                  ) : (
-                    <div className="w-10 h-10 rounded-[8px] flex items-center justify-center flex-shrink-0"
-                      style={{ background: '#f5f5f5', border: '1px dashed #ddd' }}>
-                      <Camera style={{ width: 16, height: 16, color: '#aaa' }} strokeWidth={1.75} />
+                      className="w-9 h-9 rounded-[8px] object-cover flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-semibold text-[#111]">Cover thumbnail</p>
+                      <p className="text-[11px]" style={{ color: '#aaa' }}>Shown before unlock</p>
                     </div>
-                  )}
-                  <div className="flex-1 min-w-0 text-left">
-                    <p className="text-[13px] font-semibold text-[#111]">
-                      {coverThumb ? 'Change cover thumbnail' : 'Add cover thumbnail'}
-                    </p>
-                    <p className="text-[11px]" style={{ color: '#aaa' }}>
-                      Shown to peers before they unlock your answer
-                    </p>
-                  </div>
-                  {coverThumb && (
-                    <button onClick={e => { e.stopPropagation(); setCoverThumb(null) }}
-                      className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
-                      style={{ background: '#f0f0f0' }}>
-                      <X style={{ width: 12, height: 12, color: '#888' }} strokeWidth={2.5} />
+                    <button onClick={() => setCoverThumb(null)}
+                      className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{ background: '#ddd' }}>
+                      <X style={{ width: 9, height: 9, color: '#666' }} strokeWidth={2.5} />
                     </button>
-                  )}
-                </button>
-
-                {/* ── 4. Price row ─────────────────────────────────────────── */}
-                <div className="flex items-center justify-between px-4 py-3"
-                  style={{ borderBottom: '0.5px solid #f0f0f0' }}>
-                  <div>
-                    <p className="text-[12px] font-semibold" style={{ color: '#111' }}>
-                      you keep{' '}
-                      <span style={{ color: price > 0 ? '#059669' : '#aaa' }}>
-                        {price > 0 ? `$?${(price * 0.8).toFixed(2)}` : '$?0.00'}
-                      </span>
-                    </p>
-                    {price > 0 && (
-                      <p className="text-[10px]" style={{ color: '#bbb' }}>after 20% platform fee</p>
-                    )}
                   </div>
-                  <button
-                    onClick={() => setPriceOpen(true)}
-                    className="flex items-center gap-1.5 rounded-full px-3.5 py-2"
-                    style={{ background: '#111' }}
-                  >
-                    {price > 0 && <TokenIcon size={16} />}
-                    <span className="text-[13px] font-semibold text-white">
-                      {price === 0 ? 'Free' : `$?${price}`}
-                    </span>
-                    <ChevronUp style={{ width: 13, height: 13, color: '#aaa', transform: 'rotate(180deg)' }} strokeWidth={2} />
-                  </button>
-                </div>
+                )}
 
-                {/* ── 5. Media pills ───────────────────────────────────────── */}
-                <div className="px-4 py-3 flex items-center gap-2 overflow-x-auto"
-                  style={{ borderBottom: '0.5px solid #f0f0f0', scrollbarWidth: 'none' }}>
-                  {PILLS.map(pill => (
-                    <button key={pill.key} onClick={pill.onTap}
-                      className="flex items-center gap-1.5 rounded-full px-3 py-[7px] flex-shrink-0 active:scale-95 transition-transform"
-                      style={{ background: pill.active ? '#111' : '#f2f2f2', color: pill.active ? 'white' : '#555' }}
-                    >
-                      <span style={{ color: pill.active ? 'white' : '#555', display: 'flex', alignItems: 'center' }}>
-                        {pill.icon}
-                      </span>
-                      <span className="text-[12px] font-semibold">{pill.label}</span>
-                      {pill.active && pill.key !== 'voice' && pill.key !== 'gif' && (
-                        <button onClick={e => { e.stopPropagation(); pill.onRemove() }}
-                          className="w-4 h-4 rounded-full flex items-center justify-center ml-0.5"
-                          style={{ background: 'rgba(255,255,255,0.2)' }}>
-                          <X style={{ width: 9, height: 9, color: 'white' }} strokeWidth={3} />
-                        </button>
-                      )}
-                    </button>
-                  ))}
-                </div>
-
-                {/* ── Photo / Video / PDF / Voice attachment previews ─────── */}
-                {(hasPhoto || hasVideo || hasPdf || hasVoice) && (
-                  <div className="px-4 py-2.5 flex gap-2 overflow-x-auto"
-                    style={{ borderBottom: '0.5px solid #f0f0f0', scrollbarWidth: 'none' }}>
-                    {photoFiles.map((f, i) => (
+                {/* Attachment previews */}
+                {(hasAttachments || (hasVoice && !recording)) && (
+                  <div className="px-5 pb-3 flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+                    {attachFiles.map((f, i) => (
                       <div key={i} className="relative flex-shrink-0">
-                        <img src={URL.createObjectURL(f)} alt=""
-                          className="w-16 h-16 rounded-[10px] object-cover" />
-                        <button onClick={() => setPhotoFiles(p => p.filter((_, j) => j !== i))}
+                        {f.type.startsWith('image/') ? (
+                          <img src={URL.createObjectURL(f)} alt=""
+                            className="w-16 h-16 rounded-[12px] object-cover" />
+                        ) : f.type.startsWith('video/') ? (
+                          <div className="w-16 h-16 rounded-[12px] bg-gray-900 flex items-center justify-center">
+                            <Video style={{ width: 20, height: 20, color: 'white' }} strokeWidth={1.75} />
+                          </div>
+                        ) : (
+                          <div className="w-16 h-16 rounded-[12px] flex flex-col items-center justify-center gap-1"
+                            style={{ background: '#fff3e0' }}>
+                            <FileText style={{ width: 18, height: 18, color: '#f57c00' }} strokeWidth={1.75} />
+                            <span className="text-[9px] font-semibold text-orange-600 text-center px-1 truncate max-w-full">
+                              {f.name.slice(0, 10)}
+                            </span>
+                          </div>
+                        )}
+                        <button onClick={() => setAttachFiles(p => p.filter((_, j) => j !== i))}
                           className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center"
                           style={{ background: '#111' }}>
                           <X style={{ width: 10, height: 10, color: 'white' }} strokeWidth={2.5} />
                         </button>
                       </div>
                     ))}
-                    {hasVideo && (
-                      <div className="relative flex-shrink-0">
-                        <div className="w-16 h-16 rounded-[10px] bg-gray-900 flex items-center justify-center">
-                          <Video style={{ width: 20, height: 20, color: 'white' }} strokeWidth={1.75} />
-                        </div>
-                        <button onClick={() => setVideoFile(null)}
-                          className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center"
-                          style={{ background: '#111' }}>
-                          <X style={{ width: 10, height: 10, color: 'white' }} strokeWidth={2.5} />
-                        </button>
-                      </div>
-                    )}
-                    {hasPdf && (
-                      <div className="relative flex-shrink-0">
-                        <div className="w-16 h-16 rounded-[10px] flex flex-col items-center justify-center gap-1"
-                          style={{ background: '#fff3e0' }}>
-                          <FileText style={{ width: 18, height: 18, color: '#f57c00' }} strokeWidth={1.75} />
-                          <span className="text-[9px] font-semibold text-orange-600 text-center px-1 truncate max-w-full">
-                            {pdfFile!.name.slice(0, 10)}
-                          </span>
-                        </div>
-                        <button onClick={() => setPdfFile(null)}
-                          className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center"
-                          style={{ background: '#111' }}>
-                          <X style={{ width: 10, height: 10, color: 'white' }} strokeWidth={2.5} />
-                        </button>
-                      </div>
-                    )}
                     {hasVoice && !recording && (
                       <div className="relative flex-shrink-0">
-                        <div className="w-16 h-16 rounded-[10px] flex items-center justify-center"
-                          style={{ background: '#f5f5f5' }}>
+                        <div className="w-16 h-16 rounded-[12px] flex items-center justify-center" style={{ background: '#f5f5f5' }}>
                           <Mic style={{ width: 20, height: 20, color: '#111' }} strokeWidth={1.75} />
                         </div>
                         <button onClick={() => setVoiceBlob(null)}
@@ -551,40 +403,21 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
                   </div>
                 )}
 
-                {/* Recording indicator */}
-                {recording && (
-                  <div className="flex items-center justify-center gap-2 py-2.5"
-                    style={{ borderBottom: '0.5px solid #f0f0f0' }}>
-                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                    <span className="text-[12px] font-semibold" style={{ color: '#ef4444' }}>
-                      Recording — tap Voice to stop
-                    </span>
-                  </div>
-                )}
-
-                {/* ── Link input (expanded) ─────────────────────────────── */}
+                {/* Link input */}
                 <AnimatePresence>
                   {linkOpen && (
                     <motion.div key="link-row"
                       initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.18 }} className="overflow-hidden"
-                      style={{ borderBottom: '0.5px solid #f0f0f0' }}
-                    >
-                      <div className="px-4 py-3 flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-[8px] flex items-center justify-center flex-shrink-0"
-                          style={{ background: '#eff6ff' }}>
-                          <LinkIcon style={{ width: 14, height: 14, color: '#2563eb' }} strokeWidth={2} />
-                        </div>
-                        <input
-                          type="url"
-                          value={gatedLink}
-                          onChange={e => setGatedLink(e.target.value)}
+                      transition={{ duration: 0.16 }} className="overflow-hidden">
+                      <div className="mx-5 mb-3 flex items-center gap-2.5 rounded-[14px] px-4 py-3"
+                        style={{ background: '#f5f5f7', border: '0.5px solid #eaeaea' }}>
+                        <LinkIcon style={{ width: 13, height: 13, color: '#2563eb', flexShrink: 0 }} strokeWidth={2} />
+                        <input type="url" value={gatedLink} onChange={e => setGatedLink(e.target.value)}
                           placeholder="https:// — locked until purchase"
-                          className="flex-1 text-[14px] text-[#111] placeholder-[#c0c0c0] outline-none bg-transparent"
-                        />
+                          className="flex-1 text-[14px] text-[#111] placeholder-[#ccc] outline-none bg-transparent" />
                         {gatedLink && (
                           <button onClick={() => setGatedLink('')}>
-                            <X style={{ width: 14, height: 14, color: '#aaa' }} strokeWidth={2.5} />
+                            <X style={{ width: 13, height: 13, color: '#bbb' }} strokeWidth={2.5} />
                           </button>
                         )}
                       </div>
@@ -592,125 +425,87 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
                   )}
                 </AnimatePresence>
 
-                {/* ── Location search (expanded) ────────────────────────── */}
+                {/* Location search */}
                 <AnimatePresence>
                   {locSearchOpen && (
                     <motion.div key="loc-row"
                       initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.18 }} className="overflow-hidden"
-                      style={{ borderBottom: '0.5px solid #f0f0f0' }}
-                    >
-                      <div className="px-4 pt-3 pb-1 flex items-center gap-2">
-                        <div className="flex-1 flex items-center gap-2 rounded-[10px] px-3 py-2"
-                          style={{ background: '#f5f5f7' }}>
-                          <MapPin style={{ width: 13, height: 13, color: '#aaa', flexShrink: 0 }} strokeWidth={2} />
-                          <input
-                            type="text"
-                            value={locQuery}
-                            onChange={e => searchLocations(e.target.value)}
-                            placeholder="Search a place…"
-                            className="flex-1 text-[13px] text-[#111] placeholder-[#c0c0c0] outline-none bg-transparent"
-                          />
-                          {locSearching && (
-                            <div className="w-3.5 h-3.5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin flex-shrink-0" />
-                          )}
-                        </div>
-                        <button onClick={useCurrentLocation}
-                          className="text-[11px] font-semibold px-2 py-1 rounded-[8px]"
-                          style={{ background: '#f0f0f0', color: '#555' }}>
-                          {locLoading ? '…' : 'Current'}
-                        </button>
-                      </div>
-
-                      {/* Confirm selected result */}
-                      {locConfirm && (
-                        <div className="mx-4 my-2 rounded-[12px] px-3 py-2.5 flex items-center gap-2"
-                          style={{ background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
-                          <MapPin style={{ width: 13, height: 13, color: '#16a34a', flexShrink: 0 }} strokeWidth={2} />
-                          <p className="flex-1 text-[12px] text-gray-700 leading-snug">{locConfirm.label}</p>
-                          <button onClick={confirmLocation}
-                            className="text-[11px] font-bold px-2.5 py-1 rounded-[8px]"
-                            style={{ background: '#16a34a', color: 'white' }}>
-                            Use
+                      transition={{ duration: 0.16 }} className="overflow-hidden">
+                      <div className="px-5 pb-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="flex-1 flex items-center gap-2 rounded-[12px] px-3 py-2.5" style={{ background: '#f5f5f7' }}>
+                            <MapPin style={{ width: 13, height: 13, color: '#bbb', flexShrink: 0 }} strokeWidth={2} />
+                            <input type="text" value={locQuery} onChange={e => searchLocations(e.target.value)}
+                              placeholder="Search a place…"
+                              className="flex-1 text-[13px] text-[#111] placeholder-[#ccc] outline-none bg-transparent" />
+                            {locSearching && <div className="w-3.5 h-3.5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin flex-shrink-0" />}
+                          </div>
+                          <button onClick={useCurrentLocation}
+                            className="text-[12px] font-semibold px-3 py-2 rounded-[10px]"
+                            style={{ background: '#f0f0f0', color: '#555' }}>
+                            {locLoading ? '…' : 'Current'}
                           </button>
                         </div>
-                      )}
-
-                      {/* Search results */}
-                      {locResults.length > 0 && (
-                        <div className="mx-4 mb-2 rounded-[12px] overflow-hidden"
-                          style={{ border: '0.5px solid #e5e7eb' }}>
-                          {locResults.map((r, i) => (
-                            <button key={r.place_id}
-                              onClick={() => pickNominatim(r)}
-                              className="w-full text-left px-3 py-2.5 flex items-start gap-2 active:bg-gray-50"
-                              style={{ borderTop: i > 0 ? '0.5px solid #f0f0f0' : 'none' }}>
-                              <MapPin style={{ width: 12, height: 12, color: '#aaa', flexShrink: 0, marginTop: 1 }} strokeWidth={2} />
-                              <div className="flex flex-col min-w-0">
-                                <p className="text-[12px] text-gray-700 leading-snug">{formatNominatim(r)}</p>
-                                <p className="text-[11px] text-gray-400 leading-snug truncate">{r.display_name.split(',').slice(1, 3).join(',').trim()}</p>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                        {locConfirm && (
+                          <div className="rounded-[12px] px-3 py-2.5 flex items-center gap-2 mb-2"
+                            style={{ background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
+                            <MapPin style={{ width: 13, height: 13, color: '#16a34a', flexShrink: 0 }} strokeWidth={2} />
+                            <p className="flex-1 text-[12px] text-gray-700 leading-snug">{locConfirm.label}</p>
+                            <button onClick={confirmLocation}
+                              className="text-[11px] font-bold px-2.5 py-1 rounded-[8px]"
+                              style={{ background: '#16a34a', color: 'white' }}>Use</button>
+                          </div>
+                        )}
+                        {locResults.length > 0 && (
+                          <div className="rounded-[12px] overflow-hidden" style={{ border: '0.5px solid #eaeaea' }}>
+                            {locResults.map((r, i) => (
+                              <button key={r.place_id} onClick={() => pickNominatim(r)}
+                                className="w-full text-left px-3 py-2.5 flex items-start gap-2 active:bg-gray-50"
+                                style={{ borderTop: i > 0 ? '0.5px solid #f0f0f0' : 'none' }}>
+                                <MapPin style={{ width: 12, height: 12, color: '#bbb', flexShrink: 0, marginTop: 1 }} strokeWidth={2} />
+                                <div className="flex flex-col min-w-0">
+                                  <p className="text-[12px] text-gray-700 leading-snug">{formatNominatim(r)}</p>
+                                  <p className="text-[11px] text-gray-400 leading-snug truncate">{r.display_name.split(',').slice(1, 3).join(',').trim()}</p>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                {/* Active location badge */}
                 {hasLocation && (
-                  <div className="mx-4 my-2 rounded-[12px] px-3 py-2.5 flex items-center gap-2"
+                  <div className="mx-5 mb-3 rounded-[12px] px-3 py-2.5 flex items-center gap-2"
                     style={{ background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
                     <MapPin style={{ width: 13, height: 13, color: '#16a34a', flexShrink: 0 }} strokeWidth={2} />
-                    <p className="flex-1 text-[12px] text-gray-700 leading-snug truncate">{location!.label}</p>
+                    <p className="flex-1 text-[12px] text-gray-700 truncate">{location!.label}</p>
                     <button onClick={() => setLocation(null)}>
-                      <X style={{ width: 13, height: 13, color: '#aaa' }} strokeWidth={2.5} />
+                      <X style={{ width: 13, height: 13, color: '#bbb' }} strokeWidth={2.5} />
                     </button>
                   </div>
                 )}
 
-                {/* ── List editor (expanded) ────────────────────────────── */}
+                {/* List editor */}
                 <AnimatePresence>
                   {listOpen && (
                     <motion.div key="list-row"
                       initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.18 }} className="overflow-hidden"
-                      style={{ borderBottom: '0.5px solid #f0f0f0' }}
-                    >
-                      <div className="px-4 pt-3 pb-2">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="w-7 h-7 rounded-[7px] flex items-center justify-center flex-shrink-0"
-                            style={{ background: '#f5f5f5' }}>
-                            <AlignLeft style={{ width: 13, height: 13, color: '#555' }} strokeWidth={2} />
-                          </div>
-                          <p className="text-[12px] font-semibold text-gray-500">List</p>
-                        </div>
-
-                        {/* Title */}
-                        <input
-                          type="text"
-                          value={listTitle}
-                          onChange={e => setListTitle(e.target.value)}
+                      transition={{ duration: 0.16 }} className="overflow-hidden">
+                      <div className="px-5 pb-3">
+                        <input type="text" value={listTitle} onChange={e => setListTitle(e.target.value)}
                           placeholder="List title…"
                           className="w-full text-[15px] font-semibold text-[#111] placeholder-[#d0d0d0] outline-none bg-transparent pb-2 mb-2"
-                          style={{ borderBottom: '0.5px solid #e0e0e0' }}
-                        />
-
+                          style={{ borderBottom: '0.5px solid #e8e8e8' }} />
                         <div className="space-y-1.5">
                           {listItems.map((item, i) => (
                             <div key={i} className="flex items-center gap-2">
-                              <span className="text-[11px] text-gray-400 w-4 text-right flex-shrink-0">
-                                {i + 1}.
-                              </span>
-                              <input
-                                type="text"
-                                value={item}
-                                onChange={e => updateListItem(i, e.target.value)}
+                              <span className="text-[11px] w-4 text-right flex-shrink-0" style={{ color: '#ccc' }}>{i + 1}.</span>
+                              <input type="text" value={item} onChange={e => updateListItem(i, e.target.value)}
                                 placeholder={`Item ${i + 1}`}
                                 className="flex-1 text-[14px] text-[#111] placeholder-[#d0d0d0] outline-none bg-transparent py-1"
-                                style={{ borderBottom: '0.5px solid #ebebeb' }}
-                              />
+                                style={{ borderBottom: '0.5px solid #ebebeb' }} />
                               {listItems.length > 1 && (
                                 <button onClick={() => removeListLine(i)} className="flex-shrink-0">
                                   <X style={{ width: 13, height: 13, color: '#ccc' }} strokeWidth={2.5} />
@@ -719,62 +514,113 @@ export default function AnswerComposerSheet({ open, question, defaultPrice, onCl
                             </div>
                           ))}
                         </div>
-
-                        <button
-                          onClick={addListLine}
-                          className="mt-2.5 flex items-center gap-1.5 text-[12px] font-semibold"
-                          style={{ color: '#555' }}
-                        >
+                        <button onClick={addListLine} className="mt-3 flex items-center gap-1.5 text-[12px] font-semibold" style={{ color: '#888' }}>
                           <Plus style={{ width: 13, height: 13 }} strokeWidth={2.5} />
-                          Add line
+                          Add item
                         </button>
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                {/* ── Send button ──────────────────────────────────────────── */}
-                <div className="px-4 pt-4 pb-[calc(env(safe-area-inset-bottom)+20px)]">
+                {/* Spacer so content doesn't hide behind bottom bar */}
+                <div style={{ height: 16 }} />
+              </div>
+
+              {/* ── Fixed bottom bar ─────────────────────────────────────── */}
+              <div className="flex-shrink-0" style={{ borderTop: '0.5px solid #f0f0f0' }}>
+
+                {/* Recording indicator */}
+                {recording && (
+                  <div className="flex items-center justify-center gap-1.5 py-2" style={{ borderBottom: '0.5px solid #fef2f2' }}>
+                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                    <span className="text-[12px] font-medium" style={{ color: '#ef4444' }}>Recording…</span>
+                  </div>
+                )}
+
+                {/* Tool icons + structural pills */}
+                <div className="flex items-center gap-2 px-5 py-2.5">
+                  <button onClick={() => { iosKbRef.current?.focus(); attachRef.current?.click() }}
+                    className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 active:opacity-60 transition-opacity"
+                    style={{ background: '#f2f2f2' }} aria-label="Attach file">
+                    <Paperclip style={{ width: 15, height: 15, color: '#666' }} strokeWidth={2} />
+                  </button>
+                  <button onClick={() => { iosKbRef.current?.focus(); coverRef.current?.click() }}
+                    className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 active:opacity-60 transition-opacity"
+                    style={{ background: coverThumb ? '#111' : '#f2f2f2' }} aria-label="Add cover photo">
+                    <Camera style={{ width: 15, height: 15, color: coverThumb ? 'white' : '#666' }} strokeWidth={2} />
+                  </button>
+                  <button onClick={toggleVoice}
+                    className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 active:opacity-60 transition-opacity"
+                    style={{ background: recording ? '#ef4444' : hasVoice ? '#111' : '#f2f2f2' }}
+                    aria-label={recording ? 'Stop recording' : 'Record voice'}>
+                    <Mic style={{ width: 15, height: 15, color: recording || hasVoice ? 'white' : '#666' }} strokeWidth={2} />
+                  </button>
+                  <div className="w-px h-4 flex-shrink-0" style={{ background: '#e8e8e8' }} />
+                  {PILLS.map(pill => (
+                    <button key={pill.key} onClick={pill.onTap}
+                      className="flex items-center gap-1 rounded-full px-2.5 py-1.5 flex-shrink-0 active:scale-95 transition-transform"
+                      style={{ background: pill.active ? '#111' : '#f2f2f2' }}>
+                      <span style={{ color: pill.active ? 'white' : '#666', display: 'flex', alignItems: 'center' }}>{pill.icon}</span>
+                      <span className="text-[11px] font-semibold" style={{ color: pill.active ? 'white' : '#666' }}>{pill.label}</span>
+                      {pill.active && (
+                        <button onClick={e => { e.stopPropagation(); pill.onRemove() }}
+                          className="w-3.5 h-3.5 rounded-full flex items-center justify-center ml-0.5"
+                          style={{ background: 'rgba(255,255,255,0.22)' }}>
+                          <X style={{ width: 8, height: 8, color: 'white' }} strokeWidth={3} />
+                        </button>
+                      )}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Price + send */}
+                <div className="flex items-center gap-2.5 px-5 pb-[calc(env(safe-area-inset-bottom)+14px)] pt-1">
+                  <button onClick={() => setPriceOpen(true)}
+                    className="flex items-center gap-1.5 rounded-full px-3.5 py-2.5 flex-shrink-0 active:opacity-70 transition-opacity"
+                    style={{ background: '#f2f2f2', border: '0.5px solid #e8e8e8' }}>
+                    {price > 0 && <TokenIcon size={13} />}
+                    <span className="text-[13px] font-semibold" style={{ color: price > 0 ? '#111' : '#999' }}>
+                      {price === 0 ? 'Free' : `${price} token${price !== 1 ? 's' : ''}`}
+                    </span>
+                    <ChevronUp style={{ width: 11, height: 11, color: '#bbb', transform: 'rotate(180deg)' }} strokeWidth={2.5} />
+                  </button>
+
                   <AnimatePresence mode="wait">
                     {sent ? (
                       <motion.div key="sent"
-                        initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }}
-                        className="w-full rounded-[16px] py-4 flex items-center justify-center gap-2"
-                        style={{ background: '#f5c842' }}>
-                        <Check style={{ width: 18, height: 18, color: '#111' }} strokeWidth={2.5} />
-                        <span className="text-[15px] font-bold text-[#111]">Answer sent!</span>
+                        initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                        className="flex-1 rounded-[14px] py-3 flex items-center justify-center gap-2"
+                        style={{ background: '#111' }}>
+                        <Check style={{ width: 15, height: 15, color: 'white' }} strokeWidth={2.5} />
+                        <span className="text-[14px] font-bold text-white">Sent!</span>
                       </motion.div>
                     ) : (
                       <motion.button key="send"
                         onClick={handleSend}
                         disabled={!canSend || sending}
-                        animate={{ opacity: canSend ? 1 : 0.4 }}
-                        className="w-full rounded-[16px] py-4 flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
-                        style={{ background: '#f5c842' }}>
-                        {sending ? (
-                          <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                        ) : (
-                          <>
-                            <span style={{ fontWeight: 800, color: '#111', fontSize: 14 }}>$?</span>
-                            <span className="text-[15px] font-bold text-[#111]">Send answer</span>
-                          </>
-                        )}
+                        animate={{ opacity: canSend ? 1 : 0.3 }}
+                        className="flex-1 rounded-[14px] py-3 flex items-center justify-center active:scale-[0.98] transition-transform"
+                        style={{ background: '#111' }}>
+                        {sending
+                          ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                          : <span className="text-[14px] font-bold text-white">Send answer</span>
+                        }
                       </motion.button>
                     )}
                   </AnimatePresence>
                 </div>
-
               </div>
+
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      <PriceSetterSheet
+      <TokenKeypad
         open={priceOpen}
-        currentPrice={price}
-        onConfirm={p => setPrice(Math.round(p))}
-        onClose={() => setPriceOpen(false)}
+        initialValue={price > 0 ? String(price) : ''}
+        onClose={val => { const n = Number(val); setPrice(isNaN(n) ? 0 : n); setPriceOpen(false) }}
       />
     </>
   )

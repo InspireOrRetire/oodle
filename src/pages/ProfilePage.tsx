@@ -521,7 +521,7 @@ function ThreadItem({
                           <span className="text-[12px] font-semibold text-[#111] tracking-tight">{cp(thread.price)}</span>
                         </>
                       )}
-                    </button>))
+                    </button>)
                   )}
                 </div>
               </div>

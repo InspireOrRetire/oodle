@@ -4,10 +4,37 @@ import { Home, Search, Bookmark, Plus } from 'lucide-react'
 import { useLayout } from '../../contexts/LayoutContext'
 import { useAuth } from '../../contexts/AuthContext'
 
+function InboxCoinIcon({ active, showCoin }: { active: boolean; showCoin: boolean }) {
+  return (
+    <div style={{ position: 'relative', width: 20, height: 20 }}>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+        stroke={active ? '#111' : '#666'}
+        strokeWidth={active ? 2.2 : 1.6}
+        strokeLinecap="round" strokeLinejoin="round"
+      >
+        <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+        <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+      </svg>
+      {showCoin && (
+        <span style={{
+          position: 'absolute', top: -4, right: -5,
+          width: 13, height: 13, borderRadius: '50%',
+          background: '#F5C842',
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          border: '1.5px solid rgba(255,255,255,0.9)',
+          flexShrink: 0,
+        }}>
+          <span style={{ fontSize: 5, fontWeight: 800, color: '#7A4A00', lineHeight: 1, letterSpacing: '-0.3px' }}>$?</span>
+        </span>
+      )}
+    </div>
+  )
+}
+
 export default function Layout() {
   const loc      = useLocation()
   const nav      = useNavigate()
-  const { navVisible, setNavVisible, scrollContainerRef, fabAction } = useLayout()
+  const { navVisible, setNavVisible, scrollContainerRef, fabAction, dmUnreadCount, setDmUnreadCount } = useLayout()
   const { profile } = useAuth()
   const lastScrollY  = useRef(0)
   const scrollRef    = scrollContainerRef
@@ -17,6 +44,7 @@ export default function Layout() {
   function isActive(path: string) {
     if (path === '/') return loc.pathname === '/' || loc.pathname.startsWith('/u/')
     if (path === '/profile') return loc.pathname.startsWith('/profile')
+    if (path === '/inbox') return loc.pathname === '/inbox' || loc.pathname.startsWith('/inbox/')
     return loc.pathname.startsWith(path)
   }
 
@@ -47,9 +75,10 @@ export default function Layout() {
   }
 
   const TABS = [
-    { id: 'home',   path: '/',        Icon: Home     },
-    { id: 'search', path: '/search',  Icon: Search   },
-    { id: 'saved',  path: '/saved',   Icon: Bookmark },
+    { id: 'home',     path: '/',        Icon: Home     },
+    { id: 'search',   path: '/search',  Icon: Search   },
+    { id: 'messages', path: '/inbox',   Icon: null     },
+    { id: 'saved',    path: '/saved',   Icon: Bookmark },
   ]
 
   return (
@@ -90,14 +119,14 @@ export default function Layout() {
       {!hideNav && (
         <div
           className="fixed bottom-0 left-0 right-0 z-30 flex justify-center pointer-events-none"
-          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 14px)', paddingLeft: 20, paddingRight: 20 }}
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 10px)', paddingLeft: 64, paddingRight: 64 }}
         >
           {/* Floating frosted pill */}
           <div
             className="flex items-center justify-around pointer-events-auto"
             style={{
               width: '100%',
-              height: 64,
+              height: 46,
               borderRadius: 9999,
               background: 'rgba(255,255,255,0.68)',
               backdropFilter: 'blur(24px)',
@@ -114,18 +143,43 @@ export default function Layout() {
             {/* Home · Search · Saved */}
             {TABS.map(({ id, path, Icon }) => {
               const active = isActive(path)
+              const badge  = id === 'messages' ? dmUnreadCount : 0
               return (
                 <button
                   key={id}
-                  onClick={() => handleTabPress(path)}
+                  onClick={() => { if (id === 'messages') setDmUnreadCount(0); handleTabPress(path) }}
                   className="flex flex-col items-center justify-center active:scale-90 transition-transform"
                   style={{ flex: 1, height: '100%', gap: 4 }}
                 >
-                  <Icon
-                    style={{ width: 24, height: 24, color: active ? '#111' : '#666' }}
-                    strokeWidth={active ? 2.2 : 1.6}
-                    fill={active && id === 'saved' ? '#111' : 'none'}
-                  />
+                  <div className="relative">
+                    {id === 'messages' ? (
+                      <InboxCoinIcon active={active} showCoin={dmUnreadCount > 0} />
+                    ) : (
+                      Icon && <Icon
+                        style={{ width: 20, height: 20, color: active ? '#111' : '#666' }}
+                        strokeWidth={active ? 2.2 : 1.6}
+                        fill={active && id === 'saved' ? '#111' : 'none'}
+                      />
+                    )}
+                    {badge > 0 && (
+                      <span className="absolute flex items-center justify-center" style={{
+                        top: -3, right: -5,
+                        minWidth: badge > 9 ? 16 : 14,
+                        height: badge > 9 ? 16 : 14,
+                        borderRadius: 9999,
+                        background: '#e53e3e',
+                        fontSize: 9,
+                        fontWeight: 700,
+                        color: 'white',
+                        paddingLeft: badge > 9 ? 3 : 0,
+                        paddingRight: badge > 9 ? 3 : 0,
+                        lineHeight: 1,
+                        border: '1.5px solid rgba(255,255,255,0.68)',
+                      }}>
+                        {badge > 99 ? '99+' : badge}
+                      </span>
+                    )}
+                  </div>
                   {active && (
                     <div style={{ width: 4, height: 4, borderRadius: 9999, background: '#111' }} />
                   )}
@@ -141,8 +195,8 @@ export default function Layout() {
             >
               <div
                 style={{
-                  width: 32,
-                  height: 32,
+                  width: 26,
+                  height: 26,
                   borderRadius: 9999,
                   overflow: 'hidden',
                   background: profile ? '#111' : '#e5e5ea',

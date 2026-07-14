@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { oo } from '../lib/oo'
 import TokenIcon from '../components/Unlock/TokenIcon'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, MapPin, Square, Plus, Star,  X, Camera, Video, FileText, Lock, AlignLeft, Type, Search, ChevronUp, ChevronDown, Flag } from 'lucide-react'
+import { ArrowLeft, MapPin, Square, Plus, Star, X, Camera, Video, FileText, Lock, AlignLeft, Type, Search, ChevronUp, ChevronDown, Flag } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import AnswerComposer from '../components/Thread/AnswerComposer'
 import AnswerComposerSheet from '../components/Thread/AnswerComposerSheet'
@@ -602,6 +602,7 @@ export default function MessageDetailPage() {
     }
     if (blocks.length === 0) blocks.push({ id: 'ans-1', type: 'text', content: '(answer)' })
 
+    setAnswerPrice(payload.price)
     if (payload.price !== thread!.price) {
       updatePrice(thread!.id, payload.price).catch(console.error)
       setThread(prev => prev ? { ...prev, price: payload.price } : prev)
@@ -621,7 +622,8 @@ export default function MessageDetailPage() {
         answer_text: payload.answerText.trim(),
       } : prev)
     }
-    setComposing(false)
+    // Don't call setComposing(false) here — the sheet's own close() → onClose() handles it
+    // after showing the "Answer sent!" confirmation state.
   }
 
   function handleEditAnswer(blocks: AnswerBlock[]) {
@@ -818,24 +820,11 @@ export default function MessageDetailPage() {
           </div>
         )}
 
-        {/* Post image */}
-        {postImageUrl && (
-          <div className="w-[62%]">
-            <img
-              src={postImageUrl}
-              alt=""
-              className="w-full rounded-[18px] object-cover shadow-sm"
-              style={{ aspectRatio: '4 / 3' }}
-            />
-          </div>
-        )}
-
-        {/* Question bubble */}
+        {/* Question card — Instagram shared-post style */}
         <motion.div
-          className="relative z-10 -mt-8 bg-[#F2F2F7] rounded-[18px] px-4 py-4"
+          className="rounded-[18px] overflow-hidden"
           style={{
-            borderTopLeftRadius: 6,
-            boxShadow: '0 -2px 16px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.06)',
+            background: '#f2f2f7',
             cursor: isCreator ? 'grab' : 'default',
             userSelect: 'none',
           }}
@@ -846,26 +835,70 @@ export default function MessageDetailPage() {
           onDragEnd={(_, info) => {
             if (isCreator && info.offset.y < -60) setComposing(true)
           }}
-          whileDrag={{ boxShadow: '0 -6px 28px rgba(0,0,0,0.10), 0 12px 40px rgba(0,0,0,0.10)', cursor: 'grabbing' }}
+          whileDrag={{ opacity: 0.85, cursor: 'grabbing' }}
         >
-          <div className="flex items-center gap-2 mb-2.5">
-            <Avatar url={askerProfile.avatar_url} name={askerName} size={6} />
-            <span className="text-[14px] font-semibold text-gray-900 leading-none">@{askerName}</span>
-            <div className="w-2.5 h-2.5 rounded-full bg-green-500 flex-shrink-0" />
+          {/* Header */}
+          <div className="flex items-center gap-2.5 px-4 pt-4 pb-2">
+            <Avatar url={askerProfile.avatar_url} name={askerName} size={8} />
+            <div>
+              <p className="text-[14px] font-semibold text-[#111] leading-tight">@{askerName}</p>
+              <p className="text-[11px] text-gray-400">{timeAgo(thread.created_at)}</p>
+            </div>
           </div>
-          <p className="text-[17px] text-gray-900 leading-snug">{question}</p>
-        </motion.div>
 
-        {!isAnswered && isCreator && (
-          <p className="text-[13px] text-gray-400 leading-relaxed">
-            @{askerName} will be able to view your answer after purchase.
-          </p>
-        )}
-        {!isAnswered && !isCreator && (
-          <p className="text-[13px] text-gray-400 leading-relaxed">
-            You'll be notified as soon as @{creatorName} answers.
-          </p>
-        )}
+          {/* Question text */}
+          <p className="text-[16px] text-gray-900 leading-snug px-4 pb-3">{question}</p>
+
+          {/* Post image */}
+          {postImageUrl && (
+            <img
+              src={postImageUrl}
+              alt=""
+              className="w-full object-cover"
+              style={{ aspectRatio: '4 / 3' }}
+            />
+          )}
+
+          {/* Action pills */}
+          <div className="flex items-center gap-2 px-4 py-3">
+            {isCreator && !isAnswered && (
+              <>
+                <button
+                  onClick={() => setComposing(true)}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-semibold active:opacity-70 transition-opacity"
+                  style={{ background: '#111', color: 'white' }}
+                >
+                  Answer
+                </button>
+                <button
+                  onClick={() => {
+                    const el = document.querySelector<HTMLTextAreaElement>('textarea[placeholder*="note"]')
+                    el?.focus()
+                  }}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-semibold active:opacity-70 transition-opacity"
+                  style={{ background: 'rgba(0,0,0,0.07)', color: '#111' }}
+                >
+                  Ask to clarify
+                </button>
+              </>
+            )}
+            {!isCreator && !isAnswered && (
+              <button
+                onClick={() => {
+                  const el = document.querySelector<HTMLTextAreaElement>('textarea')
+                  el?.focus()
+                }}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-semibold active:opacity-70 transition-opacity"
+                style={{ background: 'rgba(0,0,0,0.07)', color: '#111' }}
+              >
+                Add context
+              </button>
+            )}
+            {isAnswered && (
+              <span className="text-[12px] text-gray-400 px-1">Answered</span>
+            )}
+          </div>
+        </motion.div>
 
         {/* Clarification notes */}
         {noteMessages.length > 0 && (
@@ -1854,31 +1887,36 @@ export default function MessageDetailPage() {
             </div>
           </div>
 
-          {/* Toggle — creator only, unanswered */}
+          {/* Price pill — creator only, unanswered */}
           {isCreator && !isAnswered && (
-            <button
-              onClick={() => setComposing(true)}
-              className="relative flex-shrink-0 rounded-full transition-colors"
-              style={{
-                width: 52,
-                height: 30,
-                background: '#e5e7eb',
-              }}
-              aria-label="Toggle answer mode"
-            >
-              <motion.div
-                className="absolute top-[3px] w-6 h-6 rounded-full bg-white flex items-center justify-center"
-                style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.18)' }}
-                animate={{ left: 3 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 40 }}
+            answerPrice > 0 ? (
+              <div className="flex items-center gap-1 flex-shrink-0 rounded-full px-3 py-1.5" style={{ background: '#111' }}>
+                <button
+                  onClick={() => setComposing(true)}
+                  className="flex items-center gap-1 active:opacity-70 transition-opacity"
+                >
+                  <TokenIcon size={14} />
+                  <span className="text-[13px] font-semibold" style={{ color: 'white' }}>{answerPrice}</span>
+                </button>
+                <button
+                  onClick={() => setAnswerPrice(0)}
+                  className="ml-1 active:opacity-70 transition-opacity"
+                  aria-label="Clear price"
+                >
+                  <X style={{ width: 11, height: 11, color: 'rgba(255,255,255,0.55)' }} strokeWidth={2.5} />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setComposing(true)}
+                className="flex items-center gap-1 flex-shrink-0 rounded-full px-3 py-1.5 active:opacity-70 transition-opacity"
+                style={{ background: '#f0f0f0', border: '0.5px solid #e0e0e0' }}
+                aria-label="Set price or answer"
               >
-                <DollarSign
-                  className="w-3 h-3"
-                  style={{ color: '#9ca3af' }}
-                  strokeWidth={2.5}
-                />
-              </motion.div>
-            </button>
+                <span className="text-[13px] font-medium" style={{ color: '#555' }}>Free</span>
+                <ChevronUp style={{ width: 11, height: 11, color: '#999' }} strokeWidth={2.5} />
+              </button>
+            )
           )}
 
         </div>
@@ -1895,7 +1933,7 @@ export default function MessageDetailPage() {
           askerAvatarUrl: askerProfile?.avatar_url ?? null,
           media:          postImageUrl ? { type: 'image', url: postImageUrl } : null,
         } : null}
-        defaultPrice={0}
+        defaultPrice={answerPrice}
         onClose={() => setComposing(false)}
         onSubmit={handleSheetSubmit}
       />

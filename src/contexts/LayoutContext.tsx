@@ -6,6 +6,8 @@ interface LayoutCtx {
   scrollContainerRef:  React.RefObject<HTMLDivElement>
   fabAction:           (() => void) | null
   setFabAction:        (fn: (() => void) | null) => void
+  dmUnreadCount:       number
+  setDmUnreadCount:    (n: number) => void
 }
 
 const Ctx = createContext<LayoutCtx>({
@@ -14,16 +16,19 @@ const Ctx = createContext<LayoutCtx>({
   scrollContainerRef: { current: null },
   fabAction:          null,
   setFabAction:       () => {},
+  dmUnreadCount:      0,
+  setDmUnreadCount:   () => {},
 })
 
 export function useLayout() { return useContext(Ctx) }
 
 export function LayoutProvider({ children }: { children: ReactNode }) {
-  const [navVisible, setNavVisible]   = useState(true)
-  const [fabAction,  setFabAction]    = useState<(() => void) | null>(null)
+  const [navVisible,     setNavVisible]     = useState(true)
+  const [fabAction,      setFabAction]      = useState<(() => void) | null>(null)
+  const [dmUnreadCount,  setDmUnreadCount]  = useState(0)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   return (
-    <Ctx.Provider value={{ navVisible, setNavVisible, scrollContainerRef, fabAction, setFabAction }}>
+    <Ctx.Provider value={{ navVisible, setNavVisible, scrollContainerRef, fabAction, setFabAction, dmUnreadCount, setDmUnreadCount }}>
       {children}
     </Ctx.Provider>
   )
