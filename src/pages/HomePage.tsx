@@ -953,12 +953,19 @@ function HomeAskSheet({
                     </div>
 
                     {/* Textarea */}
-                    <div className="mx-4 mb-3 rounded-[14px]" style={{ background: '#f5f5f7' }}>
+                    <div
+                      className="mx-4 mb-3 rounded-[14px]"
+                      style={{
+                        background: '#f5f5f7',
+                        border: isClarify ? '1.5px dashed rgba(0,0,0,0.18)' : '1.5px solid transparent',
+                        transition: 'border-color 200ms ease',
+                      }}
+                    >
                       <textarea
                         autoFocus
                         value={text}
                         onChange={e => setText(e.target.value.slice(0, 280))}
-                        placeholder="Let your query be known…"
+                        placeholder={isClarify ? 'What needs more detail?' : 'Let your query be known…'}
                         rows={3}
                         className="w-full px-4 pt-3 pb-2 text-[15px] leading-[1.5] resize-none outline-none bg-transparent"
                         style={{ color: '#111' }}
