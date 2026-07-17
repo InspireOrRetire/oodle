@@ -4,14 +4,13 @@ import CardOptionsSheet from '../components/Post/PostOptionsSheet'
 import ClarifyOrUnlockSheet, { type ClarifyTarget } from '../components/Post/ClarifyOrUnlockSheet'
 import UnlockChips from '../components/Unlock/UnlockChips'
 import UnlockModal from '../components/Unlock/UnlockModal'
-import TokenIcon from '../components/Unlock/TokenIcon'
 import { cartCountText, cartService } from '../services/cartService'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import {
   Search, X, Bell, MessageCircle, Share2,
   Check, Plus, Bookmark, ArrowLeft,
-  Camera, MapPin, Video,
+  Camera, MapPin, Video, Image, Mic, Link2, Square,
   Lock, MoreHorizontal, Pencil, Repeat2,
 } from 'lucide-react'
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion'
@@ -717,102 +716,11 @@ function ActionBtn({
 
 // ─── Ask type picker ─────────────────────────────────────────────────────────
 
-function AskTypePicker({
-  item,
-  onClarify,
-  onNewQuestion,
-  onClose,
-}: {
-  item: FeedItem | null
-  onClarify: () => void
-  onNewQuestion: () => void
-  onClose: () => void
-}) {
-  return (
-    <AnimatePresence>
-      {item && (
-        <>
-          <motion.div
-            className="fixed inset-0 z-50"
-            style={{ backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', background: 'rgba(0,0,0,0.25)' }}
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
-            onClick={onClose}
-          />
-          <motion.div
-            className="fixed bottom-0 left-0 right-0 z-50"
-            style={{
-              background: 'rgba(255,255,255,0.98)',
-              borderRadius: '24px 24px 0 0',
-              paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)',
-              boxShadow: '0 -2px 32px rgba(0,0,0,0.12)',
-            }}
-            initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 32, stiffness: 340, mass: 0.9 }}
-          >
-            {/* Handle */}
-            <div className="flex justify-center pt-3 pb-4">
-              <div className="w-9 h-[4px] rounded-full" style={{ background: 'rgba(0,0,0,0.15)' }} />
-            </div>
-
-            <div className="px-5 pb-2">
-              <p className="text-[18px] font-bold text-[#111] mb-1">What do you want to ask?</p>
-              <p className="text-[13px] mb-5" style={{ color: '#999' }}>
-                This post already has a paid answer attached.
-              </p>
-
-              {/* Clarify option */}
-              <button
-                onClick={onClarify}
-                className="w-full text-left rounded-[16px] p-4 mb-3 active:opacity-80 transition-opacity"
-                style={{ background: '#f5f5f7', border: '1.5px solid transparent' }}
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                    style={{ background: '#e8e8ec' }}>
-                    <MessageCircle style={{ width: 17, height: 17, color: '#444' }} strokeWidth={1.75} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[15px] font-semibold text-[#111] mb-0.5">Clarify</p>
-                    <p className="text-[12px] leading-snug" style={{ color: '#888' }}>
-                      Ask about this specific answer — stays threaded here, not a new product.
-                    </p>
-                  </div>
-                </div>
-              </button>
-
-              {/* New question option */}
-              <button
-                onClick={onNewQuestion}
-                className="w-full text-left rounded-[16px] p-4 active:opacity-80 transition-opacity"
-                style={{ background: '#111', border: '1.5px solid transparent' }}
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                    style={{ background: 'rgba(255,255,255,0.15)' }}>
-                    <TokenIcon size={18} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[15px] font-semibold text-white mb-0.5">Ask something new</p>
-                    <p className="text-[12px] leading-snug" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                      A different question — creates a new answer product on their timeline.
-                    </p>
-                  </div>
-                </div>
-              </button>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
-  )
-}
-
 // ─── Ask sheet (home feed) ────────────────────────────────────────────────────
 
 function HomeAskSheet({
   item,
-  isClarify = false,
+  isClarify: isClarifyProp = false,
   extraQuestions,
   onSubmit,
   onClose,
@@ -826,14 +734,53 @@ function HomeAskSheet({
   const { user, isExploreMode } = useAuth()
   const navigate = useNavigate()
 
-  const [view,       setView]      = useState<'list' | 'compose'>('list')
-  const [text,       setText]      = useState('')
-  const [sent,       setSent]      = useState(false)
-  const [sending,    setSending]   = useState(false)
-  const [mediaFiles, setMediaFiles] = useState<File[]>([])
-  const [threadId,   setThreadId]  = useState<string | null>(null)
-  const mediaImgRef  = useRef<HTMLInputElement>(null)
-  const mediaVidRef  = useRef<HTMLInputElement>(null)
+  const [view,           setView]          = useState<'list' | 'compose'>('list')
+  const [isClarify,      setIsClarify]     = useState(isClarifyProp)
+  const [text,           setText]          = useState('')
+  const [sent,           setSent]          = useState(false)
+  const [sending,        setSending]       = useState(false)
+  const [mediaFiles,     setMediaFiles]    = useState<File[]>([])
+  const [threadId,       setThreadId]      = useState<string | null>(null)
+  const [attachMenuOpen, setAttachMenuOpen] = useState(false)
+  const [isRecording,    setIsRecording]   = useState(false)
+  const [audioBlob,      setAudioBlob]     = useState<Blob | null>(null)
+  const [recordingTime,  setRecordingTime] = useState(0)
+  const [linkUrl,        setLinkUrl]       = useState('')
+  const [showLinkInput,  setShowLinkInput] = useState(false)
+  const mediaImgRef        = useRef<HTMLInputElement>(null)
+  const mediaVidRef        = useRef<HTMLInputElement>(null)
+  const mediaRecorderRef   = useRef<MediaRecorder | null>(null)
+  const audioChunksRef     = useRef<Blob[]>([])
+  const recordingTimerRef  = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  async function startRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mr = new MediaRecorder(stream)
+      audioChunksRef.current = []
+      mr.ondataavailable = e => { if (e.data.size > 0) audioChunksRef.current.push(e.data) }
+      mr.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+        setAudioBlob(blob)
+        stream.getTracks().forEach(t => t.stop())
+      }
+      mr.start()
+      mediaRecorderRef.current = mr
+      setIsRecording(true)
+      setRecordingTime(0)
+      recordingTimerRef.current = setInterval(() => setRecordingTime(t => t + 1), 1000)
+    } catch { /* mic permission denied */ }
+  }
+
+  function stopRecording() {
+    mediaRecorderRef.current?.stop()
+    if (recordingTimerRef.current) clearInterval(recordingTimerRef.current)
+    setIsRecording(false)
+  }
+
+  function fmtTime(s: number) {
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+  }
 
   const prevId = useState<string | null>(null)
   const [, setPrevId] = prevId
@@ -845,6 +792,7 @@ function HomeAskSheet({
     setSending(false)
     setMediaFiles([])
     setThreadId(null)
+    setIsClarify(isClarifyProp)
   }
 
   const allQuestions: { text: string; status: string }[] = [
@@ -853,8 +801,13 @@ function HomeAskSheet({
   ]
 
   async function handleSend() {
-    const question = text.trim()
-    if (!item || question.length < 5 || sending) return
+    const baseText = text.trim()
+    const effectiveQuestion = linkUrl ? `${baseText}\n${linkUrl}`.trim() : baseText
+    const hasVoice = !!audioBlob
+    if (!item || (effectiveQuestion.length < 5 && !hasVoice) || sending) return
+
+    const allFiles = [...mediaFiles]
+    if (audioBlob) allFiles.push(new File([audioBlob], 'voice-memo.webm', { type: 'audio/webm' }))
 
     if (!isExploreMode && user && item.creator.id) {
       setSending(true)
@@ -863,9 +816,9 @@ function HomeAskSheet({
           postId:     item.id,
           creatorId:  item.creator.id,
           fanId:      user.id,
-          question,
+          question:   effectiveQuestion || '🎤 Voice memo',
           price:      item.price ?? 4,
-          mediaFiles,
+          mediaFiles: allFiles,
         })
         setThreadId(tid)
         onSubmit(item.id, question, {
@@ -896,7 +849,11 @@ function HomeAskSheet({
 
   function handleClose() {
     onClose()
-    setTimeout(() => { setText(''); setSent(false); setView('list'); setMediaFiles([]); setThreadId(null) }, 380)
+    stopRecording()
+    setTimeout(() => {
+      setText(''); setSent(false); setView('list'); setMediaFiles([]); setThreadId(null)
+      setAudioBlob(null); setLinkUrl(''); setShowLinkInput(false); setAttachMenuOpen(false)
+    }, 380)
   }
 
   const Tx = { type: 'spring', stiffness: 420, damping: 42 } as const
@@ -910,258 +867,243 @@ function HomeAskSheet({
     <AnimatePresence>
       {item && (
         <>
-          <motion.div key="hask-bd"
+          {/* Blurred backdrop — tap to dismiss */}
+          <motion.div
+            key="hask-bd"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50" style={{ background: 'rgba(0,0,0,0.38)' }}
-            onClick={handleClose}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50"
+            style={{ backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)', background: 'rgba(0,0,0,0.38)' }}
+            onClick={() => { if (!sending && !sent) handleClose() }}
           />
-          <motion.div key="hask-sh"
-            initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 36, stiffness: 400 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-white flex flex-col"
-            style={{ borderRadius: '24px 24px 0 0', height: '88vh' }}
+
+          {/* Centering wrapper — handles position; motion.div inside handles animation/drag */}
+          <div
+            className="fixed z-50"
+            style={{ left: '50%', top: '28%', transform: 'translateX(-50%)', width: 'min(340px, 88vw)' }}
             onClick={e => e.stopPropagation()}
           >
-            <div className="flex justify-center pt-3 pb-0 flex-shrink-0">
-              <div className="w-10 h-[4px] rounded-full" style={{ background: '#e0e0e0' }} />
-            </div>
-
-            <div className="relative overflow-hidden flex-1" style={{ minHeight: 420 }}>
+            <motion.div
+              key="hask-card"
+              initial={{ opacity: 0, scale: 0.92, y: 24 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 24 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 380 }}
+              drag={!sent ? 'y' : false}
+              dragConstraints={{ top: 0 }}
+              dragElastic={{ top: 0.05, bottom: 0.3 }}
+              dragMomentum={false}
+              onDragEnd={(_, info) => { if (info.offset.y > 60 && !sending) handleClose() }}
+              className="flex flex-col w-full"
+              style={{ background: 'rgba(255,255,255,0.96)', borderRadius: 24, boxShadow: '0 8px 40px rgba(0,0,0,0.22)', overflow: 'hidden' }}
+            >
               <AnimatePresence mode="wait">
 
-                {/* ── LIST ── */}
-                {view === 'list' && (
-                  <motion.div key="list" variants={V}
-                    initial="enter" animate="center" exit="exit" transition={Tx}
-                    className="absolute inset-0 flex flex-col"
-                  >
-                    <div className="flex items-center justify-between px-5 py-3 flex-shrink-0"
-                      style={{ borderBottom: '0.5px solid #f2f2f2' }}>
-                      <div>
-                        <span className="text-[17px] font-bold text-[#111]">Questions</span>
-                        <span className="text-[11px] text-[#bbb] ml-2">@{item.creator.username}</span>
-                      </div>
-                      <button onClick={handleClose} className="text-[15px] font-semibold" style={{ color: '#111' }}>
-                        Done
-                      </button>
+                {/* ── Compose ── */}
+                {!sent && (
+                  <motion.div key="compose" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+
+                    {/* Drag handle */}
+                    <div className="flex justify-center pt-2.5 pb-1">
+                      <div className="w-8 h-[3px] rounded-full" style={{ background: '#d0d0d0' }} />
                     </div>
 
-                    <div className="flex items-center gap-2.5 px-5 pt-4 pb-3 flex-shrink-0">
+                    {/* Creator row */}
+                    <div className="flex items-center gap-2.5 px-4 pt-2 pb-3">
                       <Av creator={item.creator} size={36} />
-                      <div>
-                        <p className="text-[13px] font-semibold text-[#111]">{item.creator.display_name}</p>
-                        <p className="text-[10px] text-[#aaa]">@{item.creator.username}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] leading-tight" style={{ color: '#aaa' }}>
+                          {isClarify
+                            ? <>Clarify <span className="font-bold" style={{ color: '#555' }}>@{item.creator.username}</span></>
+                            : <>Ask <span className="font-bold" style={{ color: '#555' }}>@{item.creator.username}</span></>
+                          }
+                        </p>
+                      </div>
+
+                      {/* Segmented toggle — only for priced posts */}
+                      {(item.price ?? 0) > 0 && (
+                        <div
+                          className="flex items-center flex-shrink-0"
+                          style={{ background: 'rgba(0,0,0,0.06)', borderRadius: 9999, padding: 3, gap: 2 }}
+                        >
+                          {(['Ask', 'Clarify'] as const).map(mode => {
+                            const active = (mode === 'Clarify') === isClarify
+                            return (
+                              <button
+                                key={mode}
+                                onClick={() => setIsClarify(mode === 'Clarify')}
+                                className="transition-all active:opacity-70"
+                                style={{
+                                  fontSize: 11,
+                                  fontWeight: active ? 600 : 400,
+                                  color: active ? '#111' : '#999',
+                                  background: active ? 'white' : 'transparent',
+                                  borderRadius: 9999,
+                                  padding: '3px 10px',
+                                  boxShadow: active ? '0 1px 4px rgba(0,0,0,0.12)' : 'none',
+                                  transition: 'background 180ms ease, box-shadow 180ms ease, color 180ms ease',
+                                }}
+                              >
+                                {mode}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Textarea */}
+                    <div className="mx-4 mb-3 rounded-[14px]" style={{ background: '#f5f5f7' }}>
+                      <textarea
+                        autoFocus
+                        value={text}
+                        onChange={e => setText(e.target.value.slice(0, 280))}
+                        placeholder="Let your query be known…"
+                        rows={3}
+                        className="w-full px-4 pt-3 pb-2 text-[15px] leading-[1.5] resize-none outline-none bg-transparent"
+                        style={{ color: '#111' }}
+                      />
+
+                      {/* Recording indicator inside textarea box */}
+                      {isRecording && (
+                        <div className="flex items-center gap-2 px-4 pb-2">
+                          <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                          <span className="text-[13px] font-medium" style={{ color: '#e00' }}>{fmtTime(recordingTime)}</span>
+                          <button onClick={stopRecording} className="ml-auto flex items-center justify-center active:opacity-60"
+                            style={{ width: 26, height: 26, borderRadius: 9999, background: 'rgba(220,0,0,0.1)' }}>
+                            <Square style={{ width: 10, height: 10, color: '#e00' }} fill="#e00" strokeWidth={0} />
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Audio playback after recording */}
+                      {audioBlob && !isRecording && (
+                        <div className="flex items-center gap-2 px-4 pb-2">
+                          <audio controls src={URL.createObjectURL(audioBlob)}
+                            className="h-8 flex-1" style={{ accentColor: '#111' }} />
+                          <button onClick={() => setAudioBlob(null)} className="active:opacity-60">
+                            <X style={{ width: 14, height: 14, color: '#aaa' }} strokeWidth={2} />
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Link input */}
+                      {showLinkInput && (
+                        <div className="flex items-center gap-2 px-4 pb-2">
+                          <Link2 style={{ width: 13, height: 13, color: '#aaa', flexShrink: 0 }} strokeWidth={1.75} />
+                          <input
+                            autoFocus={false}
+                            value={linkUrl}
+                            onChange={e => setLinkUrl(e.target.value)}
+                            placeholder="Paste a URL…"
+                            className="flex-1 text-[13px] outline-none bg-transparent"
+                            style={{ color: '#111' }}
+                          />
+                          {linkUrl && (
+                            <button onClick={() => { setLinkUrl(''); setShowLinkInput(false) }} className="active:opacity-60">
+                              <X style={{ width: 12, height: 12, color: '#aaa' }} strokeWidth={2} />
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Bottom bar: + cascade menu + char count */}
+                      <div className="px-3 pb-2 flex items-center gap-3 justify-between" style={{ position: 'relative', overflow: 'visible' }}>
+
+                        <button
+                          onClick={() => setAttachMenuOpen(o => !o)}
+                          className="flex items-center justify-center active:opacity-60 flex-shrink-0"
+                          style={{ width: 26, height: 26, borderRadius: 9999, background: 'rgba(0,0,0,0.08)',
+                            transform: attachMenuOpen ? 'rotate(45deg)' : 'rotate(0deg)', transition: 'transform 200ms ease' }}
+                        >
+                          <Plus style={{ width: 14, height: 14, color: '#666' }} strokeWidth={2.2} />
+                        </button>
+
+                        {/* Inline cascade options */}
+                        <AnimatePresence>
+                          {attachMenuOpen && [
+                            { id: 'photo', Icon: Camera, color: '#FF9F0A', action: () => { mediaImgRef.current?.click(); setAttachMenuOpen(false) } },
+                            { id: 'voice', Icon: Mic,    color: '#FF375F', action: () => { startRecording(); setAttachMenuOpen(false) } },
+                            { id: 'link',  Icon: Link2,  color: '#0A84FF', action: () => { setShowLinkInput(true); setAttachMenuOpen(false) } },
+                          ].map(({ id, Icon, color, action }, i) => (
+                            <motion.button
+                              key={id}
+                              initial={{ opacity: 0, scale: 0.5, x: -8 }}
+                              animate={{ opacity: 1, scale: 1, x: 0 }}
+                              exit={{ opacity: 0, scale: 0.5, x: -8 }}
+                              transition={{ type: 'spring', damping: 18, stiffness: 380, delay: i * 0.06 }}
+                              onClick={action}
+                              className="flex items-center justify-center active:opacity-60 flex-shrink-0"
+                              style={{ width: 26, height: 26, borderRadius: 9999, background: color }}
+                            >
+                              <Icon style={{ width: 13, height: 13, color: 'white' }} strokeWidth={1.75} />
+                            </motion.button>
+                          ))}
+                        </AnimatePresence>
+
+                        <span className="text-[11px] ml-auto" style={{ color: '#bbb' }}>{text.length}/280</span>
                       </div>
                     </div>
 
-                    <div className="overflow-y-auto flex-1 px-5 pb-6">
-                      <div className="rounded-[14px] overflow-hidden" style={{ border: '0.5px solid #ebebeb' }}>
-                        {allQuestions.map((q, i) => (
-                          <div key={i} className="px-4 py-3"
-                            style={{ borderBottom: i < allQuestions.length - 1 ? '0.5px solid #f5f5f7' : 'none' }}>
-                            <p className="text-[13px] text-[#222] leading-[1.55]">
-                              <span className="text-[11px] text-[#bbb] mr-1">↳</span>
-                              {q.text}
-                            </p>
-                            <p className="text-[10px] mt-1"
-                              style={{ color: q.status === 'answered' ? '#16a34a' : '#bbb' }}>
-                              {q.status === 'answered' ? '✓ answered' : '· pending reply'}
-                            </p>
+                    {/* Media thumbnails */}
+                    {mediaFiles.length > 0 && (
+                      <div className="flex gap-2 overflow-x-auto px-4 pb-3" style={{ scrollbarWidth: 'none' }}>
+                        {mediaFiles.map((f, i) => (
+                          <div key={i} className="relative flex-shrink-0">
+                            <img src={URL.createObjectURL(f)} className="w-14 h-14 rounded-[10px] object-cover" alt="" />
+                            <button
+                              onClick={() => setMediaFiles(p => p.filter((_, j) => j !== i))}
+                              className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center"
+                              style={{ background: '#111' }}
+                            >
+                              <X style={{ width: 8, height: 8, color: 'white' }} strokeWidth={2.5} />
+                            </button>
                           </div>
                         ))}
                       </div>
+                    )}
 
+                    {/* Hidden file input */}
+                    <input ref={mediaImgRef} type="file" accept="image/*" multiple className="hidden"
+                      onChange={e => { const fs = Array.from(e.target.files ?? []); setMediaFiles(p => [...p, ...fs]); e.target.value = '' }} />
+
+                    {/* Send button */}
+                    <div className="px-4 pb-4">
                       <button
-                        onClick={() => { setText(''); setSent(false); setView('compose') }}
-                        className="w-full mt-3 rounded-[14px] py-[13px] flex items-center justify-center gap-2 active:opacity-80 transition-opacity"
+                        onClick={handleSend}
+                        disabled={text.trim().length < 5 || sending}
+                        className="w-full py-3 rounded-[14px] text-[15px] font-semibold text-white flex items-center justify-center gap-2 active:opacity-80 disabled:opacity-30 transition-opacity"
                         style={{ background: '#111' }}
                       >
-                        <MessageCircle style={{ width: 15, height: 15, color: 'white' }} strokeWidth={1.75} />
-                        <span style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>Ask</span>
+                        {sending && <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />}
+                        <span>{sending ? 'Sending…' : 'Send'}</span>
                       </button>
-                      <p className="text-center text-[10px] mt-2" style={{ color: '#d0d0d0' }}>
-                        Each question is a private direct message
-                      </p>
                     </div>
                   </motion.div>
                 )}
 
-                {/* ── COMPOSE ── */}
-                {view === 'compose' && (
-                  <motion.div key="compose" variants={V}
-                    initial="enter" animate="center" exit="exit" transition={Tx}
-                    className="absolute inset-0 flex flex-col"
+                {/* ── Sent ── */}
+                {sent && (
+                  <motion.div key="sent"
+                    initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center py-10 px-4"
                   >
-                    <div className="flex items-center gap-2 px-5 py-3 flex-shrink-0"
-                      style={{ borderBottom: '0.5px solid #f2f2f2' }}>
-                      {allQuestions.length > 0 && (
-                        <button onClick={() => setView('list')} className="p-1 -ml-1 mr-1">
-                          <ArrowLeft style={{ width: 20, height: 20, color: '#111' }} strokeWidth={2} />
-                        </button>
-                      )}
-                      <span className="text-[17px] font-bold text-[#111]">{isClarify ? 'Clarify' : 'Ask a question'}</span>
-                      {allQuestions.length === 0 && (
-                        <button onClick={handleClose} className="ml-auto text-[15px]" style={{ color: '#aaa' }}>
-                          Cancel
-                        </button>
-                      )}
+                    <div className="w-14 h-14 rounded-full bg-[#111] flex items-center justify-center mb-4">
+                      <Check style={{ width: 26, height: 26, color: 'white' }} strokeWidth={2.5} />
                     </div>
-
-                    <div className="px-5 pt-4 pb-10 flex-1 overflow-y-auto">
-                      <AnimatePresence mode="wait">
-                        {sent ? (
-                          <motion.div key="sent"
-                            initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }}
-                            className="py-12 flex flex-col items-center"
-                          >
-                            <div className="w-14 h-14 rounded-full bg-[#111] flex items-center justify-center mb-4">
-                              <Check style={{ width: 26, height: 26, color: 'white' }} strokeWidth={2.5} />
-                            </div>
-                            <p className="text-[16px] font-bold text-[#111] mb-1">Question sent</p>
-                            <p className="text-[11px] text-[#aaa] text-center">
-                              @{item.creator.username} will be notified
-                            </p>
-                            {threadId && (
-                              <p className="text-[10px] text-[#ccc] text-center mt-1">
-                                Opening thread…
-                              </p>
-                            )}
-                          </motion.div>
-                        ) : (
-                          <motion.div key="form" initial={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                            <div className="flex items-center gap-2.5 mb-3">
-                              <Av creator={item.creator} size={36} />
-                              <div>
-                                <p className="text-[13px] font-semibold text-[#111]">{item.creator.display_name}</p>
-                                <p className="text-[10px] text-[#aaa]">@{item.creator.username}</p>
-                              </div>
-                            </div>
-
-                            {isClarify && (
-                              <div className="flex items-center gap-2 rounded-[10px] px-3 py-2.5 mb-4"
-                                style={{ background: '#f5f5f7' }}>
-                                <MessageCircle style={{ width: 13, height: 13, color: '#888', flexShrink: 0 }} strokeWidth={1.75} />
-                                <p className="text-[12px] leading-snug" style={{ color: '#555' }}>
-                                  This is a <span className="font-semibold text-[#111]">clarification</span> — your question will be tied to this answer, not create a new one.
-                                </p>
-                              </div>
-                            )}
-
-                            <textarea
-                              autoFocus
-                              value={text}
-                              onChange={e => setText(e.target.value)}
-                              placeholder="Type your question here…"
-                              rows={4}
-                              className="w-full rounded-[12px] px-4 py-3 text-[14px] text-[#111] placeholder-[#ccc] resize-none outline-none leading-[1.5]"
-                              style={{ background: '#f5f5f7' }}
-                            />
-
-                            {/* Media attachment row */}
-                            <div className="flex gap-2 mt-3 mb-1">
-                              <button
-                                onClick={() => mediaImgRef.current?.click()}
-                                className="flex items-center gap-1.5 rounded-full px-3 py-1.5 active:opacity-60 transition-opacity"
-                                style={{ background: '#f0f0f5', border: '0.5px solid #e0e0e8' }}
-                              >
-                                <Camera style={{ width: 13, height: 13, color: '#666' }} strokeWidth={1.75} />
-                                <span className="text-[11px]" style={{ color: '#666' }}>
-                                  {mediaFiles.filter(f => f.type.startsWith('image')).length > 0
-                                    ? `${mediaFiles.filter(f => f.type.startsWith('image')).length} photo${mediaFiles.filter(f => f.type.startsWith('image')).length > 1 ? 's' : ''}`
-                                    : 'Photo'}
-                                </span>
-                              </button>
-                              <button
-                                onClick={() => mediaVidRef.current?.click()}
-                                className="flex items-center gap-1.5 rounded-full px-3 py-1.5 active:opacity-60 transition-opacity"
-                                style={{ background: '#f0f0f5', border: '0.5px solid #e0e0e8' }}
-                              >
-                                <Video style={{ width: 13, height: 13, color: '#666' }} strokeWidth={1.75} />
-                                <span className="text-[11px]" style={{ color: '#666' }}>
-                                  {mediaFiles.some(f => f.type.startsWith('video')) ? 'Video ✓' : 'Video'}
-                                </span>
-                              </button>
-                              {mediaFiles.length > 0 && (
-                                <button
-                                  onClick={() => setMediaFiles([])}
-                                  className="flex items-center gap-1 rounded-full px-3 py-1.5 active:opacity-60"
-                                  style={{ background: '#ffeded', border: '0.5px solid #ffcaca' }}
-                                >
-                                  <X style={{ width: 11, height: 11, color: '#c00' }} strokeWidth={2.5} />
-                                  <span className="text-[11px]" style={{ color: '#c00' }}>Clear</span>
-                                </button>
-                              )}
-                            </div>
-
-                            {/* Media thumbnails */}
-                            {mediaFiles.length > 0 && (
-                              <div className="flex gap-2 overflow-x-auto pb-1 mb-2" style={{ scrollbarWidth: 'none' }}>
-                                {mediaFiles.map((f, i) => (
-                                  <div key={i} className="relative flex-shrink-0">
-                                    {f.type.startsWith('image') ? (
-                                      <img
-                                        src={URL.createObjectURL(f)}
-                                        className="w-16 h-16 rounded-[10px] object-cover"
-                                        alt=""
-                                      />
-                                    ) : (
-                                      <div className="w-16 h-16 rounded-[10px] bg-gray-100 flex flex-col items-center justify-center gap-1">
-                                        <Video style={{ width: 18, height: 18, color: '#888' }} strokeWidth={1.5} />
-                                        <span className="text-[8px] text-gray-400">video</span>
-                                      </div>
-                                    )}
-                                    <button
-                                      onClick={() => setMediaFiles(p => p.filter((_, j) => j !== i))}
-                                      className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center"
-                                      style={{ background: '#111' }}
-                                    >
-                                      <X style={{ width: 8, height: 8, color: 'white' }} strokeWidth={2.5} />
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Hidden file inputs */}
-                            <input ref={mediaImgRef} type="file" accept="image/*" multiple className="hidden"
-                              onChange={e => { const fs = Array.from(e.target.files ?? []); setMediaFiles(p => [...p, ...fs]); e.target.value = '' }} />
-                            <input ref={mediaVidRef} type="file" accept="video/*" className="hidden"
-                              onChange={e => { const f = e.target.files?.[0]; if (f) setMediaFiles(p => [...p, f]); e.target.value = '' }} />
-
-                            {(() => {
-                              const canSend = text.trim().length >= 5
-                              return (
-                                <>
-                                  <p className="text-[10px] mt-2 mb-5" style={{ color: '#bbb' }}>
-                                    price set per answer
-                                  </p>
-                                  <button
-                                    onClick={handleSend}
-                                    disabled={!canSend || sending}
-                                    className="w-full rounded-[14px] py-[14px] flex items-center justify-center gap-2 active:opacity-80 disabled:opacity-30 transition-opacity"
-                                    style={{ background: '#111' }}
-                                  >
-                                    {sending
-                                      ? <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                                      : <MessageCircle style={{ width: 15, height: 15, color: 'white' }} strokeWidth={1.75} />
-                                    }
-                                    <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
-                                      {sending ? 'Sending…' : 'Send question'}
-                                    </span>
-                                  </button>
-                                </>
-                              )
-                            })()}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
+                    <p className="text-[16px] font-bold text-[#111] mb-1">Question sent</p>
+                    <p className="text-[12px] text-center" style={{ color: '#aaa' }}>
+                      @{item.creator.username} will be notified
+                    </p>
+                    {threadId && (
+                      <p className="text-[10px] text-center mt-1" style={{ color: '#ccc' }}>Opening thread…</p>
+                    )}
                   </motion.div>
                 )}
 
               </AnimatePresence>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
@@ -1494,7 +1436,6 @@ export default function HomePage() {
   const [askItem,         setAskItem]         = useState<FeedItem | null>(null)
   const [askSheetKey,     setAskSheetKey]     = useState(0)
   const [askClarify,      setAskClarify]      = useState(false)
-  const [askPickerItem,   setAskPickerItem]   = useState<FeedItem | null>(null)
   const [cardOptionsItem, setCardOptionsItem] = useState<FeedItem | null>(null)
   const [editPostItem,    setEditPostItem]    = useState<FeedItem | null>(null)
   const [repostTarget,    setRepostTarget]    = useState<FeedItem | null>(null)
@@ -1992,8 +1933,7 @@ export default function HomePage() {
                 onProfile={username => navigate(`/u/${username}`)}
                 onAsk={() => {
                   iosKbRef.current?.focus()
-                  if ((item.price ?? 0) > 0) { setAskPickerItem(item) }
-                  else { setAskClarify(false); setAskItem(item); setAskSheetKey(k => k + 1) }
+                  setAskClarify(false); setAskItem(item); setAskSheetKey(k => k + 1)
                 }}
                 onTap={() => handleCardTap(item)}
                 onReplyTap={(replyIndex) => {
@@ -2082,24 +2022,6 @@ export default function HomePage() {
         userId={user?.id ?? ''}
         onClose={() => setRepostTarget(null)}
         onReposted={refreshFeed}
-      />
-
-      {/* ── Ask type picker (shown for priced posts) ── */}
-      <AskTypePicker
-        item={askPickerItem}
-        onClarify={() => {
-          setAskClarify(true)
-          setAskItem(askPickerItem)
-          setAskPickerItem(null)
-          setAskSheetKey(k => k + 1)
-        }}
-        onNewQuestion={() => {
-          setAskClarify(false)
-          setAskItem(askPickerItem)
-          setAskPickerItem(null)
-          setAskSheetKey(k => k + 1)
-        }}
-        onClose={() => setAskPickerItem(null)}
       />
 
       {/* ── Ask sheet ── */}

@@ -817,182 +817,196 @@ export default function PostDetailPage() {
         )}
       </AnimatePresence>
 
-      {/* ── Ask sheet (bottom sheet, stays within detail view) ── */}
+      {/* ── Ask overlay — Instagram story sticker style ── */}
       <AnimatePresence>
         {askOpen && (
           <>
-            {/* Backdrop */}
+            {/* Blurred backdrop — tap to dismiss */}
             <motion.div
               key="ask-bd"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
               className="fixed inset-0 z-50"
-              style={{ background: 'rgba(0,0,0,0.45)' }}
-              onClick={() => { if (!askSending) setAskOpen(false) }}
+              style={{
+                backdropFilter: 'blur(18px)',
+                WebkitBackdropFilter: 'blur(18px)',
+                background: 'rgba(0,0,0,0.38)',
+              }}
+              onClick={() => { if (!askSending && !askSent) setAskOpen(false) }}
             />
 
-            {/* Sheet — fixed tall, keyboard-anchored, no drag (Threads-style) */}
-            <motion.div
-              key="ask-sh"
-              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 36, stiffness: 400 }}
-              className="fixed bottom-0 left-0 right-0 z-50 glass-sheet flex flex-col"
-              style={{ borderRadius: '24px 24px 0 0', height: '88vh' }}
+            {/* Floating card — wrapper handles centering, inner motion.div handles animation/drag */}
+            <div
+              className="fixed z-50 flex flex-col"
+              style={{
+                left: '50%',
+                top: '28%',
+                transform: 'translateX(-50%)',
+                width: 'min(340px, 88vw)',
+              }}
               onClick={e => e.stopPropagation()}
             >
-              {/* Handle */}
-              <div className="flex justify-center pt-3 pb-1">
-                <div className="w-10 h-[4px] rounded-full" style={{ background: '#e0e0e0' }} />
-              </div>
-
+            <motion.div
+              key="ask-card"
+              initial={{ opacity: 0, scale: 0.92, y: 24 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 24 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 380 }}
+              drag={!askSent ? 'y' : false}
+              dragConstraints={{ top: 0 }}
+              dragElastic={{ top: 0.05, bottom: 0.3 }}
+              dragMomentum={false}
+              onDragEnd={(_, info) => {
+                if (info.offset.y > 60 && !askSending) setAskOpen(false)
+              }}
+              className="flex flex-col w-full"
+              style={{
+                background: 'rgba(255,255,255,0.96)',
+                borderRadius: 24,
+                boxShadow: '0 8px 40px rgba(0,0,0,0.22)',
+                overflow: 'hidden',
+              }}
+            >
               <AnimatePresence mode="wait">
 
                 {/* ── Compose ── */}
                 {!askSent && (
-                  <motion.div key="compose" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    className="flex flex-col">
+                  <motion.div key="compose" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
 
-                    {/* Header row */}
-                    <div
-                      className="flex items-center gap-2 px-5 py-3 flex-shrink-0"
-                      style={{ borderBottom: '0.5px solid #f2f2f2' }}
-                    >
-                      <span className="text-[17px] font-bold text-[#111]">Ask a question</span>
+                    {/* Drag handle */}
+                    <div className="flex justify-center pt-2.5 pb-1">
+                      <div className="w-8 h-[3px] rounded-full" style={{ background: '#d0d0d0' }} />
+                    </div>
+
+                    {/* Creator row */}
+                    <div className="flex items-center gap-2.5 px-4 pt-2 pb-3">
+                      <Av
+                        url={item.creator.avatar_url}
+                        name={item.creator.display_name}
+                        color={item.creator.color}
+                        initials={item.creator.initials}
+                        size={36}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-bold text-[#111] leading-tight truncate">
+                          {item.creator.display_name}
+                        </p>
+                        <p className="text-[11px] leading-tight" style={{ color: '#aaa' }}>
+                          Ask a question
+                        </p>
+                      </div>
                       <button
                         onClick={() => setAskOpen(false)}
-                        className="ml-auto text-[15px]"
-                        style={{ color: '#aaa' }}
+                        className="w-7 h-7 rounded-full flex items-center justify-center active:opacity-60"
+                        style={{ background: '#f0f0f0' }}
                       >
-                        Cancel
+                        <span style={{ fontSize: 14, color: '#888', lineHeight: 1 }}>✕</span>
                       </button>
                     </div>
 
-                    {/* Body */}
-                    <div className="px-5 pt-4 pb-[calc(env(safe-area-inset-bottom)+20px)]">
-
-                      {/* Creator row */}
-                      <div className="flex items-center gap-2.5 mb-4">
-                        <Av
-                          url={item.creator.avatar_url}
-                          name={item.creator.display_name}
-                          color={item.creator.color}
-                          initials={item.creator.initials}
-                          size={36}
+                    {/* Input area */}
+                    <div className="px-4 pb-2">
+                      <div className="rounded-[14px] overflow-hidden" style={{ background: '#f5f5f7' }}>
+                        <textarea
+                          ref={askTextareaRef}
+                          autoFocus
+                          value={askText}
+                          onChange={e => { setAskText(e.target.value); setAskError(null) }}
+                          rows={3}
+                          maxLength={280}
+                          placeholder="What do you want to know?"
+                          className="w-full px-4 pt-3 pb-2 text-[15px] leading-[1.5] resize-none outline-none bg-transparent"
+                          style={{ color: '#111' }}
                         />
-                        <div>
-                          <p className="text-[13px] font-semibold text-[#111]">{item.creator.display_name}</p>
-                          <p className="text-[10px]" style={{ color: '#aaa' }}>@{item.creator.username}</p>
+                        <div className="flex justify-end px-3 pb-2">
+                          <span className="text-[10px]" style={{ color: '#bbb' }}>{askText.length}/280</span>
                         </div>
                       </div>
-
-                      {/* Textarea */}
-                      {(() => {
-                        const canSend = askText.trim().length >= 3
-
-                        return (
-                          <>
-                            <div className="relative w-full rounded-[12px] overflow-hidden"
-                              style={{ background: '#f5f5f7', minHeight: 112 }}>
-                              <textarea
-                                ref={askTextareaRef}
-                                autoFocus
-                                value={askText}
-                                onChange={e => { setAskText(e.target.value); setAskError(null) }}
-                                rows={4}
-                                maxLength={280}
-                                placeholder="What do you want to know?"
-                                className="w-full h-full px-4 py-3 text-[14px] leading-[1.5] resize-none outline-none bg-transparent"
-                                style={{ color: '#111', minHeight: 112 }}
-                              />
-                            </div>
-
-                            <div className="flex justify-end mt-1.5 mb-4">
-                              <p className="text-[10px]" style={{ color: '#bbb' }}>
-                                {askText.length}/280
-                              </p>
-                            </div>
-
-                            <motion.button
-                              onClick={async () => {
-                                if (!canSend || askSending) return
-                                const question = askText.trim()
-                                setAskSending(true)
-                                try {
-                                  if (!isExploreMode && user && item.creator.id) {
-                                    const tid = await createThreadWithMedia({
-                                      postId:     item.id,
-                                      creatorId:  item.creator.id,
-                                      fanId:      user.id,
-                                      question,
-                                      price:      price ?? 4,
-                                      mediaFiles: [],
-                                    })
-                                    myQuestionsStore.add({
-                                      threadId:        tid,
-                                      postId:          item.id,
-                                      question,
-                                      creatorUsername: item.creator.username,
-                                      creatorName:     item.creator.display_name,
-                                      creatorAvatar:   item.creator.avatar_url ?? null,
-                                      price:           price ?? 0,
-                                      askedAt:         new Date().toISOString(),
-                                      status:          'pending',
-                                    })
-                                    setAskSending(false)
-                                    setAskSent(true)
-                                    setTimeout(() => {
-                                      setAskOpen(false)
-                                      navigate(`/inbox/${tid}`)
-                                    }, 1800)
-                                  } else {
-                                    await new Promise(r => setTimeout(r, 900))
-                                    setAskSending(false)
-                                    setAskSent(true)
-                                    setTimeout(() => { setAskOpen(false) }, 1800)
-                                  }
-                                } catch (e) {
-                                  console.error(e)
-                                  setAskError((e as { message?: string })?.message ?? 'Failed to send — try again.')
-                                  setAskSending(false)
-                                }
-                              }}
-                              disabled={!canSend}
-                              animate={{ opacity: canSend ? 1 : 0.4 }}
-                              className="w-full rounded-[14px] py-[14px] flex items-center justify-center gap-2 active:opacity-80 transition-opacity"
-                              style={{ background: '#111' }}
-                            >
-                              {askSending
-                                ? <div className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                : <>
-                                    <MessageCircle style={{ width: 15, height: 15, color: 'white' }} strokeWidth={1.75} />
-                                    <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>Send question</span>
-                                  </>
-                              }
-                            </motion.button>
-                            {askError && (
-                              <p className="mt-2 text-[12px] text-red-500 text-center">{askError}</p>
-                            )}
-                          </>
-                        )
-                      })()}
                     </div>
+
+                    {askError && (
+                      <p className="px-4 pb-1 text-[11px] text-red-500 text-center">{askError}</p>
+                    )}
+
+                    {/* Send button */}
+                    <div className="px-4 pb-4 pt-1">
+                      <motion.button
+                        onClick={async () => {
+                          const canSend = askText.trim().length >= 3
+                          if (!canSend || askSending) return
+                          const question = askText.trim()
+                          setAskSending(true)
+                          try {
+                            if (!isExploreMode && user && item.creator.id) {
+                              const tid = await createThreadWithMedia({
+                                postId:     item.id,
+                                creatorId:  item.creator.id,
+                                fanId:      user.id,
+                                question,
+                                price:      price ?? 4,
+                                mediaFiles: [],
+                              })
+                              myQuestionsStore.add({
+                                threadId:        tid,
+                                postId:          item.id,
+                                question,
+                                creatorUsername: item.creator.username,
+                                creatorName:     item.creator.display_name,
+                                creatorAvatar:   item.creator.avatar_url ?? null,
+                                price:           price ?? 0,
+                                askedAt:         new Date().toISOString(),
+                                status:          'pending',
+                              })
+                              setAskSending(false)
+                              setAskSent(true)
+                              setAskText('')
+                              setTimeout(() => {
+                                setAskOpen(false)
+                                navigate(`/inbox/${tid}`)
+                              }, 1600)
+                            } else {
+                              await new Promise(r => setTimeout(r, 900))
+                              setAskSending(false)
+                              setAskSent(true)
+                              setAskText('')
+                              setTimeout(() => setAskOpen(false), 1600)
+                            }
+                          } catch (e) {
+                            console.error(e)
+                            setAskError((e as { message?: string })?.message ?? 'Failed to send — try again.')
+                            setAskSending(false)
+                          }
+                        }}
+                        animate={{ opacity: askText.trim().length >= 3 ? 1 : 0.38 }}
+                        className="w-full rounded-[14px] py-3 flex items-center justify-center gap-2 active:opacity-80"
+                        style={{ background: '#111' }}
+                      >
+                        {askSending
+                          ? <div className="w-[16px] h-[16px] border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          : <span style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>Send</span>
+                        }
+                      </motion.button>
+                    </div>
+
                   </motion.div>
                 )}
 
-                {/* ── Success ── */}
+                {/* ── Sent ── */}
                 {askSent && (
-                  <motion.div key="success"
-                    initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }}
-                    className="flex flex-col items-center px-6 pt-12 pb-[calc(env(safe-area-inset-bottom)+28px)] text-center">
+                  <motion.div key="sent"
+                    initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center px-6 py-8 text-center"
+                  >
                     <motion.div
                       initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-                      transition={{ type: 'spring', stiffness: 380, damping: 20 }}
-                      className="w-14 h-14 rounded-full flex items-center justify-center mb-4"
+                      transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                      className="w-12 h-12 rounded-full flex items-center justify-center mb-3"
                       style={{ background: '#111' }}
                     >
-                      <Check style={{ width: 26, height: 26, color: 'white' }} strokeWidth={2.5} />
+                      <Check style={{ width: 22, height: 22, color: 'white' }} strokeWidth={2.5} />
                     </motion.div>
-                    <p className="text-[16px] font-bold text-[#111] mb-1">Question sent</p>
-                    <p className="text-[11px] text-center" style={{ color: '#aaa' }}>
+                    <p className="text-[15px] font-bold text-[#111] mb-1">Question sent</p>
+                    <p className="text-[12px]" style={{ color: '#aaa' }}>
                       @{item.creator.username} will be notified
                     </p>
                   </motion.div>
@@ -1000,6 +1014,7 @@ export default function PostDetailPage() {
 
               </AnimatePresence>
             </motion.div>
+            </div>
           </>
         )}
       </AnimatePresence>
