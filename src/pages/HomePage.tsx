@@ -821,7 +821,7 @@ function HomeAskSheet({
           mediaFiles: allFiles,
         })
         setThreadId(tid)
-        onSubmit(item.id, question, {
+        onSubmit(item.id, effectiveQuestion, {
           threadId:        tid,
           creatorUsername: item.creator.username,
           creatorName:     item.creator.display_name,
@@ -1934,7 +1934,7 @@ export default function HomePage() {
                   if (feedItem.unlock_configs?.length) {
                     setUnlockModalPost(feedItem)
                   } else {
-                    setUnlockTarget({ creator: feedItem.creator, question: feedItem.question, price: feedItem.price ?? 0, postId: feedItem.id })
+                    setUnlockTarget({ creatorId: feedItem.creator.id ?? '', creator: feedItem.creator, question: feedItem.question, price: feedItem.price ?? 0, postId: feedItem.id })
                   }
                 }}
                 onProfile={username => navigate(`/u/${username}`)}

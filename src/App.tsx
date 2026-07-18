@@ -14,7 +14,6 @@ import HelpCenterPage from './pages/HelpCenterPage'
 import NotificationsPage from './pages/NotificationsPage'
 import SettingsPage from './pages/SettingsPage'
 import PostDetailPage from './pages/PostDetailPage'
-import CartPage from './pages/CartPage'
 import SearchPage from './pages/SearchPage'
 import SavedPage from './pages/SavedPage'
 import OnboardingFlow from './components/Onboarding/OnboardingFlow'
@@ -86,7 +85,6 @@ export default function App() {
           <Route path="/help"          element={<HelpCenterPage />} />
           <Route path="/settings"      element={<SettingsPage />} />
           <Route path="/post/:postId"  element={<PostDetailPage />} />
-          <Route path="/cart"          element={<CartPage />} />
           <Route path="/search"        element={<SearchPage />} />
           <Route path="/saved"         element={<SavedPage />} />
         </Route>

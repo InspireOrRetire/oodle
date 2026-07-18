@@ -10,7 +10,6 @@ import ImageLightbox from '../components/Post/ImageLightbox'
 import UnlockSheet, { type UnlockTarget } from '../components/Post/UnlockSheet'
 import ClarifyOrUnlockSheet, { type ClarifyTarget } from '../components/Post/ClarifyOrUnlockSheet'
 import TokenIcon from '../components/Unlock/TokenIcon'
-import { cartCountText } from '../services/cartService'
 import { createThreadWithMedia } from '../services/threadService'
 import { myQuestionsStore } from '../services/myQuestionsStore'
 import { useAuth } from '../contexts/AuthContext'
@@ -53,8 +52,9 @@ export default function PostDetailPage() {
   const navigate   = useNavigate()
   const location   = useLocation()
   const { user, isExploreMode } = useAuth()
-  const [unlockTarget,  setUnlockTarget]  = useState<UnlockTarget | null>(null)
-  const [clarifyTarget, setClarifyTarget] = useState<ClarifyTarget | null>(null)
+  const [unlockTarget,       setUnlockTarget]       = useState<UnlockTarget | null>(null)
+  const [clarifyTarget,      setClarifyTarget]      = useState<ClarifyTarget | null>(null)
+  const [confirmingPayment,  setConfirmingPayment]  = useState(false)
   const [askOpen,    setAskOpen]    = useState(false)
   const [askText,    setAskText]    = useState('')
   const [askSent,    setAskSent]    = useState(false)
@@ -97,6 +97,40 @@ export default function PostDetailPage() {
     supabase.from('saved_items').select('saved_id').eq('user_id', user.id).eq('post_id', postId).maybeSingle()
       .then(({ data }) => setIsSaved(!!data))
   }, [postId, user?.id])
+
+  // Handle return from Stripe Checkout — poll until webhook confirms the purchase
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    if (params.get('unlock') !== 'success' || !postId || !user) return
+
+    // Strip the query param from the URL without a reload
+    window.history.replaceState({}, '', `/post/${postId}`)
+
+    setConfirmingPayment(true)
+    let attempts = 0
+    const MAX = 20
+
+    const poll = async () => {
+      attempts++
+      const { data } = await supabase
+        .from('post_purchases')
+        .select('status')
+        .eq('post_id', postId)
+        .eq('buyer_id', user.id)
+        .eq('status', 'completed')
+        .maybeSingle()
+
+      if (data) {
+        setConfirmingPayment(false)
+        handleUnlocked()
+        return
+      }
+      if (attempts < MAX) setTimeout(poll, 1500)
+      else setConfirmingPayment(false)
+    }
+
+    poll()
+  }, [location.search, postId, user?.id])
 
   async function toggleSave() {
     if (!user || !postId) return
@@ -341,6 +375,24 @@ export default function PostDetailPage() {
             </div>
           )}
 
+          {/* ── Confirming payment banner ── */}
+          <AnimatePresence>
+            {confirmingPayment && (
+              <motion.div
+                key="confirming-banner"
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                className="flex items-center gap-3 mb-4 px-4 py-3.5 rounded-[16px]"
+                style={{ background: '#f5f5f7' }}
+              >
+                <div className="w-4 h-4 rounded-full border-2 border-[#111] border-t-transparent animate-spin flex-shrink-0" />
+                <p className="text-[13px] font-medium text-[#333]">Confirming payment…</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* ── Unlock reveal banner ── */}
           <AnimatePresence>
             {justUnlocked && (
@@ -493,10 +545,11 @@ export default function PostDetailPage() {
             {isType2 && !hasReplies && (
               <button
                 onClick={() => setUnlockTarget({
-                  creator:  item.creator,
-                  question: item.question,
-                  price:    price ?? 0,
-                  postId:   item.id,
+                  creatorId: item.creator.id ?? '',
+                  creator:   item.creator,
+                  question:  item.question,
+                  price:     price ?? 0,
+                  postId:    item.id,
                 })}
                 className="w-full flex items-center justify-center py-3.5 rounded-full active:opacity-80 transition-opacity mb-3"
                 style={{ background: '#000' }}
@@ -570,7 +623,7 @@ export default function PostDetailPage() {
                 {item.isLocked && price != null && price > 0 && (
                   <div className="absolute inset-y-0 right-0 flex items-center">
                     <button
-                      onClick={() => setUnlockTarget({ creator: item.creator, question: item.question, price: price ?? 0, postId: item.id })}
+                      onClick={() => setUnlockTarget({ creatorId: item.creator.id ?? '', creator: item.creator, question: item.question, price: price ?? 0, postId: item.id })}
                       className="inline-flex items-center gap-1 active:opacity-75 transition-opacity"
                     >
                       <Lock style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
@@ -728,11 +781,6 @@ export default function PostDetailPage() {
                           <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white tracking-tight"><Lock style={{ width: 9, height: 9 }} strokeWidth={2.5} />{reply.price.toFixed(2)}</span>
                         </button>
                       </div>
-                      {cartCountText(reply.cart_count) && (
-                        <p className="text-[11px] mb-1" style={{ color: '#bbb' }}>
-                          🛒 {cartCountText(reply.cart_count)}
-                        </p>
-                      )}
                     </div>
                   </div>
                 )
@@ -810,7 +858,7 @@ export default function PostDetailPage() {
             target={clarifyTarget}
             onClose={() => setClarifyTarget(null)}
             onUnlock={() => {
-              setUnlockTarget({ creator: { ...clarifyTarget.creator, avatar_url: clarifyTarget.creator.avatar_url ?? undefined }, question: clarifyTarget.question, price: clarifyTarget.price, postId: clarifyTarget.postId })
+              setUnlockTarget({ creatorId: clarifyTarget.creatorId, creator: { ...clarifyTarget.creator, avatar_url: clarifyTarget.creator.avatar_url ?? undefined }, question: clarifyTarget.question, price: clarifyTarget.price, postId: clarifyTarget.postId })
               setClarifyTarget(null)
             }}
           />
