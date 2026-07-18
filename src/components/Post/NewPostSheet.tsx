@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   X, Check, Plus, Minus, Camera, MapPin, AlignLeft, FileText,
   Search, Link2, SlidersHorizontal, Image as ImageIcon, Type,
-  ChefHat, Map, GripVertical,
+  GripVertical,
 } from 'lucide-react'
 import TokenKeypad from './TokenKeypad'
 import { supabase } from '../../lib/supabase'
@@ -567,25 +567,7 @@ export default function NewPostSheet({
                       </div>
                     )}
 
-                    {/* Subtype picker — only in answer mode, hidden when editing */}
-                    {isAnswerMode && !editPost && (
-                      <div className="flex gap-2 mb-4">
-                        {([
-                          { key: 'none',      label: 'General',    icon: null },
-                          { key: 'recipe',    label: 'Recipe',     icon: <ChefHat style={{ width: 14, height: 14 }} strokeWidth={1.75} /> },
-                          { key: 'itinerary', label: 'Itinerary',  icon: <Map     style={{ width: 14, height: 14 }} strokeWidth={1.75} /> },
-                        ] as { key: PostSubtype; label: string; icon: React.ReactNode }[]).map(opt => (
-                          <button key={opt.key} onClick={() => setPostSubtype(opt.key)}
-                            className="flex items-center gap-1.5 px-3 py-[7px] rounded-full text-[12px] font-semibold transition-all active:opacity-70"
-                            style={postSubtype === opt.key
-                              ? { background: '#111', color: '#fff' }
-                              : { background: '#f0f0f0', color: '#666' }}>
-                            {opt.icon}
-                            {opt.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                    {/* Subtype picker — hidden (recipe/itinerary builders not active) */}
 
                     {/* Composer row — hidden when editing (cost/unlock only) */}
                     {!editPost && <div className="flex gap-3">
@@ -736,7 +718,7 @@ export default function NewPostSheet({
                             {/* Transaction type — radio, single-select */}
                             <p className="text-[10px] font-semibold uppercase tracking-wide mb-2" style={{ color: '#bbb' }}>Access type</p>
                             <div className="flex flex-wrap gap-1.5 mb-0">
-                              {TRANSACTION_TYPES.map(t => {
+                              {TRANSACTION_TYPES.filter(t => t === 'cash' || t === 'free').map(t => {
                                 const active = unlockTx === t
                                 return (
                                   <button
@@ -802,7 +784,7 @@ export default function NewPostSheet({
                               <div className="mt-3">
                                 <p className="text-[10px] font-semibold uppercase tracking-wide mb-2" style={{ color: '#bbb' }}>Also collect (optional)</p>
                                 <div className="flex gap-1.5 flex-wrap">
-                                  {RELATIONSHIP_TYPES.map(t => {
+                                  {RELATIONSHIP_TYPES.filter(t => t === 'follow_creator').map(t => {
                                     const active = unlockRel.includes(t)
                                     return (
                                       <button

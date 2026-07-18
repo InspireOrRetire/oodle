@@ -2,22 +2,16 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Eye, ShoppingCart, Lock, MoreHorizontal, Bookmark, ChevronDown, ChevronRight, Check, MessageCircle, CheckCircle } from 'lucide-react'
 import { Post, Question } from '../../lib/supabase'
-import { useAuth } from '../../contexts/AuthContext'
 import AskQuestionSheet from './AskQuestionSheet'
 import ReactionBar from './ReactionBar'
-import PurchaseSheet from './PurchaseSheet'
 
 interface Props { post: Post; onClose: () => void; onReact: (id: string, emoji: string) => void }
 
 const PANEL_W = 196
 
 export default function PostModal({ post, onClose, onReact }: Props) {
-  const { profile } = useAuth()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [userBalance, setUserBalance] = useState((profile as any)?.balance ?? 120)
   const [showAsk, setShowAsk] = useState(false)
   const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [purchaseQ, setPurchaseQ] = useState<Question | null>(null)
   const [sort, setSort] = useState<'top' | 'recent'>('top')
   const [showSortToast, setShowSortToast] = useState(false)
   const [showActivity, setShowActivity] = useState(false)
@@ -122,7 +116,7 @@ export default function PostModal({ post, onClose, onReact }: Props) {
                         <Bookmark className="w-4 h-4 text-gray-500" />
                       </button>
                       <button
-                        onClick={() => { setExpandedId(null); setPurchaseQ(q) }}
+                        onClick={() => setExpandedId(null)}
                         className="flex-1 flex items-center justify-center gap-1 bg-gray-900 rounded-r-2xl border-l border-white/10 px-2"
                       >
                         <span className="text-white text-[11px] font-semibold leading-tight">
@@ -287,18 +281,7 @@ export default function PostModal({ post, onClose, onReact }: Props) {
         )}
       </AnimatePresence>
 
-      {/* Purchase flow */}
-      <AnimatePresence>
-        {purchaseQ && (
-          <PurchaseSheet
-            question={purchaseQ}
-            post={post}
-            balance={userBalance}
-            onClose={() => setPurchaseQ(null)}
-            onPurchaseComplete={(newBalance) => setUserBalance(newBalance)}
-          />
-        )}
-      </AnimatePresence>
+      {/* Purchase flow — hidden (wallet replaced by Stripe Checkout) */}
     </motion.div>
   )
 }

@@ -2767,7 +2767,7 @@ export default function ProfilePage() {
         onClose={() => setShareOpen(false)}
       />
 
-      <PurchaseSheet thread={purchaseThread} onClose={() => setPurchaseThread(null)} />
+      {/* PurchaseSheet hidden — wallet replaced by Stripe Checkout */}
       <SaveSheet
         open={saveTarget !== null}
         initialSaved={saveTarget ? (savedItems[saveTarget] ?? new Set()) : new Set()}
