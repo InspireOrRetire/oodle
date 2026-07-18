@@ -119,8 +119,8 @@ serve(async (req: Request) => {
         },
       },
       mode: 'payment',
-      success_url: `${SITE_URL}/thread/${postId}?unlock=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url:  `${SITE_URL}/thread/${postId}?unlock=cancelled`,
+      success_url: `${SITE_URL}/post/${postId}?unlock=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url:  `${SITE_URL}/post/${postId}?unlock=cancelled`,
       // metadata is passed through to checkout.session.completed webhook
       metadata: {
         post_id: postId,

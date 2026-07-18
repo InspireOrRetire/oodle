@@ -49,7 +49,8 @@ export default function UnlockModal({
     })
   }, [open, postId, creatorId, configs])
 
-  const outstanding = states.filter(s => !s.completed)
+  const HIDDEN_TYPES = new Set(['questionnaire', 'contact_form', 'location', 'email', 'sms'])
+  const outstanding = states.filter(s => !s.completed && !HIDDEN_TYPES.has(s.config.unlock_type))
   const cashState   = outstanding.find(s => s.config.unlock_type === 'cash')
   const cashAmount  = cashState ? (cashState.config.config.amount as number ?? 0) : 0
 
@@ -83,8 +84,8 @@ export default function UnlockModal({
         formData: Object.keys(formData).length ? formData : undefined,
       }
 
-      // Complete all non-cash unlocks first (relationship, forms, etc.)
-      await completeNonCashUnlocks(submission, states)
+      // Complete all non-cash unlocks first — skip hidden types
+      await completeNonCashUnlocks(submission, states.filter(s => !HIDDEN_TYPES.has(s.config.unlock_type)))
 
       // Follow Creator unlock
       const followState = outstanding.find(s => s.config.unlock_type === 'follow_creator')
@@ -301,8 +302,8 @@ export default function UnlockModal({
                         <>
                           <div className="space-y-1 mb-4 divide-y" style={{ borderColor: '#f2f2f2' }}>
                             {[
-                              ...states.filter(s => s.config.unlock_class === 'transaction'),
-                              ...states.filter(s => s.config.unlock_class === 'relationship'),
+                              ...states.filter(s => s.config.unlock_class === 'transaction' && !HIDDEN_TYPES.has(s.config.unlock_type)),
+                              ...states.filter(s => s.config.unlock_class === 'relationship' && !HIDDEN_TYPES.has(s.config.unlock_type)),
                             ].map(renderRequirement)}
                           </div>
 
