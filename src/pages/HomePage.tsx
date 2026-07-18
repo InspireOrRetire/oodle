@@ -965,7 +965,7 @@ function HomeAskSheet({
                         autoFocus
                         value={text}
                         onChange={e => setText(e.target.value.slice(0, 280))}
-                        placeholder={isClarify ? 'What needs more detail?' : 'Let your query be known…'}
+                        placeholder={isClarify ? 'Need more detail?' : 'Let your query be known…'}
                         rows={3}
                         className="w-full px-4 pt-3 pb-2 text-[15px] leading-[1.5] resize-none outline-none bg-transparent"
                         style={{ color: '#111' }}
