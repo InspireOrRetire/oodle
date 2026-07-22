@@ -22,6 +22,7 @@ import { useLayout } from '../contexts/LayoutContext'
 import { useAuth } from '../contexts/AuthContext'
 import { fetchComposedFeed, composedPostToFeedItem, fetchOwnRepostsAsFeedItems, searchCreators as searchCreatorsDB, type FeedItem, type FeedCreator, type RecipeData, type ItineraryData } from '../services/feedService'
 import RepostSheet from '../components/Post/RepostSheet'
+import AnswerThumbnailCard from '../components/Post/AnswerThumbnailCard'
 import { createThreadWithMedia } from '../services/threadService'
 import type { ThreadWithParticipants } from '../lib/database.types'
 import {
@@ -260,6 +261,22 @@ function FeedCard({
                   <MoreHorizontal style={{ width: 16, height: 16, color: '#bbb' }} strokeWidth={2} />
                 </button>
               </div>
+              {/* ── Type 2 (answer post): thumbnail card ── */}
+              {isType2 ? (
+                <AnswerThumbnailCard
+                  title={item.text ?? ''}
+                  imageUrl={item.images?.[0]}
+                  price={item.price}
+                  isLocked={item.isLocked}
+                  isOwner={item.creator.id === myUserId}
+                  onClick={e => {
+                    e.stopPropagation()
+                    if (item.creator.id === myUserId) { onTap?.(); return }
+                    onUnlock(item)
+                  }}
+                />
+              ) : (
+                <>
               {/* Text */}
               {item.text && (
                 <p className="text-[14px] text-[#111] leading-[1.55] mb-2.5">{item.text}</p>
@@ -346,6 +363,8 @@ function FeedCard({
                   </div>
                 )
               })()}
+                </>
+              )}
               {/* ── Action row ── */}
               <div className="relative flex items-center py-2.5" style={{ borderTop: '0.5px solid #f5f5f7', minHeight: 40 }}>
                 {/* Share · Ask · Save — left-aligned group */}
@@ -357,7 +376,7 @@ function FeedCard({
                     <Share2 style={{ width: 12, height: 12, color: '#555' }} strokeWidth={1.75} />
                     <span className="text-[12px] font-medium" style={{ color: '#555' }}>Share</span>
                   </button>
-                  {item.creator.id !== myUserId && (
+                  {item.creator.id !== myUserId && !isType2 && (
                     <button
                       onClick={e => { e.stopPropagation(); onAsk?.() }}
                       className="flex items-center gap-1.5 active:opacity-70 transition-opacity"
@@ -384,35 +403,32 @@ function FeedCard({
                     </button>
                   )}
                 </div>
-                {/* Unlock chips (new system) or price pill (legacy) */}
-                {item.unlock_configs?.length ? (
+                {/* Unlock chips / price pill — hidden for type2 non-owners (lock lives on thumbnail card) */}
+                {(() => {
+                  // type1: questions are free — strip cash configs, only show relationship gates
+                  const chips = !isType2
+                    ? (item.unlock_configs ?? []).filter(c => c.unlock_type !== 'cash')
+                    : []
+                  return !isType2 && chips.length ? (
+                    <div className="absolute inset-y-0 right-0 flex items-center">
+                      <UnlockChips
+                        configs={chips}
+                        isOwner={item.creator.id === myUserId}
+                        onTap={() => onUnlock(item)}
+                        onEdit={() => onEdit?.()}
+                      />
+                    </div>
+                  ) : null
+                })()}
+                {isType2 && item.price && item.price > 0 && item.creator.id === myUserId ? (
                   <div className="absolute inset-y-0 right-0 flex items-center">
-                    <UnlockChips
-                      configs={item.unlock_configs}
-                      isOwner={item.creator.id === myUserId}
-                      onTap={() => onUnlock(item)}
-                      onEdit={() => onEdit?.()}
-                    />
-                  </div>
-                ) : item.price && item.price > 0 ? (
-                  <div className="absolute inset-y-0 right-0 flex items-center">
-                    {item.creator.id === myUserId ? (
-                      <button
-                        onClick={e => { e.stopPropagation(); onEdit?.() }}
-                        className="inline-flex items-center gap-1 active:opacity-75 transition-opacity"
-                      >
-                        <Pencil style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
-                        <span className="text-[12px] font-semibold text-[#111] tracking-tight">Edit · {cp(item.price!)}</span>
-                      </button>
-                    ) : (
-                      <button
-                        onClick={e => { e.stopPropagation(); onUnlock(item) }}
-                        className="inline-flex items-center gap-1 active:opacity-75 transition-opacity"
-                      >
-                        <Lock style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
-                        <span className="text-[12px] font-semibold text-[#111] tracking-tight">{cp(item.price!)}</span>
-                      </button>
-                    )}
+                    <button
+                      onClick={e => { e.stopPropagation(); onEdit?.() }}
+                      className="inline-flex items-center gap-1 active:opacity-75 transition-opacity"
+                    >
+                      <Pencil style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
+                      <span className="text-[12px] font-semibold text-[#111] tracking-tight">Edit · {cp(item.price!)}</span>
+                    </button>
                   </div>
                 ) : null}
               </div>

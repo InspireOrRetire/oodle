@@ -20,6 +20,7 @@ import { supabase } from '../lib/supabase'
 import PostOptionsSheet from '../components/Post/PostOptionsSheet'
 import UnlockChips from '../components/Unlock/UnlockChips'
 import NewPostSheet from '../components/Post/NewPostSheet'
+import AnswerThumbnailCard from '../components/Post/AnswerThumbnailCard'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -352,13 +353,24 @@ export default function PostDetailPage() {
             </div>
           </div>
 
-          {/* Full text */}
-          {item.text && (
+          {/* Full text — type1 only */}
+          {item.text && !isType2 && (
             <p className="text-[15px] text-[#111] leading-[1.6] mb-3">{item.text}</p>
           )}
 
-          {/* Media */}
-          {item.images && item.images.length > 0 && (
+          {/* Answer thumbnail card — type2 */}
+          {isType2 && (
+            <AnswerThumbnailCard
+              title={item.text ?? ''}
+              imageUrl={item.images?.[0]}
+              price={price}
+              isLocked={item.isLocked}
+              isOwner={user?.id === item.creator.id}
+            />
+          )}
+
+          {/* Media — type1 only (type2 images go inside the thumbnail card) */}
+          {item.images && item.images.length > 0 && !isType2 && (
             <div className="mb-3 rounded-[16px] overflow-hidden">
               <PostMediaCarousel images={item.images} aspectRatio="vertical" onImageClick={setLightboxIdx} />
             </div>
