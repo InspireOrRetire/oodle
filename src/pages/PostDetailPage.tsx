@@ -363,9 +363,6 @@ export default function PostDetailPage() {
             <AnswerThumbnailCard
               title={item.text ?? ''}
               imageUrl={item.images?.[0]}
-              price={price}
-              isLocked={item.isLocked}
-              isOwner={user?.id === item.creator.id}
             />
           )}
 

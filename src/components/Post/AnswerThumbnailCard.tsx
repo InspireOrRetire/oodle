@@ -1,32 +1,13 @@
-import { Lock } from 'lucide-react'
-
 interface Props {
-  title:      string
-  imageUrl?:  string
-  price?:     number | null
-  isLocked?:  boolean
-  isOwner?:   boolean
-  onClick?:   (e: React.MouseEvent) => void
+  title:    string
+  imageUrl?: string
+  onClick?: (e: React.MouseEvent) => void
 }
 
-export default function AnswerThumbnailCard({ title, imageUrl, price, isLocked, isOwner, onClick }: Props) {
-  const showLock   = (price ?? 0) > 0 && isLocked && !isOwner
-  const priceLabel = price ? (price % 1 === 0 ? `$${price}` : `$${price.toFixed(2)}`) : ''
-
+export default function AnswerThumbnailCard({ title, imageUrl, onClick }: Props) {
   const captionStrip = (
     <div style={{ borderTop: '1px solid #f0f0f0' }}>
       <div className="px-3 pt-2 pb-3">
-        {showLock && (
-          <div className="flex justify-end mb-1">
-            <div
-              className="flex items-center gap-1 rounded-full px-2.5 py-1"
-              style={{ background: '#111' }}
-            >
-              <Lock style={{ width: 10, height: 10, color: 'white' }} strokeWidth={2.5} />
-              <span className="text-white text-[12px] font-semibold">{priceLabel}</span>
-            </div>
-          </div>
-        )}
         <p className="text-[15px] text-[#111] leading-snug line-clamp-2">{title}</p>
       </div>
     </div>

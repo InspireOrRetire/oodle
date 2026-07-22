@@ -266,9 +266,6 @@ function FeedCard({
                 <AnswerThumbnailCard
                   title={item.text ?? ''}
                   imageUrl={item.images?.[0]}
-                  price={item.price}
-                  isLocked={item.isLocked}
-                  isOwner={item.creator.id === myUserId}
                   onClick={e => {
                     e.stopPropagation()
                     if (item.creator.id === myUserId) { onTap?.(); return }
@@ -420,15 +417,26 @@ function FeedCard({
                     </div>
                   ) : null
                 })()}
-                {isType2 && item.price && item.price > 0 && item.creator.id === myUserId ? (
+                {isType2 && item.price && item.price > 0 ? (
                   <div className="absolute inset-y-0 right-0 flex items-center">
-                    <button
-                      onClick={e => { e.stopPropagation(); onEdit?.() }}
-                      className="inline-flex items-center gap-1 active:opacity-75 transition-opacity"
-                    >
-                      <Pencil style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
-                      <span className="text-[12px] font-semibold text-[#111] tracking-tight">Edit · {cp(item.price!)}</span>
-                    </button>
+                    {item.creator.id === myUserId ? (
+                      <button
+                        onClick={e => { e.stopPropagation(); onEdit?.() }}
+                        className="inline-flex items-center gap-1 active:opacity-75 transition-opacity"
+                      >
+                        <Pencil style={{ width: 11, height: 11, color: '#111' }} strokeWidth={2} />
+                        <span className="text-[12px] font-semibold text-[#111] tracking-tight">Edit · {cp(item.price!)}</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={e => { e.stopPropagation(); onUnlock(item) }}
+                        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 active:opacity-75 transition-opacity"
+                        style={{ background: '#111' }}
+                      >
+                        <Lock style={{ width: 10, height: 10, color: 'white' }} strokeWidth={2.5} />
+                        <span className="text-white text-[12px] font-semibold">{cp(item.price!)}</span>
+                      </button>
+                    )}
                   </div>
                 ) : null}
               </div>
