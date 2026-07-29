@@ -16,6 +16,8 @@ import SettingsPage from './pages/SettingsPage'
 import PostDetailPage from './pages/PostDetailPage'
 import SearchPage from './pages/SearchPage'
 import SavedPage from './pages/SavedPage'
+import TermsPage from './pages/TermsPage'
+import PrivacyPage from './pages/PrivacyPage'
 import OnboardingFlow from './components/Onboarding/OnboardingFlow'
 import SplashScreen from './components/UI/SplashScreen'
 
@@ -75,6 +77,8 @@ export default function App() {
       </AnimatePresence>
       <Routes>
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
         <Route element={<RequireAuth><Layout /></RequireAuth>}>
           <Route path="/"              element={<HomePage />} />
           <Route path="/u/:username"   element={<UserProfilePage />} />
