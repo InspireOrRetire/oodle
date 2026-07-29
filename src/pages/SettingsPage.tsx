@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   ArrowLeft, ChevronRight, TrendingUp, CreditCard, Bell, Lock,
   User, Globe, HelpCircle, LogOut, Trash2, Shield, Eye, EyeOff,
@@ -1208,7 +1208,8 @@ function MyAnswersSheet({ open, onClose }: { open: boolean; onClose: () => void 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
-  const navigate  = useNavigate()
+  const navigate        = useNavigate()
+  const [searchParams]  = useSearchParams()
   const { signOut } = useAuth()
   async function handleSignOut() { await signOut(); navigate('/auth', { replace: true }) }
 
@@ -1274,9 +1275,21 @@ export default function SettingsPage() {
 
   function showToast(msg: string) {
     if (toastTimer.current) clearTimeout(toastTimer.current)
+
     setToast(msg)
     toastTimer.current = setTimeout(() => setToast(null), 2600)
   }
+
+  // ── auto-open payout sheet when Stripe redirects back after onboarding ──────
+  useEffect(() => {
+    const stripeParam = searchParams.get('stripe')
+    if (stripeParam === 'return' || stripeParam === 'refresh') {
+      setPayoutOpen(true)
+      if (stripeParam === 'return') showToast('Payout setup complete!')
+      navigate('/settings', { replace: true })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Earnings (creator only)
   const [weekEarnings,  setWeekEarnings]  = useState(0)
