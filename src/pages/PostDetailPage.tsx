@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { ArrowLeft, MoreHorizontal, MapPin, Check, MessageCircle, Lock, Bookmark, Eye, Download, Share2 } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, MapPin, Check, MessageCircle, Lock, Bookmark, Eye, Download, Share2, ShoppingBag } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { FeedItem, RecipeData, ItineraryData } from '../services/feedService'
 import { fetchPostById, composedPostToFeedItem, incrementPostView } from '../services/feedService'
@@ -580,8 +580,17 @@ export default function PostDetailPage() {
                     <span className="text-[12px]" style={{ color: '#aaa' }}>{(item.views ?? 0).toLocaleString()}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <MessageCircle style={{ width: 13, height: 13, color: '#aaa' }} strokeWidth={1.75} />
-                    <span className="text-[12px]" style={{ color: '#aaa' }}>{item.comments ?? 0} {item.comments === 1 ? 'question' : 'questions'}</span>
+                    {isType2 ? (
+                      <>
+                        <ShoppingBag style={{ width: 13, height: 13, color: '#aaa' }} strokeWidth={1.75} />
+                        <span className="text-[12px]" style={{ color: '#aaa' }}>{item.purchase_count ?? 0} {(item.purchase_count ?? 0) === 1 ? 'purchase' : 'purchases'}</span>
+                      </>
+                    ) : (
+                      <>
+                        <MessageCircle style={{ width: 13, height: 13, color: '#aaa' }} strokeWidth={1.75} />
+                        <span className="text-[12px]" style={{ color: '#aaa' }}>{item.comments ?? 0} {item.comments === 1 ? 'question' : 'questions'}</span>
+                      </>
+                    )}
                   </div>
                 </div>
                 <div className="absolute inset-y-0 right-0 flex items-center">
