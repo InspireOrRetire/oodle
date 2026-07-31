@@ -797,18 +797,11 @@ export default function PostDetailPage() {
             </div>
           )}
 
-          {/* Type 2 — no answers yet */}
-          {isType2 && !hasReplies && (
+          {/* Type 2 — no answers yet — only show clarify prompt for non-owners */}
+          {isType2 && !hasReplies && user?.id !== item.creator.id && (
             <div className="flex flex-col items-center justify-center pt-10 pb-6 text-center">
-              <div
-                className="w-12 h-12 rounded-full flex items-center justify-center mb-3"
-                style={{ background: '#f5f5f5', border: '1px solid #e0e0e0' }}
-              >
-                <TokenIcon size={20} />
-              </div>
-              <p className="text-[14px] font-semibold text-[#111] mb-1">Be the first to ask</p>
               <p className="text-[13px]" style={{ color: '#aaa' }}>
-                Ask {item.creator.display_name} a question, or buy the answer above.
+                Have a question before purchasing? Tap <strong style={{ color: '#111' }}>Ask</strong> below.
               </p>
             </div>
           )}
