@@ -1,2 +1,2 @@
-/** Format an Oodle wallet amount with the branded $? currency symbol. */
-export const oo = (amount: number) => `$?${amount.toFixed(2)}`
+/** Format a price in USD. */
+export const oo = (amount: number) => `$${amount % 1 === 0 ? amount : amount.toFixed(2)}`

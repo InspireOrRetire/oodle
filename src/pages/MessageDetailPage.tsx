@@ -1037,10 +1037,10 @@ export default function MessageDetailPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-[13px] font-semibold text-gray-800">
-                        $?{thread.price} <span className="font-normal text-gray-400">per unlock</span>
+                        ${thread.price} <span className="font-normal text-gray-400">per unlock</span>
                       </p>
                       <p className="text-[11px] text-gray-400 mt-0.5">
-                        ~${(thread.price * 0.07).toFixed(2)} earned per purchase
+                        ~${(thread.price * 0.85).toFixed(2)} earned per purchase
                       </p>
                     </div>
                     <button
