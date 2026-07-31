@@ -820,85 +820,54 @@ export default function MessageDetailPage() {
           </div>
         )}
 
-        {/* Question card — Instagram shared-post style */}
-        <motion.div
-          className="rounded-[18px] overflow-hidden"
-          style={{
-            background: '#f2f2f7',
-            cursor: isCreator ? 'grab' : 'default',
-            userSelect: 'none',
-          }}
-          drag={isCreator ? 'y' : false}
-          dragConstraints={{ top: -220, bottom: 0 }}
-          dragElastic={{ top: 0.38, bottom: 0.05 }}
-          dragMomentum={false}
-          onDragEnd={(_, info) => {
-            if (isCreator && info.offset.y < -60) setComposing(true)
-          }}
-          whileDrag={{ opacity: 0.85, cursor: 'grabbing' }}
-        >
-          {/* Header */}
-          <div className="flex items-center gap-2.5 px-4 pt-4 pb-2">
-            <Avatar url={askerProfile.avatar_url} name={askerName} size={8} />
-            <div>
-              <p className="text-[14px] font-semibold text-[#111] leading-tight">@{askerName}</p>
-              <p className="text-[11px] text-gray-400">{timeAgo(thread.created_at)}</p>
+        {/* Question — left-aligned DM bubble (iMessage/Instagram style) */}
+        <div className="flex items-end gap-2">
+          <Avatar url={askerProfile.avatar_url} name={askerName} size={7} />
+          <div className="flex flex-col gap-1" style={{ maxWidth: '72%' }}>
+            <p className="text-[11px] text-gray-400 ml-1">@{askerName} · {timeAgo(thread.created_at)}</p>
+            {/* Small post thumbnail */}
+            {postImageUrl && (
+              <div className="rounded-[14px] overflow-hidden" style={{ width: 180 }}>
+                <img src={postImageUrl} alt="" className="w-full object-cover" style={{ aspectRatio: '4/3' }} />
+              </div>
+            )}
+            {/* Question bubble */}
+            <div
+              className="rounded-[18px] rounded-bl-[5px] px-3.5 py-2.5"
+              style={{ background: '#f2f2f7' }}
+            >
+              <p className="text-[15px] text-[#111] leading-snug">{question}</p>
             </div>
-          </div>
-
-          {/* Question text */}
-          <p className="text-[16px] text-gray-900 leading-snug px-4 pb-3">{question}</p>
-
-          {/* Post image */}
-          {postImageUrl && (
-            <img
-              src={postImageUrl}
-              alt=""
-              className="w-full object-cover"
-              style={{ aspectRatio: '4 / 3' }}
-            />
-          )}
-
-          {/* Action pills */}
-          <div className="flex items-center gap-2 px-4 py-3">
+            {/* Action pills — unanswered only */}
             {isCreator && !isAnswered && (
-              <>
+              <div className="flex items-center gap-2 mt-1">
                 <button
                   onClick={() => setComposing(true)}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-semibold active:opacity-70 transition-opacity"
+                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[13px] font-semibold active:opacity-70 transition-opacity"
                   style={{ background: '#111', color: 'white' }}
                 >
                   Answer
                 </button>
                 <button
-                  onClick={() => {
-                    const el = document.querySelector<HTMLTextAreaElement>('textarea[placeholder*="note"]')
-                    el?.focus()
-                  }}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-semibold active:opacity-70 transition-opacity"
+                  onClick={() => document.querySelector<HTMLTextAreaElement>('textarea[placeholder*="note"]')?.focus()}
+                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[13px] font-semibold active:opacity-70 transition-opacity"
                   style={{ background: 'rgba(0,0,0,0.07)', color: '#111' }}
                 >
-                  Ask to clarify
+                  Clarify
                 </button>
-              </>
+              </div>
             )}
             {!isCreator && !isAnswered && (
               <button
-                onClick={() => {
-                  const el = document.querySelector<HTMLTextAreaElement>('textarea')
-                  el?.focus()
-                }}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-semibold active:opacity-70 transition-opacity"
+                onClick={() => document.querySelector<HTMLTextAreaElement>('textarea')?.focus()}
+                className="mt-1 self-start flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[13px] font-semibold active:opacity-70 transition-opacity"
                 style={{ background: 'rgba(0,0,0,0.07)', color: '#111' }}
               >
                 Add context
               </button>
             )}
-            {isAnswered && (
-              <span className="text-[12px] text-gray-400 px-1">Answered</span>
-            )}
           </div>
-        </motion.div>
+        </div>
 
         {/* Clarification notes */}
         {noteMessages.length > 0 && (
