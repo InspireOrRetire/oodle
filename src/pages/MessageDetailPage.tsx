@@ -825,10 +825,21 @@ export default function MessageDetailPage() {
           <Avatar url={askerProfile.avatar_url} name={askerName} size={7} />
           <div className="flex flex-col gap-1" style={{ maxWidth: '72%' }}>
             <p className="text-[11px] text-gray-400 ml-1">@{askerName} · {timeAgo(thread.created_at)}</p>
-            {/* Small post thumbnail */}
+            {/* Horizontal post preview — thumbnail left, caption right */}
             {postImageUrl && (
-              <div className="rounded-[14px] overflow-hidden" style={{ width: 180 }}>
-                <img src={postImageUrl} alt="" className="w-full object-cover" style={{ aspectRatio: '4/3' }} />
+              <div
+                className="flex items-center gap-2.5 rounded-[14px] overflow-hidden"
+                style={{ background: '#f2f2f7', width: 260 }}
+              >
+                <img
+                  src={postImageUrl}
+                  alt=""
+                  className="flex-shrink-0 object-cover"
+                  style={{ width: 64, height: 64 }}
+                />
+                <p className="text-[13px] font-medium text-[#111] leading-snug line-clamp-2 pr-3">
+                  {postCaption || 'View post'}
+                </p>
               </div>
             )}
             {/* Question bubble */}
